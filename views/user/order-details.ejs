@@ -11,12 +11,14 @@
           <li><a href="/cart" class="breadcrumb__link" style="font-size: 12px ;">Cart</a></li>
           <li><span class="breadcrumb__link">></span></li>
           <li><a href="/checkout" class="breadcrumb__link" style="font-size: 12px ;">Checkout</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a  class="breadcrumb__link" style="font-size: 12px ;">Order details</a></li>
         </ul>
       </section>
 
       <section class="order-details section--lg">
         <div class="order-details__container container">
-          <h1 class="order-summary__title">Order Details</h1>
+          <h1 class="order-summary__title" style="margin-bottom: 100px; margin-top: -70px; color: rgb(17, 3, 34);">Order Details</h1>
           <% if (order) { %>
             <div class="order-user">
               <h3 class="order-user__name"><%= user.name %></h3>

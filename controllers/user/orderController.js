@@ -50,7 +50,19 @@ const getOrderDetails = async (req, res) => {
 const getOrdersList = async (req, res) => {
   try {
     const userId = req.session.user; // Ensure user ID is correctly retrieved
-    const orders = await Order.find({ userId }).populate('orderedItems.product')
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skip = (page - 1) * limit;
+
+    const orders = await Order.find({ userId })
+      .populate('orderedItems.product')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalOrders = await Order.countDocuments({ userId });
+    const totalPages = Math.ceil(totalOrders / limit);
+
     // Check if the request is an AJAX request
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
       return res.json({ orders });
@@ -59,7 +71,9 @@ const getOrdersList = async (req, res) => {
     res.render('order-list', { // Ensure the correct path to the view
       orders, 
       error: null,
-      user: req.session.user 
+      user: req.session.user,
+      currentPage: page,
+      totalPages
     });
   } catch (error) {
     console.error('Error fetching orders:', error);

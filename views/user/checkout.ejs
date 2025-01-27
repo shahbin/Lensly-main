@@ -285,11 +285,19 @@
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
 
     if (!selectedAddressId) {
-      showNotification('Please select an address', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Please select an address'
+      });
       return;
     }
     if (!paymentMethod) {
-      showNotification('Please select a payment method', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Please select a payment method'
+      });
       return;
     }
 
@@ -303,14 +311,29 @@
       const data = await response.json();
       
       if (response.ok) {
-        showNotification('Order placed successfully!', 'success');
-        window.location.href = `/order-details/${data.orderId}`;
+        Swal.fire({
+          icon: 'success',
+          title: 'Order placed successfully!',
+          showConfirmButton: false,
+          timer: 2000,
+          willClose: () => {
+            window.location.href = `/order-details/${data.orderId}`;
+          }
+        });
       } else {
-        showNotification(data.message || 'Failed to place order', 'error');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message || 'Failed to place order'
+        });
       }
     } catch (error) {
       console.error('Error placing order:', error);
-      showNotification('Failed to place order', 'error');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to place order'
+      });
     }
   }
 
