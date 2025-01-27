@@ -1,0 +1,414 @@
+<%- include("../../views/partials/user/header") %>
+
+<main class="main">
+  <!-- Breadcrumb -->
+  <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
+        <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
+          <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Shop</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a href="" class="breadcrumb__link" style="font-size: 12px ;"><%= product.productName %></a></li>
+        </ul>
+      </section>
+
+  <!-- Product Details -->
+  <section class="details section--lg">
+    <div class="details__container container grid" style="margin-top: -75px;">
+      <!-- Product Images -->
+      <div class="details__group" >
+        <div class="product-image-zoom">
+          <img
+            src="/admin-assets/imgs/brands/<%= product.productImage[0] %>"
+            alt="<%= product.productName %>"
+            class="details__img"
+            id="main-img"
+          />
+        </div>
+        
+        <div class="details__small-images grid">
+          <% product.productImage.forEach((image, index) => { %>
+            <img
+              src="/admin-assets/imgs/brands/<%= image %>"
+              alt="<%= product.productName %>"
+              class="details__small-img"
+              onclick="changeImage(this)"
+            />
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="details__group">
+        <h3 class="details__title"><%= product.productName %></h3>
+        <p class="details__brand">Brand: <span><%= product.brand %></span></p>
+        
+        <div class="details__price flex">
+          <span class="new__price">₹<%= product.salePrice %></span>
+          <% if (product.regularPrice > product.salePrice) { %>
+            <span class="old__price">₹<%= product.regularPrice %></span>
+            <span class="save__price">
+              10% Off
+            </span>
+          <% } %>
+        </div>
+
+        <p class="short__description"><%= product.description %></p>
+
+        <ul class="products__list">
+          <li class="list__item flex">
+            <i class="fi-rs-crown"></i> 1 Year Brand Warranty
+          </li>
+          <li class="list__item flex">
+            <i class="fi-rs-refresh"></i> 30 Days Return Policy
+          </li>
+          <li class="list__item flex">
+            <i class="fi-rs-credit-card"></i> Cash on Delivery available
+          </li>
+        </ul>
+
+        <div class="details__action">
+          <div class="quantity-wrapper">
+            <button class="qty-btn" onclick="updateQuantity('decrease')">-</button>
+            <input type="number" min="1" max="<%= Math.min(product.quantity, 5) %>" value="1" id="quantity" class="quantity" />
+            <button class="qty-btn" onclick="updateQuantity('increase')" id="increase-btn">+</button>
+          </div>
+          <div id="max-quantity-message" style="display: none; color: red; font-size: 12px;">Maximum quantity reached</div>
+          <div id="out-of-stock-message" style="display: none; color: red; font-size: 12px;">Out of stock</div>
+          
+          <a href="#" class="btn btn--sm" onclick="handleAddToCart('<%= product._id %>')">
+            Add To Cart
+          </a>
+          
+          <a href="/add-to-wishlist/<%= product._id %>" class="details__action-btn">
+            <i class="fi fi-rs-heart"></i>
+          </a>
+        </div>
+
+        <ul class="details__meta">
+          <li class="meta__list flex">
+            <span>SKU:</span><%=  'N/A' %>
+          </li>
+          <li class="meta__list flex">
+            <span>Category:</span><%= product.category.name %>
+          </li>
+          <li class="meta__list flex">
+            <span >Availability:</span><p style="color: #28a745;"><%= product.quantity %> Items in stock</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-5" style="padding: 20px;">
+        <h1 style="margin-left: 20px; color: #000000; font-family: Arial, sans-serif;">Related Products</h1>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px;">
+            <% relatedProduct.forEach((related) => { %>
+            <div class="product-card" style="
+                width: 300px;
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                overflow: hidden;
+                transition: transform 0.3s;
+            ">
+                <a href="/productDetails?id=<%= related._id %>" style="text-decoration: none; color: inherit;">
+                    <img src="/admin-assets/imgs/brands/<%= related.productImage[0] %>" alt="<%= related.productName %>" style="
+                        width: 100%;
+                        height: 200px;
+                        object-fit: cover;
+                    ">
+                    <div style="padding: 15px; text-align: center;">
+                        <h4 style="font-size: 1.2em; margin-bottom: 10px; font-family: Arial, sans-serif; color: #333;">
+                            <%= related.productName %>
+                        </h4>
+                        <p class="dprice" style="font-size: 1em; color: #28a745; margin: 5px 0;">
+                            ₹<%= related.salePrice %>
+                        </p>
+                        <p class="price" style="font-size: 0.9em; text-decoration: line-through; color: #888;">
+                            ₹<%= related.regularPrice %>
+                        </p>
+                    </div>
+                </a>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    
+  </section>
+
+  <!-- Product Description Tabs -->
+  <section class="details__tab container">
+    <div class="detail__tabs">
+      <span class="detail__tab active-tab" data-target="#info">
+        Additional Info
+      </span>
+      <span class="detail__tab" data-target="#reviews">Reviews</span>
+    </div>
+
+    <div class="details__tabs-content">
+      <!-- Additional Info Tab -->
+      <div class="details__tab-content active-tab" content id="info">
+        <div class="product-description">
+          <h3>Product Specifications</h3>
+          <p>Sensor Type: 20.9MP FX-Format CMOS Sensor</p>
+          <p>Image Processor: EXPEED 6</p>
+          <p>LCD Screen: 3.2" 2.1m-Dot Tilting Touchscreen</p>
+          <p>Video Recording: 4K UHD at 30fps</p>
+          <p>Connectivity: Wi-Fi and Bluetooth</p>
+          <p>Battery Life: Approximately 470 Shots</p>
+          <p>Weight: 585g (Body Only)</p>
+          <p>Storage: Dual SD Card Slots</p>
+        </div>
+      </div>
+
+      <!-- Reviews Tab -->
+      <div class="details__tab-content" content id="reviews">
+        <div class="review-item">
+          <div class="reviewer">
+            <h4>John D.</h4>
+            <div class="stars">★★★★★</div>
+            <span class="date">Posted on: January 10, 2025</span>
+          </div>
+          <p>Excellent mirrorless camera! The image quality is outstanding and the autofocus is lightning fast.</p>
+        </div>
+
+        <div class="review-item">
+          <div class="reviewer">
+            <h4>Sarah M.</h4>
+            <div class="stars">★★★★☆</div>
+            <span class="date">Posted on: January 5, 2025</span>
+          </div>
+          <p>Great camera overall. Battery life could be better, but the image quality makes up for it.</p>
+        </div>
+
+        <div class="review-item">
+          <div class="reviewer">
+            <h4>Mike R.</h4>
+            <div class="stars">★★★★★</div>
+            <span class="date">Posted on: December 30, 2024</span>
+          </div>
+          <p>Perfect upgrade from my DSLR. The electronic viewfinder is fantastic and the handling is superb.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include("../../views/partials/user/footer") %>
+
+<style>
+.product-image-zoom {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.product-image-zoom img {
+  max-width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.product-image-zoom:hover img {
+  transform: scale(1.5);
+  cursor: zoom-in;
+}
+
+.details__small-images {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.details__small-img {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.details__small-img:hover,
+.details__small-img.active {
+  transform: scale(1.1);
+  border-color: #007bff;
+}
+
+.quantity-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.qty-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.qty-btn:hover {
+  background: #e5e5e5;
+}
+
+.quantity {
+  width: 60px;
+  text-align: center;
+  border: none;
+  padding: 0.5rem;
+}
+
+.details__action {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.details__price {
+  margin: 1rem 0;
+  align-items: center;
+}
+
+.new__price {
+  font-size: 1.5rem;
+  font-weight: larger;
+  color: #056512;
+}
+
+.old__price {
+  text-decoration: line-through;
+  color: #666;
+  margin-left: -23rem;
+  margin-bottom: -0.75rem;
+}
+
+.save__price {
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 1rem;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // Cart management functions
+const cartAPI = {
+  async addToCart(productId, quantity = 1) {
+    try {
+      const response = await fetch('/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId, quantity })
+      });
+      
+      if (!response.ok) throw new Error('Failed to add to cart');
+      window.location.href = '/cart';
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to add product to cart');
+    }
+  },
+
+  async updateQuantity(productId, quantity) {
+    try {
+      const response = await fetch('/update-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId, quantity })
+      });
+
+      if (!response.ok) throw new Error('Update failed');
+      location.reload();
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to update quantity');
+    }
+  },
+
+  async removeItem(productId) {
+    try {
+      const response = await fetch(`/removeFrom-cart/${productId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Remove failed');
+      location.reload();
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to remove item');
+    }
+  }
+};
+
+function handleAddToCart(productId) {
+  const quantity = document.getElementById('quantity')?.value || 1;
+  cartAPI.addToCart(productId, parseInt(quantity));
+}
+
+function handleQuantityUpdate(input, productId) {
+  const quantity = parseInt(input.value);
+  if (quantity < 1) {
+    input.value = 1;
+    return;
+  }
+  cartAPI.updateQuantity(productId, quantity);
+}
+
+function handleRemoveItem(productId) {
+  if (!confirm('Remove this item?')) return;
+  cartAPI.removeItem(productId);
+}
+
+function updateQuantity(action) {
+  const quantityInput = document.getElementById('quantity');
+  let quantity = parseInt(quantityInput.value);
+  const maxQuantity = parseInt(quantityInput.max);
+  const availableStock = parseInt('<%= product.quantity %>');
+
+  if (action === 'increase' && quantity < maxQuantity) {
+    quantity++;
+  } else if (action === 'decrease' && quantity > 1) {
+    quantity--;
+  }
+
+  quantityInput.value = quantity;
+  toggleIncreaseButton(quantity, maxQuantity, availableStock);
+}
+
+function toggleIncreaseButton(quantity, maxQuantity, availableStock) {
+  const increaseBtn = document.getElementById('increase-btn');
+  const outOfStockMessage = document.getElementById('out-of-stock-message');
+
+  if (quantity >= maxQuantity) {
+    increaseBtn.disabled = true;
+    Swal.fire({
+      icon: 'warning',
+      title: 'Maximum quantity reached',
+      text: 'You cannot add more than the allowed limit.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } else if (quantity >= availableStock) {
+    increaseBtn.disabled = true;
+    outOfStockMessage.style.display = 'block';
+  } else {
+    increaseBtn.disabled = false;
+    outOfStockMessage.style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const quantityInput = document.getElementById('quantity');
+  toggleIncreaseButton(parseInt(quantityInput.value), parseInt(quantityInput.max), parseInt('<%= product.quantity %>'));
+});
+</script>

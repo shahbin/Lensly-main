@@ -1,0 +1,63 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+ 
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+      }
+  
+    
+    .error-title {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+  
+    
+    .error-message {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 30px;
+      }
+  
+    
+    .error-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+  
+    .error-button:hover {
+        background-color: #b30000;
+    }
+  </style>
+
+<div class="error-page">
+    <h1 class="error-title">Error Page Admin</h1>
+    <p class="error-message">An error occurred.</p>
+    <button class="error-button" onclick="godashboard()">Go to Home Page</button>
+</div>
+
+<script>
+    function godashboard() {
+        window.location.href = "/admin";
+    }
+</script>
+
+
+<%- include("../../views/partials/admin/footer") %>

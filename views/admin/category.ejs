@@ -1,0 +1,400 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"/>
+  <style>
+    /* General Layout */
+    .col-md-3 {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin: 10px;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Form Styles */
+    .form-label {
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #555;
+      box-sizing: border-box;
+    }
+
+    .error-message {
+      color: #d9534f;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    /* Search Bar */
+    .input-group {
+      margin: 20px auto;
+    }
+
+    /* Table Styles */
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
+    .table thead th {
+      text-align: left;
+      padding: 12px;
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      font-weight: 600;
+    }
+
+    .table tbody td {
+      padding: 12px;
+      vertical-align: middle;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Column Widths */
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+      width: 5%;
+      text-align: center;
+    }
+
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+      width: 20%;
+    }
+
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+      width: 30%;
+    }
+
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+      width: 15%;
+      text-align: center;
+    }
+
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+      width: 15%;
+      text-align: center;
+    }
+
+    .table th:nth-child(6),
+    .table td:nth-child(6) {
+      width: 15%;
+      text-align: center;
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 4px;
+      font-weight: 500;
+      transition: 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin: 2px;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-info {
+      background-color: #17a2b8;
+      color: white;
+    }
+
+    .btn a {
+      color: white;
+      text-decoration: none;
+      display: block;
+    }
+
+    /* Badge Styles */
+    .badge {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .badge.alert-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .badge.alert-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    /* Pagination Styles */
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .pagination-container a {
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .pagination-container .current-page {
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .col-md-3 {
+        margin: 10px 0;
+      }
+      
+      .table td button {
+        width: 100%;
+        margin: 2px 0;
+      }
+      
+      .input-group {
+        width: 100% !important;
+        margin-left: 0 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <section class="content-main">
+    <div class="content-header">
+      <h2 class="content-title card-title">Category</h2>
+    </div>
+
+    <header class="card-header text-center mb-20">
+      <form action="/admin/category/" method="get" class="d-inline">
+        <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px">
+          <input type="text" class="form-control border-0 rounded-pill mt-3" placeholder="Search categories" name="search" />
+          <button class="btn" type="submit">Search</button>
+        </div>
+      </form>
+    </header>
+
+    <div class="card" style="margin: 20px auto; max-width: 1200px;">
+      <div class="card-body">
+        <div class="row">
+          <!-- Category Form -->
+          <div class="col-md-3">
+            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+              <div class="mb-4">
+                <label for="product_name" class="form-label">Name</label>
+                <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
+                <div id="name-error" class="error-message"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Description</label>
+                <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId"></textarea>
+                <div id="description-error" class="error-message"></div>
+              </div>
+              <div class="d-grid">
+                <button class="btn btn-primary" type="submit">Create category</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Category Table -->
+          <div class="col-md-8" style="margin-left: 20px;">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>List/UnList</th>
+                    <th>Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% cat.reverse().forEach((category, index) => { %>
+                  <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= category.name %></td>
+                    <td><%= category.description %></td>
+                    <td>
+                      <% if(category.isListed){ %>
+                      <span class="badge alert-success">Listed</span>
+                      <% }else{ %>
+                      <span class="badge alert-danger">Unlisted</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if(category.isListed){ %>
+                      <button class="btn btn-danger">
+                        <a href="/admin/listCategory?id=<%= category._id %>">UnList</a>
+                      </button>
+                      <% }else{ %>
+                      <button class="btn btn-success">
+                        <a href="/admin/unListCategory?id=<%= category._id %>">List</a>
+                      </button>
+                      <% } %>
+                    </td>
+                    <td>
+                      <button class="btn btn-info">
+                        <a href="/admin/editCategory?id=<%= category._id %>">Edit</a>
+                      </button>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <% if (currentPage > 1) { %>
+      <a href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
+      <% } %>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+        <span class="current-page"><%= i %></span>
+        <% } else { %>
+        <a href="?page=<%= i %>"><%= i %></a>
+        <% } %>
+      <% } %>
+      <% if (currentPage < totalPages) { %>
+      <a href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+      <% } %>
+    </div>
+  </section>
+</body>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <script>
+
+
+    function handleFormSubmit(event){
+
+        event.preventDefault()
+        if(!validateForm()){
+            return
+        }
+        const name = document.getElementsByName("name")[0].value.trim();
+        const description = document.getElementById("descriptionId").value;
+        console.log(name);
+        
+
+        fetch('/admin/addCategory', {
+            method:'POST',
+            headers:{
+                'content-type':'application/json'
+            },
+            body:JSON.stringify({name,description})
+        })
+        .then(response =>{
+            if(!response.ok){
+                return response.json().then(err =>{
+                    throw new Error(err.error);
+                })
+            }
+            return response.json();
+        })
+        .then(data =>{
+            location.reload()
+        })
+        .catch(error =>{
+            if(error.message === "Category already exists"){
+                Swal.fire({
+                    icon:'error',
+                    title:'Oops',
+                    text:'Category already exists'
+                })
+            }else{
+                Swal.fire({
+                    icon:'error',
+                    title:'Oops',
+                    text:'An error  while adding the category'
+                })
+            }
+        })
+    }
+
+    function validateForm() {
+    clearErrorMessages();
+    const name = document.getElementsByName("name")[0].value.trim();
+    const description = document.getElementById("descriptionId").value.trim();
+    console.log("name", name, "description", description);
+
+    let isValid = true;
+
+    if (name === "") {
+        displayErrorMessage("name-error", "Please enter a name");
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+        displayErrorMessage("name-error", "Category name should contain only alphabetic characters");
+        isValid = false;
+    }
+    if (description === "") {
+        displayErrorMessage("description-error", "Please enter a description");
+        isValid = false;
+    }
+    return isValid;
+}
+
+
+    function displayErrorMessage(elementId,message){
+        var errorElement = document.getElementById(elementId)
+        errorElement.innerHTML = message;
+        errorElement.style.display = "block"
+    }
+
+    function clearErrorMessages(){
+        const errorElements = document.getElementsByClassName("error-message")
+        Array.from(errorElements).forEach((element)=>{
+            element.innerText = "";
+            element.style.display = "none"
+        })
+    }
+
+  </script>
+
+<%- include("../../views/partials/admin/footer") %>

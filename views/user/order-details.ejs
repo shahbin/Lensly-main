@@ -1,0 +1,97 @@
+<%- include("../../views/partials/user/header") %>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+      <!--=============== BREADCRUMB ===============-->
+      <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
+        <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
+          <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Shop</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a href="/cart" class="breadcrumb__link" style="font-size: 12px ;">Cart</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a href="/checkout" class="breadcrumb__link" style="font-size: 12px ;">Checkout</a></li>
+        </ul>
+      </section>
+
+      <section class="order-details section--lg">
+        <div class="order-details__container container">
+          <h2 class="section__title">Order Details</h2>
+          <% if (order) { %>
+            <div class="order-user">
+              <h3 class="order-user__name"><%= user.name %></h3>
+            </div>
+            <div class="order-address">
+              <h3 class="order-address__title">Shipping Address</h3>
+              <% if (order.address) { %>
+                <p><%= order.address.name %></p>
+                <p><%= order.address.landMark %></p>
+                <p><%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %></p>
+                <p>Phone: <%= order.address.phone %></p>
+                <% if (order.address.altPhone) { %>
+                  <p>Alt Phone: <%= order.address.altPhone %></p>
+                <% } %>
+              <% } else { %>
+                <p>Address not available</p>
+              <% } %>
+            </div>
+            <div class="order-tracker">
+              <h3 class="order-tracker__title">Payment Method</h3>
+              <p>Cash On Delivery</p>
+            </div>
+            <br>
+            <div class="order-tracker">
+              <h3 class="order-tracker__title">Order Tracker</h3>
+              <p>Status: <%= order.status %></p>
+            </div>
+            <div class="order-summary">
+              <h3 class="order-summary__title">Order Summary</h3>
+              <table class="order-summary__table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Details</th>
+                    <!-- <th>Total</th> -->
+                  </tr>
+                </thead>
+                <tbody>
+                  <% order.orderedItems.forEach(item => { %>
+                    <tr>
+                      <td><img src="/admin-assets/imgs/brands/<%= item.product.productImage[0] %>" alt="Product Image" class="order__img" /></td>
+                      <td>
+                        <h3 class="table__title"><%= item.product.productName %></h3>
+                        <p class="table__quantity">x <%= item.quantity %></p>
+                      </td>
+                      <!-- <td><span class="table__price">₹<%= item.price.toFixed(2) %></span></td> -->
+                    </tr>
+                  <% }) %>
+                  <tr>
+                    <td><span class="order__subtitle">Subtotal</span></td>
+                    <td colspan="2"><span class="table__price">₹<%= order.totalPrice.toFixed(2) %></span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="order__subtitle">Shipping</span></td>
+                    <td colspan="2"><span class="table__price">₹49.00</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="order__subtitle">Discount</span></td>
+                    <td colspan="2"><span class="table__price">₹<%= order.discount.toFixed(2) %></span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="order__subtitle">Total</span></td>
+                    <td colspan="2"><span class="order__grand-total">₹<%= order.finalAmount.toFixed(2) %></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <p class="error-message"><%= error %></p>
+          <% } %>
+          <div class="order-actions">
+            <a href="/shop" class="btn btn--md">Continue Shopping</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <%- include("../../views/partials/user/footer") %>

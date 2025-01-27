@@ -1,0 +1,834 @@
+<%- include("../../views/partials/user/header") %>
+
+<!--=============== MAIN ===============-->
+<main class="main">
+  <!--=============== BREADCRUMB ===============-->
+  <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
+    <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
+      <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Shop</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a href="/cart" class="breadcrumb__link" style="font-size: 12px ;">Cart</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><span class="breadcrumb__link" style="font-size: 12px ;">Checkout</span></li>
+    </ul>
+  </section>
+
+  <!--=============== CHECKOUT ===============-->
+  <section class="checkout section--lg">
+    <div class="checkout__container container grid">
+      <div class="checkout__group">
+        <h3 class="section__title">Select Address</h3>
+        <div class="address-list">
+          <!-- Address cards will be populated here -->
+        </div>
+        <button class="btn btn--md" onclick="showAddressForm()">Add New Address</button>
+      </div>
+      <div class="checkout__group">
+        <h3 class="section__title">Cart Totals</h3>
+        <table class="order__table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Details</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="cartItems">
+            <% if (cart && cart.items.length > 0) { %>
+              <% cart.items.forEach(item => { %>
+                <% if (item.productId) { %>
+                  <tr>
+                    <td><img src="/admin-assets/imgs/brands/<%= item.productImage %>" alt="Product Image" class="order__img" /></td>
+                    <td>
+                      <h3 class="table__title"><%= item.productName %></h3>
+                      <p class="table__quantity">x <%= item.quantity %></p>
+                    </td>
+                    <td><span class="table__price">₹<%= item.totalPrice.toFixed(2) %></span></td>
+                  </tr>
+                <% } %>
+              <% }) %>
+              <tr>
+                <td><span class="order__subtitle">Subtotal</span></td>
+                <td colspan="2"><span class="table__price">₹<%= cart.items.reduce((total, item) => total + item.totalPrice, 0).toFixed(2) %></span></td>
+              </tr>
+              <tr>
+                <td><span class="order__subtitle">Shipping</span></td>
+                <td colspan="2"><span class="table__price">₹49.00</span></td>
+              </tr>
+              <tr>
+                <td><span class="order__subtitle">Discount</span></td>
+                <td colspan="2"><span class="table__price">₹0.00</span></td>
+              </tr>
+              <tr>
+                <td><span class="order__subtitle">Total</span></td>
+                <td colspan="2"><span class="order__grand-total">₹<%= (cart.items.reduce((total, item) => total + item.totalPrice, 0) + 49 - discount).toFixed(2) %></span></td>
+              </tr>
+            <% } else { %>
+              <tr><td colspan="3">No items in cart</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+        <div style="margin-bottom: 20px;"></div>
+        <div class="coupon-container" style="display: flex; gap: 10px;">
+          <input type="text" id="couponCode" placeholder="Enter coupon code" class="form-input" />
+          <button class="btn btn--md" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div class="payment__methods">
+          <h3 class="checkout__title payment__title">Payment</h3>
+          <div class="payment__option flex">
+            <input type="radio" name="paymentMethod" id="cod" value="cod" checked class="payment__input" />
+            <label for="cod" class="payment__label">Cash on Delivery</label>
+          </div>
+          <div class="payment__option flex">
+            <input type="radio" name="paymentMethod" id="online" value="online" class="payment__input" />
+            <label for="online" class="payment__label">Online Payment</label>
+          </div>
+          <div class="payment__option flex">
+            <input type="radio" name="paymentMethod" id="wallet" value="wallet" class="payment__input" />
+            <label for="wallet" class="payment__label">Wallet Payment</label>
+          </div>
+        </div>
+        <button class="btn btn--md" onclick="placeOrder()">Place Order</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Add/Edit Address Modal -->
+<div class="modal" id="addressFormModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="addressFormTitle">Add New Address</h2>
+      <button class="close-btn" aria-label="Close" onclick="closeAddressForm()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="address-form" id="addressForm" onsubmit="saveAddress(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="addressType">Address Type</label>
+            <select class="form-input" id="addressType">
+              <option value="home">Home</option>
+              <option value="work">Work</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" class="form-input" id="name" maxlength="50">
+            <div class="validation-message"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" class="form-input" id="city">
+            <div class="validation-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="landmark">Landmark</label>
+            <input type="text" class="form-input" id="landmark" required>
+            <div class="validation-message"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="state">State</label>
+            <input type="text" class="form-input" id="state">
+            <div class="validation-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="pincode">Pincode</label>
+            <input type="text" class="form-input" id="pincode" maxlength="6">
+            <div class="validation-message"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" class="form-input" id="phone" pattern="\d{10}">
+            <div class="validation-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="altPhone">Alternative Phone Number</label>
+            <input type="tel" class="form-input" id="altPhone" required>
+            <div class="validation-message"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="action-btn">Save Address</button>
+          <button type="button" class="action-btn secondary" onclick="closeAddressForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add SweetAlert2 CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  let addresses = [];
+  let selectedAddressId = null;
+  let editingAddressId = null;
+  let discount = 0;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchAddresses();
+    // fetchCartItems();
+  });
+
+  async function fetchAddresses() {
+    try {
+      const response = await fetch('/addresses');
+      const data = await response.json();
+      if (response.ok) {
+        addresses = data.addresses;
+        renderAddresses();
+      } else {
+        showNotification('Failed to load addresses', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      showNotification('Failed to load addresses', 'error');
+    }
+  }
+
+  function renderAddresses() {
+    const addressList = document.querySelector('.address-list');
+    if (!addresses.length) {
+      addressList.innerHTML = `<div class="no-addresses">No addresses found. Click "Add New Address" to add one.</div>`;
+      return;
+    }
+    addressList.innerHTML = addresses.map(address => `
+      <div class="address-card">
+        <div class="address-select">
+          <input type="radio" name="addressId" id="address-${address._id}" value="${address._id}" class="address__input" onclick="selectAddress('${address._id}')" />
+        </div>
+        <div class="address-details" onclick="selectAddress('${address._id}')">
+          <span class="address-type">${address.addressType}</span>
+          <div class="address-content">
+            <p class="name">${address.name}</p>
+            ${address.landMark ? `<p class="landmark">${address.landMark}</p>` : ''}
+            <p class="location">${address.city}, ${address.state} ${address.pincode}</p>
+            <p class="phone">Phone: ${address.phone}</p>
+            ${address.altPhone ? `<p class="alt-phone">Alt Phone: ${address.altPhone}</p>` : ''}
+          </div>
+        </div>
+        <div class="address-actions">
+          <button class="edit-btn" onclick="editAddress('${address._id}')">Edit</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function fetchCartItems() {
+    try {
+      const response = await fetch('/cart');
+      const data = await response.json();
+      if (response.ok) {
+        renderCartItems(data.cartItems);
+      } else {
+        console.error('Failed to load cart items:', data.message);
+        showNotification('Failed to load cart items', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching cart items:', error);
+      showNotification('Failed to load cart items', 'error');
+    }
+  }
+
+  function renderCartItems(cartItems) {
+    const cartItemsContainer = document.getElementById('cartItems');
+    if (!cartItems.length) {
+      cartItemsContainer.innerHTML = `<tr><td colspan="3">No items in cart</td></tr>`;
+      return;
+    }
+    const subtotal = cartItems.reduce((total, item) => total + item.subtotal, 0);
+    const shipping = 49;
+    const total = subtotal + shipping - discount;
+
+    cartItemsContainer.innerHTML = cartItems.map(item => `
+      <tr>
+        <td><img src="/admin-assets/imgs/brands/${item.product.productImage[0]}" alt="Product Image" class="order__img" /></td>
+        <td>
+          <h3 class="table__title">${item.product.productName}</h3>
+          <p class="table__quantity">x ${item.quantity}</p>
+        </td>
+        <td><span class="table__price">₹${item.subtotal.toFixed(2)}</span></td>
+      </tr>
+    `).join('');
+    cartItemsContainer.innerHTML += `
+      <tr>
+        <td><span class="order__subtitle">Subtotal</span></td>
+        <td colspan="2"><span class="table__price">₹${subtotal.toFixed(2)}</span></td>
+      </tr>
+      <tr>
+        <td><span class="order__subtitle">Shipping</span></td>
+        <td colspan="2"><span class="table__price">₹${shipping.toFixed(2)}</span></td>
+      </tr>
+      <tr>
+        <td><span class="order__subtitle">Discount</span></td>
+        <td colspan="2"><span class="table__price">-₹${discount.toFixed(2)}</span></td>
+      </tr>
+      <tr>
+        <td><span class="order__subtitle">Total</span></td>
+        <td colspan="2"><span class="order__grand-total">₹${total.toFixed(2)}</span></td>
+      </tr>
+    `;
+  }
+
+  async function placeOrder() {
+    const selectedAddressId = document.querySelector('input[name="addressId"]:checked')?.value;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+    if (!selectedAddressId) {
+      showNotification('Please select an address', 'error');
+      return;
+    }
+    if (!paymentMethod) {
+      showNotification('Please select a payment method', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addressId: selectedAddressId, paymentMethod })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        showNotification('Order placed successfully!', 'success');
+        window.location.href = `/order-details/${data.orderId}`;
+      } else {
+        showNotification(data.message || 'Failed to place order', 'error');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      showNotification('Failed to place order', 'error');
+    }
+  }
+
+  function showAddressForm() {
+    document.getElementById('addressFormTitle').textContent = 'Add New Address';
+    document.getElementById('addressFormModal').classList.add('active');
+    document.getElementById('addressForm').onsubmit = saveAddress;
+  }
+
+  function closeAddressForm() {
+    document.getElementById('addressFormModal').classList.remove('active');
+    document.getElementById('addressForm').reset();
+    clearValidationMessages();
+    editingAddressId = null;
+  }
+
+  async function saveAddress(event) {
+    event.preventDefault();
+    console.log('Save Address triggered'); 
+    const { isValid, errors, formData } = validateForm();
+    console.log('Validation Result:', { isValid, errors, formData });
+    if (!isValid) {
+      console.log('Validation failed with errors:', errors);
+      clearValidationMessages();
+      displayErrorMessages(errors);
+      return;
+    }
+
+    try {
+      const url = editingAddressId ? `/addresses/${editingAddressId}` : '/addAddress';
+      const method = editingAddressId ? 'PUT' : 'POST';
+      console.log('Sending request:', { url, method, formData });
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      console.log('Server Response:', { status: response.status, data }); 
+      if (response.ok) {
+        if (editingAddressId) {
+          addresses = addresses.map(addr => addr._id === editingAddressId ? data.address : addr);
+          Swal.fire('Success', 'Address updated successfully!', 'success');
+        } else {
+          addresses.push(data.address);
+          Swal.fire('Success', 'Address added successfully!', 'success');
+        }
+        renderAddresses();
+        closeAddressForm();
+      } else {
+        console.error('Save address failed:', data);
+        showNotification(data.message || 'Failed to save address', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving address:', error);
+      showNotification('Failed to save address', 'error');
+    }
+  }
+
+  function validateForm() {
+    const formData = {
+      addressType: document.getElementById('addressType').value,
+      name: document.getElementById('name').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      altPhone: document.getElementById('altPhone').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      landMark: document.getElementById('landmark').value.trim(),
+      state: document.getElementById('state').value.trim(),
+      pincode: document.getElementById('pincode').value.trim()
+    };
+
+    const errors = {};
+    const phoneRegex = /^\d{10}$/;
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    const alphaRegex = /^[a-zA-Z\s]+$/;
+    const consecutiveZerosRegex = /0{7,}/;
+
+    if (!formData.addressType) {
+      errors.addressType = 'Address type is required';
+    }
+    if (!formData.name) {
+      errors.name = 'Name is required';
+    } else if (formData.name.length < 3) {
+      errors.name = 'Name must be at least 3 characters';
+    } else if (!alphaRegex.test(formData.name)) {
+      errors.name = 'Name must contain only letters and spaces';
+    }
+    if (!formData.phone) {
+      errors.phone = 'Phone number is required';
+    } else if (!phoneRegex.test(formData.phone)) {
+      errors.phone = 'Phone number must be exactly 10 digits';
+    } else if (consecutiveZerosRegex.test(formData.phone)) {
+      errors.phone = 'Phone number is invalid';
+    }
+    if (!formData.altPhone) {
+      errors.altPhone = 'Alternative phone number is required';
+    } else if (!phoneRegex.test(formData.altPhone)) {
+      errors.altPhone = 'Alternative phone number must be exactly 10 digits';
+    } else if (consecutiveZerosRegex.test(formData.altPhone)) {
+      errors.altPhone = 'Alternative phone number is invalid';
+    } else if (formData.phone === formData.altPhone) {
+      errors.altPhone = 'Phone number and alternative phone number cannot be the same';
+    }
+    if (!formData.city) {
+      errors.city = 'City is required';
+    } else if (!alphaRegex.test(formData.city)) {
+      errors.city = 'City must contain only letters and spaces';
+    }
+    if (!formData.state) {
+      errors.state = 'State is required';
+    } else if (!alphaRegex.test(formData.state)) {
+      errors.state = 'State must contain only letters and spaces';
+    }
+    if (!formData.pincode) {
+      errors.pincode = 'Pincode is required';
+    } else if (!pincodeRegex.test(formData.pincode)) {
+      errors.pincode = 'Pincode must be a valid 6-digit number';
+    }
+    if (!formData.landMark) {
+      errors.landMark = 'Landmark is required';
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+      formData
+    };
+  }
+
+  function clearValidationMessages() {
+    document.querySelectorAll('.validation-message').forEach(div => div.textContent = '');
+    document.querySelectorAll('.form-input').forEach(input => input.classList.remove('error'));
+  }
+
+  function displayErrorMessages(errors) {
+    Object.entries(errors).forEach(([fieldName, message]) => {
+      const field = document.getElementById(fieldName);
+      if (field) {
+        const validationDiv = field.nextElementSibling;
+        field.classList.add('error');
+        validationDiv.textContent = message;
+      }
+    });
+  }
+
+
+  function editAddress(addressId) {
+  editingAddressId = addressId;
+  const address = addresses.find(addr => addr._id === addressId);
+
+  document.getElementById('addressFormTitle').textContent = 'Edit Address';
+  document.getElementById('addressFormModal').classList.add('active');
+
+  // Populate the form fields with the existing address data
+  document.getElementById('addressType').value = address.addressType;
+  document.getElementById('name').value = address.name;
+  document.getElementById('phone').value = address.phone;
+  document.getElementById('altPhone').value = address.altPhone;
+  document.getElementById('city').value = address.city;
+  document.getElementById('landmark').value = address.landMark;
+  document.getElementById('state').value = address.state;
+  document.getElementById('pincode').value = address.pincode;
+
+  // Bind the saveAddress function to the form's onsubmit event
+  document.getElementById('addressForm').onsubmit = saveAddress;
+}
+
+
+
+  
+  function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  function applyCoupon() {
+    const couponCode = document.getElementById('couponCode').value.trim();
+    if (couponCode === 'DISCOUNT10') {
+      discount = 10;
+      showNotification('Coupon applied successfully!', 'success');
+      fetchCartItems();
+    } else {
+      showNotification('Invalid coupon code', 'error');
+    }
+  }
+
+  function updateQuantity(productId, action) {
+    const quantityInput = document.getElementById(`quantity-${productId}`);
+    let quantity = parseInt(quantityInput.value);
+    const maxQuantity = 10; // Set your max quantity here
+
+    if (action === 'increase' && quantity < maxQuantity) {
+      quantity++;
+    } else if (action === 'decrease' && quantity > 1) {
+      quantity--;
+    }
+
+    quantityInput.value = quantity;
+    checkMaxQuantity(productId, quantity, maxQuantity);
+  }
+
+  function checkMaxQuantity(productId, quantity, maxQuantity) {
+    const maxQuantityMessage = document.getElementById(`max-quantity-message-${productId}`);
+    const increaseBtn = document.getElementById(`increase-btn-${productId}`);
+
+    if (quantity >= maxQuantity) {
+      maxQuantityMessage.style.display = 'block';
+      increaseBtn.disabled = true;
+    } else {
+      maxQuantityMessage.style.display = 'none';
+      increaseBtn.disabled = false;
+    }
+  }
+
+  function selectAddress(addressId) {
+    selectedAddressId = addressId;
+    document.querySelectorAll('.address-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    document.getElementById(`address-${addressId}`).closest('.address-card').classList.add('selected');
+  }
+</script>
+
+<style>
+  .quantity-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .quantity-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  .quantity-btn:disabled {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+  }
+  .quantity {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ccc;
+    margin: 0 5px;
+  }
+  .max-quantity-message {
+    display: none;
+    color: red;
+    font-size: 12px;
+  }
+  .notification-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+  .notification {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  .form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.validation-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  min-height: 1.25rem;
+}
+
+.form-input.error {
+  border-color: #dc2626;
+}
+
+.form-input.error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+.address-list {
+  margin-top: 1rem;
+}
+
+.address-card {
+  display: flex;
+  align-items: center;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.address-select {
+  margin-right: 1rem;
+}
+
+.address-details {
+  flex: 1;
+}
+
+.address-card:hover {
+  border-color: var(--pink);
+  background-color: #FDF2F8;
+}
+
+.address-type {
+  display: inline-block;
+  background-color: #FDF2F8;
+  color: var(--pink);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.address-content {
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.address-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.address-action-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: #6B7280;
+  transition: color 0.2s ease;
+}
+
+.address-action-btn:hover {
+  color: var(--pink);
+}
+
+.add-address-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #F3F4F6;
+  border: 2px dashed #D1D5DB;
+  border-radius: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-address-btn:hover {
+  background-color: #FDF2F8;
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+      grid-template-columns: 1fr;
+  }
+}
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    overflow: hidden;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.modal-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+.modal-body {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+}
+
+.action-btn.secondary {
+    background-color: #6c757d;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+
+.form-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+  }
+
+.validation-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    min-height: 1.25rem;
+}
+
+.form-input.error {
+    border-color: #dc2626;
+}
+
+.form-input.error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<%- include("../../views/partials/user/footer") %>

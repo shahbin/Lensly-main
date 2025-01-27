@@ -1,0 +1,91 @@
+<%- include("../../views/partials/user/header", { user: user, query: query }) %>
+
+<main class="main">
+  <!-- Breadcrumb -->
+  <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;">
+    <ul class="breadcrumb__list container" style="margin-left: -25px;">
+      <li><a href="/" class="breadcrumb__link" style="font-size: 12px;">Home</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px;">Shop</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><span class="breadcrumb__link" style="font-size: 12px;">Search Results</span></li>
+    </ul>
+  </section>
+
+  <!-- Search Results -->
+  <section class="products container section--lg">
+    <h3 class="section__title">Search Results for "<%= query %>"</h3>
+    <div class="products__container grid">
+      <% if (products.length > 0) { %>
+        <% products.forEach(product => { %>
+          <div class="product__item">
+            <div class="product__banner">
+              <a href="/productDetails?id=<%= product._id %>" class="product__images">
+                <img src="/admin-assets/imgs/brands/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="product__img default" />
+                <img src="/admin-assets/imgs/brands/<%= product.productImage[1] %>" alt="" class="product__img hover" />
+              </a>
+              <div class="product__actions">
+                <a href="#" class="action__btn" aria-label="Quick View">
+                  <i class="fi fi-rs-eye"></i>
+                </a>
+                <a href="/addToWishlist?id=<%= product._id %>" class="action__btn" aria-label="Add to Wishlist">
+                  <i class="fi fi-rs-heart"></i>
+                </a>
+              </div>
+              <div class="product__badge light-pink">Now Available</div>
+            </div>
+            <div class="product__content">
+              <span class="product__category"><%= product.category.name %></span>
+              <a href="/productDetails?id=<%= product._id %>">
+                <h3 class="product__title"><%= product.productName %></h3>
+              </a>
+              <div class="product__rating">
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+              </div>
+              <div class="product__price">
+                <span class="new__price">₹<%= product.salePrice %></span>
+                <br>
+                <span class="old__price">₹<%= product.regularPrice %></span>
+              </div>
+              <a href="/cart" class="action__btn cart__btn" aria-label="Add To Cart" onclick="event.preventDefault(); addToCart('<%= product._id %>');">
+                <i class="fi fi-rs-shopping-bag-add"></i>
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>No products found for your search query.</p>
+      <% } %>
+    </div>
+  </section>
+</main>
+
+<%- include("../../views/partials/user/footer") %>
+
+<script>
+  function addToCart(productId) {
+    fetch('/cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Product added to cart successfully!');
+      } else {
+        alert('Failed to add product to cart.');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    });
+  }
+</script>

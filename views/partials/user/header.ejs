@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--=============== FLATICON ===============-->
+    <link
+      rel="stylesheet"
+      href="https://cdn-uicons.flaticon.com/2.0.0/uicons-regular-straight/css/uicons-regular-straight.css"
+    />
+
+    <!--=============== SWIPER CSS ===============-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+
+    <!--=============== CSS ===============-->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <title>Lensly</title>
+  </head>
+  <body>
+    <!--=============== HEADER ===============-->
+    <header class="header">
+      <nav class="nav container">
+        <a href="/" class="nav__logo">
+          <img
+            class="nav__logo-img"
+            src="assets/img/lensly logo.png"
+            alt="website logo"
+          />
+        </a>
+        <div class="nav__menu" id="nav-menu">
+          <div class="nav__menu-top">
+            <a href="/" class="nav__menu-logo">
+              <img src="./assets/img/logo.svg" alt="">
+            </a>
+            <div class="nav__close" id="nav-close">
+              <i class="fi fi-rs-cross-small"></i>
+            </div>
+          </div>
+          <ul class="nav__list">
+            <li class="nav__item">
+              <a href="/" class="nav__link active-link">Home</a>
+            </li>
+            <li class="nav__item">
+              <a href="shop" class="nav__link">Shop</a>
+            </li>
+            <li class="nav__item">
+              <a href="account" class="nav__link">My Account</a>
+            </li>
+            <li class="nav__item">
+              <a href="compare" class="nav__link">Compare</a>
+            </li>
+          </ul>
+          <div class="header__search">
+            <form action="/search" method="GET" class="search-form">
+              <input
+                type="text"
+                name="query"
+                placeholder="Search For Items..."
+                class="form__input"
+                value="<%= typeof query !== 'undefined' ? query : '' %>"
+              />
+              <button type="submit" class="search__btn">
+                <img src="assets/img/search.png" alt="search icon" />
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="header__user-actions">
+          <a href="wishlist.html" class="header__action-btn" title="Wishlist">
+            <img src="assets/img/icon-heart.svg" alt="" />
+            <!-- <span class="count"></span> -->
+          </a>
+          <a href="/cart" class="header__action-btn" title="Cart">
+            <img src="assets/img/icon-cart.svg" alt="" />
+            <% if (user) { %>
+              <span class="count"><%= typeof cartItems !== 'undefined' ? cartItems.length : 0 %></span>
+            <% } %>
+          </a>
+          <div class="header__container ">
+            <% if (user) { %>
+              <div class="dropdown">
+                <a href="#" class="sign-in-link" style="margin-left: 50px;"><%= user.name %></a>
+                <div class="dropdown-content">
+                  <a href="/userProfile">Profile</a>
+                  <a href="/logout">Logout</a>
+                </div>
+              </div>
+            <% } else { %>
+              <a href="/login" class="header__top-action">
+                Log In  
+              </a>
+            <% } %>
+          </div>
+          <div class="header__action-btn nav__toggle" id="nav-toggle">
+            <img src="./assets//img/menu-burger.svg" alt="">
+          </div>
+        </div>
+      </nav>
+    </header>
+  </body>
+</html>

@@ -1,0 +1,1435 @@
+<%- include("../../views/partials/user/header", { user: user }) %>
+
+<style>
+    /* user-profile */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --purple: #8B5CF6;
+  --pink: #EC4899;
+  --gold: #D4AF37;
+  --orange: #F59E0B;
+  --cyan: #06B6D4;
+  --yellow: #FCD34D;
+}
+
+body {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+
+
+.header {
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.welcome-text {
+  color: #111827;
+  font-size: 1.875rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.date-time {
+  color: #6B7280;
+  font-size: 1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+}
+
+.dashboard-item {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+}
+
+.dashboard-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+  border-color: var(--purple);
+}
+
+.icon-wrapper {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.dashboard-item:hover .icon-wrapper {
+  transform: scale(1.1);
+}
+
+.icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.purple { color: var(--purple); background: rgba(139, 92, 246, 0.1); }
+.pink { color: var(--pink); background: rgba(236, 72, 153, 0.1); }
+.gold { color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+.orange { color: var(--orange); background: rgba(245, 158, 11, 0.1); }
+.cyan { color: var(--cyan); background: rgba(6, 182, 212, 0.1); }
+.yellow { color: var(--yellow); background: rgba(252, 211, 77, 0.1); }
+
+.dashboard-item h3 {
+  color: #111827;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-item p {
+  color: #6B7280;
+  font-size: 0.875rem;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal.active {
+  display: flex;
+  opacity: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 500px;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.modal-header h2 {
+  color: #111827;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6B7280;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.info-group {
+  position: relative;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.info-group:hover {
+  background-color: #F9FAFB;
+}
+
+.info-group label {
+  display: block;
+  color: #6B7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.info-group p {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.form-input.error {
+  border-color: #EF4444;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: rgb(90, 138, 90);
+  color: white;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.action-btn.secondary {
+  background: #E5E7EB;
+  color: #374151;
+}
+
+.btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Animation for notifications */
+@keyframes slideIn {
+  from {
+      transform: translateY(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+.notification {
+  animation: slideIn 0.3s ease-out;
+}
+.password-strength {
+  margin-top: 5px;
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.password-strength.very-weak {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+.password-strength.weak {
+  color: #f97316;
+  background-color: #fff7ed;
+}
+
+.password-strength.medium {
+  color: #eab308;
+  background-color: #fef9c3;
+}
+
+.password-strength.strong {
+  color: #22c55e;
+  background-color: #dcfce7;
+}
+
+.error-message {
+  color: #dc2626;
+  background-color: #fee2e2;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  color: #059669;
+  background-color: #d1fae5;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.message-container {
+  margin-bottom: 1rem;
+}
+
+.notification {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-width: 300px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+.form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.validation-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  min-height: 1.25rem;
+}
+
+.form-input.error {
+  border-color: #dc2626;
+}
+
+.form-input.error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+.address-list {
+  margin-top: 1rem;
+}
+
+.address-card {
+  position: relative;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.address-card:hover {
+  border-color: var(--pink);
+  background-color: #FDF2F8;
+}
+
+.address-type {
+  display: inline-block;
+  background-color: #FDF2F8;
+  color: var(--pink);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.address-content {
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.address-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.address-action-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: #6B7280;
+  transition: color 0.2s ease;
+}
+
+.address-action-btn:hover {
+  color: var(--pink);
+}
+
+.add-address-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #F3F4F6;
+  border: 2px dashed #D1D5DB;
+  border-radius: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-address-btn:hover {
+  background-color: #FDF2F8;
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+      grid-template-columns: 1fr;
+  }
+}
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh; /* Limit modal height */
+    overflow: hidden; /* Prevent content overflow */
+}
+
+.modal-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-body {
+    padding: 16px;
+    flex: 1; /* Allow modal body to expand */
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: calc(80vh - 100px); /* Adjust based on header height */
+}
+
+.address-list {
+    margin-top: 16px;
+}
+
+.address-card {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+}
+
+</style>
+
+
+<body>
+    <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
+        <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
+          <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
+          <li><span class="breadcrumb__link">></span></li>
+          <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Profile</a></li>
+      
+        </ul>
+      </section>
+  <header class="header">
+    <div class="container">
+        <h1 class="welcome-text" id="welcomeText">Welcome back, <%= user.name %>!</h1>
+        <div class="date-time" id="dateTime"></div>
+    </div>
+</header>
+
+
+
+<main class="container">
+    <div class="dashboard-grid">
+        <div class="dashboard-item" data-type="profile">
+            <div class="icon-wrapper purple">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M20 21a8 8 0 1 0-16 0"/>
+                </svg>
+            </div>
+            <h3>Profile</h3>
+            <p>View and edit your profile</p>
+        </div>
+          <div class="dashboard-item" data-type="address">
+              <div class="icon-wrapper pink">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                      <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+              </div>
+              <h3>Address</h3>
+              <p>Manage your addresses</p>
+          </div>
+          
+          <div class="modal" id="addressModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Manage Addresses</h2>
+                    <button class="close-btn" aria-label="Close">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <button class="add-address-btn" onclick="showAddressForm()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 5v10m5-5H5"/>
+                        </svg>
+                        Add New Address
+                    </button>
+        
+                    <div class="address-list">
+                        <!-- Address cards will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add/Edit Address Modal -->
+        <div class="modal" id="addressFormModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="addressFormTitle">Add New Address</h2>
+                    <button class="close-btn" aria-label="Close">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <form class="address-form" id="addressForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="addressType">Address Type</label>
+                                <select class="form-input" id="addressType" >
+                                    <option value="home">Home</option>
+                                    <option value="work">Work</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" class="form-input" id="name" maxlength="50">
+                            </div>
+                        </div>
+        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" class="form-input" id="city" >
+                            </div>
+                            <div class="form-group">
+                                <label for="landmark">Landmark</label>
+                                <input type="text" class="form-input" id="landmark" required>
+                            </div>
+                        </div>
+        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="state">State</label>
+                                <input type="text" class="form-input" id="state" >
+                            </div>
+                            <div class="form-group">
+                                <label for="pincode">Pincode</label>
+                                <input type="text" class="form-input" id="pincode" maxlength="6" >
+                            </div>
+                        </div>
+        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" class="form-input" id="phone" pattern="\d{10}">
+                            </div>
+                            <div class="form-group">
+                                <label for="altPhone">Alternative Phone Number</label>
+                                <input type="tel" class="form-input" id="altPhone" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+        
+                <div class="modal-footer">
+                    <button class="action-btn" onclick="saveAddress()">Save Address</button>
+                    <button class="action-btn secondary" onclick="closeAddressForm()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+
+          <div class="dashboard-item" data-type="orders">
+              <div class="icon-wrapper gold">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 8H3m4 8h10M7 4h10l2 4v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8l2-4z"/>
+                  </svg>
+              </div>
+              <h3>Orders</h3>
+              <p>Track your orders</p>
+          </div>
+          
+          <div class="dashboard-item" data-type="wallet">
+              <div class="icon-wrapper orange">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/>
+                      <path d="M12 8v8m-4-4h8"/>
+                  </svg>
+              </div>
+              <h3>Wallet</h3>
+              <p>Check your balance</p>
+          </div>
+          
+          <div class="dashboard-item" data-type="history">
+              <div class="icon-wrapper cyan">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 20V4m-7 4l7-4 7 4M5 16l7 4 7-4"/>
+                  </svg>
+              </div>
+              <h3>History</h3>
+              <p>View transaction history</p>
+          </div>
+          
+          <div class="dashboard-item" data-type="referral">
+              <div class="icon-wrapper yellow">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                      <path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+                  </svg>
+              </div>
+              <h3>Referral</h3>
+              <p>Invite friends</p>
+          </div>
+      </div>
+  </main>
+
+  <!-- Profile Modal -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>My Profile</h2>
+            <button class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="info-group">
+                <label>Name</label>
+                <p id="profileName"><%= user.name %></p>
+            </div>
+            
+            <div class="info-group">
+                <label>Phone</label>
+                <p id="profilePhone"><%= user.phone %></p>
+            </div>
+            
+            <div class="info-group">
+                <label>Email</label>
+                <p id="profileEmail"><%= user.email %></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="action-btn" onclick="showEditDetailsModal()">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Edit Details
+            </button>
+            
+            <button class="action-btn" onclick="showPasswordModal()">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Change Password
+            </button>
+        </div>
+    </div>
+</div>
+
+  <!-- Edit Field Modal -->
+   
+  <div class="modal" id="editDetailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Profile Details</h2>
+            <button class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+        </div>
+        <form id="editProfileForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editName">Name</label>
+                    <input type="text" id="editName" name="name" class="form-input" value="<%= user.name %>">
+                    <div class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Phone</label>
+                    <input type="tel" id="editPhone" name="phone" class="form-input" value="<%= user.phone %>">
+                    <div class="validation-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="action-btn">Save Changes</button>
+                <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal" id="changePasswordModal">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h2>Change Password</h2>
+          <button type="button" class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+      </div>
+      <form id="changePasswordForm">
+          <div class="modal-body">
+              <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" name="currentPassword" class="form-input">
+                  <div class="validation-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" name="newPassword" class="form-input">
+                  <div class="validation-message"></div>
+                  <div class="password-strength"></div>
+              </div>
+              <div class="form-group">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <input type="password" id="confirmPassword" name="confirmPassword" class="form-input">
+                  <div class="validation-message"></div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="submit" class="action-btn">Update Password</button>
+              <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+
+<script>
+
+
+// Script to handle modal functionality
+function showEditDetailsModal() {
+    const modal = document.getElementById('editDetailsModal');
+    if (modal) {
+        modal.classList.add('active'); // Show the modal
+    }
+}
+
+function closeModals() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.classList.remove('active'); // Hide all modals
+    });
+}
+
+// Optional: Close modal when clicking outside the modal content
+window.addEventListener('click', (event) => {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+});
+
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.toggle("active");
+            }
+        }
+
+        document.querySelectorAll('.dashboard-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const type = item.getAttribute('data-type');
+                if (type === 'profile') {
+                    toggleModal('profileModal');
+                } else if (type === 'address') {
+                    showAddressModal();
+                }
+            });
+        });
+
+        document.querySelectorAll('.close-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        function updateDateTime() {
+            const dateTimeElement = document.getElementById('dateTime');
+            const now = new Date();
+            dateTimeElement.textContent = now.toLocaleString();
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+
+        // Edit Profile Form Submission
+        const editProfileForm = document.getElementById('editProfileForm');
+        if (editProfileForm) {
+            editProfileForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                clearValidationMessages(this);
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                let isValid = true;
+
+                // Name validation
+                if (!data.name.trim()) {
+                    showValidationError('editName', 'Name is required');
+                    isValid = false;
+                } else if (data.name.trim().length < 3) {
+                    showValidationError('editName', 'Name must be at least 3 characters');
+                    isValid = false;
+                }
+
+                // Phone validation
+                const phoneRegex = /^\d{10}$/;
+                const invalidPhonePattern = /0{7,}/; // Pattern to check for 7 or more consecutive zeros
+                if (!phoneRegex.test(data.phone.replace(/\s+/g, ''))) {
+                    showValidationError('editPhone', 'Please enter a valid 10-digit phone number');
+                    isValid = false;
+                } else if (invalidPhonePattern.test(data.phone)) {
+                    showValidationError('editPhone', 'Phone number cannot contain 7 or more consecutive zeros');
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                try {
+                    const response = await fetch('/editProfile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        document.getElementById('profileName').textContent = data.name;
+                        document.getElementById('profilePhone').textContent = data.phone;
+                        showMessage(result.message, 'success');
+                        closeModals();
+                    } else {
+                        result.errors.forEach(error => {
+                            if (error.toLowerCase().includes('name')) {
+                                showValidationError('editName', error);
+                            } else if (error.toLowerCase().includes('phone')) {
+                                showValidationError('editPhone', error);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    showMessage('An error occurred', 'error');
+                }
+            });
+        }
+
+        // Change Password Form Submission
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        if (changePasswordForm) {
+            const newPasswordInput = document.getElementById('newPassword');
+            if (newPasswordInput) {
+                newPasswordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    const strength = checkPasswordStrength(password);
+                    updatePasswordStrength(this, strength);
+                });
+            }
+
+            changePasswordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                clearValidationMessages(this);
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                let isValid = true;
+
+                if (!data.currentPassword) {
+                    showValidationError('currentPassword', 'Current password is required');
+                    isValid = false;
+                }
+
+                if (!data.newPassword) {
+                    showValidationError('newPassword', 'New password is required');
+                    isValid = false;
+                } else if (data.newPassword.length < 8) {
+                    showValidationError('newPassword', 'Password must be at least 8 characters');
+                    isValid = false;
+                }
+
+                if (!data.confirmPassword) {
+                    showValidationError('confirmPassword', 'Please confirm your password');
+                    isValid = false;
+                } else if (data.newPassword !== data.confirmPassword) {
+                    showValidationError('confirmPassword', 'Passwords do not match');
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                try {
+                    const response = await fetch('/changePassword', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showMessage(result.message, 'success');
+                        closeModals();
+                    } else {
+                        result.errors.forEach(error => {
+                            if (error.toLowerCase().includes('current')) {
+                                showValidationError('currentPassword', error);
+                            } else if (error.toLowerCase().includes('new')) {
+                                showValidationError('newPassword', error);
+                            } else if (error.toLowerCase().includes('confirm') || error.toLowerCase().includes('match')) {
+                                showValidationError('confirmPassword', error);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    showMessage('An error occurred', 'error');
+                }
+            });
+        }
+
+        // Helper Functions
+        function showValidationError(fieldId, message) {
+            const input = document.getElementById(fieldId);
+            const validationDiv = input.nextElementSibling;
+            input.classList.add('error');
+            validationDiv.textContent = message;
+        }
+
+        function clearValidationMessages(form) {
+            form.querySelectorAll('.validation-message').forEach(div => div.textContent = '');
+            form.querySelectorAll('.form-input').forEach(input => input.classList.remove('error'));
+        }
+
+        function updatePasswordStrength(input, strength) {
+            const existingIndicator = input.parentElement.querySelector('.password-strength');
+            if (existingIndicator) existingIndicator.remove();
+
+            const strengthIndicator = document.createElement('div');
+            strengthIndicator.className = 'password-strength';
+
+            const strengthTexts = ['Weak', 'Medium', 'Strong'];
+            const strengthClasses = ['weak', 'medium', 'strong'];
+
+            if (input.value.length > 0) {
+                strengthIndicator.textContent = `Password Strength: ${strengthTexts[strength - 1] || 'Very Weak'}`;
+                strengthIndicator.className = `password-strength ${strengthClasses[strength - 1] || 'very-weak'}`;
+            }
+
+            input.parentElement.appendChild(strengthIndicator);
+        }
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Za-z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            return strength;
+        }
+
+        function closeModals() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.classList.remove('active');
+                const form = modal.querySelector('form');
+                if (form) {
+                    form.reset();
+                    clearValidationMessages(form);
+                    const strengthIndicator = form.querySelector('.password-strength');
+                    if (strengthIndicator) {
+                        strengthIndicator.remove();
+                    }
+                }
+            });
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message notification`;
+            messageDiv.textContent = message;
+
+            const container = document.querySelector('.container');
+            if (container) {
+                container.insertBefore(messageDiv, container.firstChild);
+                setTimeout(() => messageDiv.remove(), 5000);
+            }
+        }
+    });
+
+    // State management
+    let addresses = [];
+    let editingAddressId = null;
+
+    // Constants
+    const VALIDATION_RULES = {
+        phone: {
+            pattern: /^\d{10}$/,
+            message: 'Please enter a valid 10-digit phone number'
+        },
+        pincode: {
+            pattern: /^[1-9][0-9]{5}$/,
+            message: 'Please enter a valid 6-digit pincode'
+        },
+        text: {
+            pattern: /^[a-zA-Z\s]+$/,
+            message: 'Please enter only letters and spaces'
+        },
+        addressTypes: ['home', 'work', 'other']
+    };
+
+    // Form handling functions
+    function getFormData() {
+        return {
+            type: document.getElementById('addressType').value,
+            name: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            altPhone: document.getElementById('altPhone').value.trim(),
+            landmark: document.getElementById('landmark').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            state: document.getElementById('state').value.trim(),
+            pincode: document.getElementById('pincode').value.trim()
+        };
+    }
+
+    function validateForm() {
+        const formData = getFormData();
+        const errors = {};
+
+        // Address Type validation
+        if (!formData.type || !VALIDATION_RULES.addressTypes.includes(formData.type.toLowerCase())) {
+            errors.type = 'Please select a valid address type';
+        }
+
+        // Name validation
+        if (!formData.name) {
+            errors.name = 'Name is required';
+        } else if (formData.name.length < 3) {
+            errors.name = 'Name must be at least 3 characters';
+        } else if (!VALIDATION_RULES.text.pattern.test(formData.name)) {
+            errors.name = 'Name must contain only letters';
+        }
+
+        // Phone validation
+        if (!formData.phone) {
+            errors.phone = 'Phone number is required';
+        } else if (!VALIDATION_RULES.phone.pattern.test(formData.phone)) {
+            errors.phone = VALIDATION_RULES.phone.message;
+        }
+
+        // Alt Phone validation
+        if (!formData.altPhone) {
+            errors.altPhone = 'Alternative phone number is required';
+        } else if (!VALIDATION_RULES.phone.pattern.test(formData.altPhone)) {
+            errors.altPhone = VALIDATION_RULES.phone.message;
+        } else if (formData.phone === formData.altPhone) {
+            errors.altPhone = 'Phone number and alternative phone number cannot be the same';
+        }
+
+        // City validation
+        if (!formData.city) {
+            errors.city = 'City is required';
+        } else if (!VALIDATION_RULES.text.pattern.test(formData.city)) {
+            errors.city = 'City must contain only letters';
+        }
+
+        // State validation
+        if (!formData.state) {
+            errors.state = 'State is required';
+        } else if (!VALIDATION_RULES.text.pattern.test(formData.state)) {
+            errors.state = 'State must contain only letters';
+        }
+
+        // Pincode validation
+        if (!formData.pincode) {
+            errors.pincode = 'Pincode is required';
+        } else if (!VALIDATION_RULES.pincode.pattern.test(formData.pincode)) {
+            errors.pincode = VALIDATION_RULES.pincode.message;
+        }
+
+        // Landmark validation
+        if (!formData.landmark) {
+            errors.landmark = 'Landmark is required';
+        } else if (formData.landmark.length > 100) {
+            errors.landmark = 'Landmark must not exceed 100 characters';
+        }
+
+        return {
+            isValid: Object.keys(errors).length === 0,
+            errors,
+            formData
+        };
+    }
+
+    // UI handling functions
+    function clearErrorMessages() {
+        document.querySelectorAll('.error-message').forEach(el => el.remove());
+    }
+
+    function displayErrorMessages(errors) {
+        Object.entries(errors).forEach(([fieldName, message]) => {
+            const field = document.getElementById(fieldName);
+            if (field) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                field.parentNode.appendChild(errorDiv);
+            }
+        });
+    }
+
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    function resetForm() {
+        document.getElementById('addressForm').reset();
+        clearErrorMessages();
+        editingAddressId = null;
+    }
+
+    // Modal functions
+    function showAddressModal() {
+        document.getElementById('addressModal').classList.add('active');
+        renderAddresses();
+    }
+
+    function closeAddressModal() {
+        document.getElementById('addressModal').classList.remove('active');
+    }
+
+    function showAddressForm(isEdit = false) {
+        document.getElementById('addressFormTitle').textContent = isEdit ? 'Edit Address' : 'Add New Address';
+        document.getElementById('addressModal').classList.remove('active');
+        document.getElementById('addressFormModal').classList.add('active');
+    }
+
+    function closeAddressForm() {
+        document.getElementById('addressFormModal').classList.remove('active');
+        document.getElementById('addressModal').classList.add('active');
+        resetForm();
+    }
+
+    // API functions
+    async function saveAddress() {
+        const { isValid, errors, formData } = validateForm();
+        
+        if (!isValid) {
+            clearErrorMessages();
+            displayErrorMessages(errors);
+            return;
+        }
+
+        try {
+            const url = editingAddressId 
+                ? `/addresses/${editingAddressId}`
+                : '/addAddress';
+                
+            const response = await fetch(url, {
+                method: editingAddressId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    addressType: formData.type,
+                    name: formData.name,
+                    phone: formData.phone,
+                    altPhone: formData.altPhone,
+                    city: formData.city,
+                    landMark: formData.landmark,
+                    state: formData.state,
+                    pincode: formData.pincode
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to save address');
+            }
+
+            if (editingAddressId) {
+                addresses = addresses.map(addr =>
+                    addr._id === editingAddressId ? { ...data.address } : addr
+                );
+            } else {
+                addresses.push(data.address);
+            }
+
+            resetForm();
+            closeAddressForm();
+            renderAddresses();
+            showNotification(editingAddressId ? 'Address updated successfully!' : 'Address saved successfully!');
+
+        } catch (error) {
+            console.error('Error saving address:', error);
+            showNotification(error.message, 'error');
+        }
+    }
+
+    async function deleteAddress(id) {
+        if (!confirm('Are you sure you want to delete this address?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/addresses/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete address');
+            }
+
+            addresses = addresses.filter(addr => addr._id !== id);
+            renderAddresses();
+            showNotification('Address deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting address:', error);
+            showNotification('Failed to delete address', 'error');
+        }
+    }
+
+    // Render functions
+    function renderAddresses() {
+        const addressList = document.querySelector('.address-list');
+        
+        if (!addresses.length) {
+            addressList.innerHTML = `
+                <div class="no-addresses">
+                    No addresses found. Click "Add New Address" to add one.
+                </div>`;
+            return;
+        }
+
+        addressList.innerHTML = addresses.map(address => `
+            <div class="address-card">
+                <span class="address-type">${address.addressType}</span>
+                <div class="address-content">
+                    <p class="name">${address.name}</p>
+                    ${address.landMark ? `<p class="landmark">${address.landMark}</p>` : ''}
+                    <p class="location">${address.city}, ${address.state} ${address.pincode}</p>
+                    <p class="phone">Phone: ${address.phone}</p>
+                    ${address.altPhone ? `<p class="alt-phone">Alt Phone: ${address.altPhone}</p>` : ''}
+                </div>
+                <div class="address-actions">
+                    <button class="edit-btn" onclick="editAddress('${address._id}')">
+                        Edit
+                    </button>
+                    <button class="delete-btn" onclick="deleteAddress('${address._id}')">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Edit address function
+    function editAddress(addressId) {
+        const address = addresses.find(addr => addr._id === addressId);
+        if (!address) return;
+
+        editingAddressId = addressId;
+        
+        document.getElementById('addressType').value = address.addressType;
+        document.getElementById('name').value = address.name;
+        document.getElementById('phone').value = address.phone;
+        document.getElementById('altPhone').value = address.altPhone || '';
+        document.getElementById('landmark').value = address.landMark || '';
+        document.getElementById('city').value = address.city;
+        document.getElementById('state').value = address.state;
+        document.getElementById('pincode').value = address.pincode;
+
+        showAddressForm(true);
+    }
+
+    // Event listeners for address functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form submission
+        const addressForm = document.getElementById('addressForm');
+        if (addressForm) {
+            addressForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveAddress();
+            });
+
+            // Real-time validation
+            addressForm.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('input', function() {
+                    const errorMessage = this.parentNode.querySelector('.error-message');
+                    if (errorMessage) {
+                        errorMessage.remove();
+                    }
+                });
+            });
+        }
+
+        // Initial load of addresses
+        fetchAddresses();
+    });
+
+    // Fetch addresses on load
+    async function fetchAddresses() {
+        try {
+            const response = await fetch('/addresses');
+            const data = await response.json();
+            
+            if (response.ok) {
+                addresses = data.addresses;
+                renderAddresses();
+            } else {
+                showNotification('Failed to load addresses', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching addresses:', error);
+            showNotification('Failed to load addresses', 'error');
+        }
+    }
+
+
+
+
+
+    
+</script>
+
+</body>
+
+<%- include("../../views/partials/user/footer") %>

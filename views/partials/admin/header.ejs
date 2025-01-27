@@ -1,0 +1,225 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Lensly</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <link rel="shortcut icon" type="image/x-icon" href="#">
+    <link href="/admin-assets/css/main.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.min.css">
+<script src="https://kit.fontawesome.com/16d4885483.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<style>
+/* General Body Styling */
+/* General */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f4f9;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #ddd;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.sidebar ul li i.icon {
+  font-size: 20px;
+  width: 30px; /* Ensure all icons take up the same width */
+  text-align: center; /* Center-align the icon within its space */
+  color: #bbb;
+  margin-right: 10px;
+  transition: color 0.3s ease;
+}
+
+.sidebar ul li span {
+  flex: 1; /* Ensures the text aligns with the icons */
+}
+
+.sidebar ul li:hover {
+  color: #333;
+}
+
+.sidebar ul li:hover i.icon {
+  color: #007bff;
+}
+
+
+/* Topbar */
+.topbar {
+  margin-left: 250px;
+  height: 60px;
+  background-color: #3a79ff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  justify-content: space-between;
+}
+
+.topbar .profile {
+  display: flex;
+  align-items: center;
+}
+
+.topbar .profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.topbar .profile img:hover {
+  transform: scale(1.1);
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+}
+
+.dashboard-header {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+}
+
+.card {
+  background-color: #ffffff;
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Buttons */
+.button {
+  padding: 10px 20px;
+  background-color: #3a79ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.button:hover {
+  background-color: #2d5fcc;
+}
+
+</style>
+
+
+</style>
+</head>
+<body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="#" class="brand-wrap">
+                <img src="/assets/img/lensly logo.png"  class="logo" alt="Lensly Dashboard">
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin"> <i class="icon material-icons md-home"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/users"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Customers</span>
+                    </a>
+
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/category"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Category</span>
+                    </a>
+
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/brands"> <i class="icon material-icons md-stars"></i>
+                        <span class="text">Brands</span> </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/addProducts"> <i class="icon material-icons md-add_box"></i>
+                        <span class="text">Add product</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
+                        <span class="text">Products</span>
+                    </a>
+                </li>
+            
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/coupon"> <i class="icon material-icons md-class"></i>
+                        <span class="text">Coupon</span> </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/banner"> <i class="icon material-icons md-photo_size_select_actual"></i>
+                        <span class="text">Banner</span> </a>
+                </li>
+
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/orderList"> <i class="icon material-icons md-shopping_cart"></i>
+                        <span class="text">Orders</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <header class="main-header navbar">
+            <div class="col-search">
+            </div>
+            <div class="col-nav">
+                <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
+                <ul class="nav">
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="/assets/img/avatar-1.jpg" alt="User"></a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="/admin/logout"><i class="material-icons md-exit_to_app"></i>Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </header>

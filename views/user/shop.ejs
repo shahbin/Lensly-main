@@ -1,0 +1,635 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+/* Filter Container */
+.filters {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 280px;
+  height: fit-content;
+  margin-top: 30px;
+}
+
+.filters__heading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1.25rem;
+}
+
+/* Price Range Slider */
+.filters__price {
+  margin-bottom: 1.5rem;
+}
+
+.price-range-slider {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  margin: 2rem 0;
+}
+
+.slider-track {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.slider-range {
+  position: absolute;
+  height: 5px;
+  background: #088179;
+  border-radius: 3px;
+}
+
+.range-input {
+  position: relative;
+}
+
+.range-input input {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  top: -5px;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Improved slider thumb styles */
+input[type="range"]::-webkit-slider-thumb {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  background: #088179;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 1.5rem;
+  width: 1.5rem;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #088179;
+  pointer-events: auto;
+  -moz-appearance: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover state for slider thumbs */
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #088179;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: #088179;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Active state for slider thumbs */
+input[type="range"]::-webkit-slider-thumb:active {
+  background: #088179;
+  transform: scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb:active {
+  background: #088179;
+  transform: scale(1.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.price-input {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.price-input .field {
+  display: flex;
+  align-items: center;
+  height: 2.5rem;
+  width: 45%;
+}
+
+.field span {
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+  color: #4b5563;
+}
+
+.field input {
+  width: 100%;
+  height: 100%;
+  outline: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  -moz-appearance: textfield;
+}
+
+.field input::-webkit-outer-spin-button,
+.field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+/* Categories */
+.filters__categories {
+  margin-bottom: 1.5rem;
+}
+
+.filters__category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filters__category-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.filters__checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.25rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.filters__checkbox:checked {
+  background-color: #088179;
+  border-color: #088179;
+}
+
+.filters__checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.filters__category-label {
+  font-size: 0.875rem;
+  color: #4b5563;
+  flex-grow: 1;
+}
+
+.filters__category-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+}
+
+/* Sort Dropdown */
+.filters__sort {
+  margin-bottom: 1.5rem;
+}
+
+.filters__sort-select {
+  width: 100%;
+  padding: 0.625rem;
+  font-size: 0.875rem;
+  color: #68696a;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+.filters__sort-select:focus {
+  outline: none;
+  border-color: #b1b1b1;
+  /* box-shadow: 0 0 0 2px rgba(149, 149, 149, 0.2);   */
+}
+
+/* Apply Button */
+.filters__apply {
+  width: 100%;
+  background-color: #088179;
+  color: white;
+  padding: 0.75rem 1rem;
+  border: 2px solid #088179;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filters__apply:hover {
+  background-color: #ffffff;
+  color: #088179;
+}
+
+.filters__apply:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.2);
+}
+
+/* Layout */
+.main-content {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.products-section {
+  flex: 1;
+  min-width: 0;
+}
+</style>
+
+<!--=============== MAIN ===============-->
+<main class="main">
+  <!--=============== BREADCRUMB ===============-->
+  <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;">
+    <ul class="breadcrumb__list container" style="margin-left: -25px;">
+      <li><a href="/" class="breadcrumb__link" style="font-size: 12px;">Home</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px;">Shop</a></li>
+    </ul>
+  </section>
+
+  <!--=============== MAIN CONTENT ===============-->
+  <div class="main-content container section--lg" style="margin-top: -50px; ">
+    <!--=============== FILTER ===============-->
+    <div class="filters">
+      <!-- Price Filter -->
+      <div class="filters__price">
+        <h3 class="filters__heading">Filter by Price</h3>
+        <div class="price-input">
+          <div class="field">
+            <span>₹</span>
+            <input type="number" class="input-min" value="0">
+          </div>
+          <div class="field">
+            <span>₹</span>
+            <input type="number" class="input-max" value="500000">
+          </div>
+        </div>
+        <div class="price-range-slider">
+          <div class="slider-track"></div>
+          <div class="slider-range"></div>
+          <div class="range-input">
+            <input type="range" class="range-min" min="0" max="500000" value="0" step="100">
+            <input type="range" class="range-max" min="0" max="500000" value="500000" step="100">
+          </div>
+        </div>
+        <button class="filters__apply" onclick="applyPriceFilter()">Apply Price Filter</button>
+      </div>
+    
+      <!-- Categories -->
+      <div class="filters__categories">
+        <h3 class="filters__heading">Categories</h3>
+        <ul class="filters__category-list">
+          <li class="filters__category-item">
+            <input type="checkbox" id="none" class="filters__checkbox" <%= (typeof selectedCategory !== 'undefined' && selectedCategory.length === 0) ? 'checked' : '' %> onclick="handleNoneSelection(this)">
+            <label for="none">None</label>
+          </li>
+          <% const categories = Object.keys(categoryQuantities); %>
+          <% categories.forEach(category => { %>
+            <li class="filters__category-item">
+              <input type="checkbox" id="<%= category %>" class="filters__checkbox" <%= (typeof selectedCategory !== 'undefined' && selectedCategory.includes(category)) ? 'checked' : '' %> onclick="handleCategorySelection(this)">
+              <label for="<%= category %>"><%= category.charAt(0).toUpperCase() + category.slice(1) %></label>
+              <span class="filters__category-count"><%= categoryQuantities[category] || 0 %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    
+      <!-- Sort -->
+      <div class="filters__sort">
+        <h3 class="filters__heading">Sort by</h3>
+        <select class="filters__sort-select">
+          <option value="" <%= !selectedSort ? 'selected' : '' %>>None</option>
+          <option value="featured" <%= selectedSort === 'featured' ? 'selected' : '' %>>Featured</option>
+          <option value="popularity" <%= selectedSort === 'popularity' ? 'selected' : '' %>>Popularity</option>
+          <option value="priceLowToHigh" <%= selectedSort === 'priceLowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="priceHighToLow" <%= selectedSort === 'priceHighToLow' ? 'selected' : '' %>>Price: High to Low</option>
+          <option value="newArrivals" <%= selectedSort === 'newArrivals' ? 'selected' : '' %>>New Arrivals</option>
+          <option value="aToZ" <%= selectedSort === 'aToZ' ? 'selected' : '' %>>A - Z</option>
+          <option value="zToA" <%= selectedSort === 'zToA' ? 'selected' : '' %>>Z - A</option>
+        </select>
+      </div>
+    
+      <button class="filters__apply" onclick="applyFilters()">Apply Filters</button>
+    </div>
+    
+    <!--=============== PRODUCTS ===============-->
+    <div class="products-section">
+      <section class="products container section--lg">
+        <% if (pagination.currentPage === 1) { %>
+          <p class="total__products" style="font-size: medium;">
+            <% if (selectedSort === 'featured') { %>
+              We found <span><%= totalProducts %></span> featured items for you!
+            <% } else if (selectedSort === 'popularity') { %>
+              We found <span>6</span> popular items for you!
+            <% } else if (selectedSort === 'newArrivals') { %>
+              We found <span>4</span> new arrivals for you!
+            <% } else if (selectedSort === 'priceLowToHigh') { %>
+              We found <span><%= totalProducts %></span> items sorted by price: Low to High for you!
+            <% } else if (selectedSort === 'priceHighToLow') { %>
+              We found <span><%= totalProducts %></span> items sorted by price: High to Low for you!
+            <% } else { %>
+              We found <span><%= totalProducts %></span> items for you!
+            <% } %>
+          </p>
+        <% } %>
+        <div class="products__container grid">
+          <% products.forEach(product => { %>
+          <div class="product__item">
+            <div class="product__banner">
+              <a href="/productDetails?id=<%= product._id %>" class="product__images">
+                <img
+                  src="/admin-assets/imgs/brands/<%= product.productImage[0] %>"
+                  alt="<%= product.productName %>"
+                  class="product__img default"
+                />
+                <img
+                  src="/admin-assets/imgs/brands/<%= product.productImage[1] %>"
+                  alt=""
+                  class="product__img hover"
+                />
+              </a>
+              <div class="product__actions">
+                <a href="#" class="action__btn" aria-label="Quick View">
+                  <i class="fi fi-rs-eye"></i>
+                </a>
+                <a
+                  href="/addToWishlist?id=<%= product._id %>"
+                  class="action__btn"
+                  aria-label="Add to Wishlist"
+                >
+                  <i class="fi fi-rs-heart"></i>
+                </a>
+              </div>
+              <div class="product__badge light-pink">Now Available</div>
+            </div>
+            <div class="product__content">
+              <span class="product__category"><%= product.category.name %></span>
+              <a href="/productDetails?id=<%= product._id %>">
+                <h3 class="product__title"><%= product.productName %></h3>
+              </a>
+              <div class="product__rating">
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+                <i class="fi fi-rs-star"></i>
+              </div>
+              <div class="product__price">
+                <span class="new__price">₹<%= product.salePrice %></span>
+                <br>
+                <span class="old__price">₹<%= product.regularPrice %></span>
+              </div>
+              <a
+                href="/addToCart?id=<%= product._id %>"
+                class="action__btn cart__btn"
+                aria-label="Add To Cart"
+              >
+                <i class="fi fi-rs-shopping-bag-add"></i>
+              </a>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <ul class="pagination">
+          <% if(pagination.hasPrevPage){ %>
+          <li>
+            <a href="/shop?page=<%= pagination.prevPage %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>" class="pagination__link icon">
+              <i class="fi-rs-angle-double-small-left"></i>
+            </a>
+          </li>
+          <% } %>
+
+          <% 
+          let pageNumbers = []
+          const showMax = 5;
+
+          if(pagination.totalPages <= showMax){
+            for(let i=1; i<= pagination.totalPages; i++){
+              pageNumbers.push(i)
+            }
+          }else{
+            pageNumbers.push(1)
+
+            if(pagination.currentPage > 3){
+              pageNumbers.push('...')
+            }
+
+            for(let i=Math.max(2, pagination.currentPage - 1); 
+            i <= Math.min(pagination.totalPages - 1, pagination.currentPage + 1); i++){
+              pageNumbers.push(i)
+            }
+            
+            if (pagination.currentPage < pagination.totalPages - 2) {
+            pageNumbers.push('...');
+            }
+        
+            if (pagination.totalPages > 1) {
+            pageNumbers.push(pagination.totalPages);
+            }
+
+          }
+          %>
+
+          <% pageNumbers.forEach(num => { %>
+            <% if (num === '...') { %>
+                <li><a class="pagination__link">...</a></li>
+          <% } else { %>
+          <li>
+            <a href="/shop?page=<%= num %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>" 
+               class="pagination__link <%= pagination.currentPage === num ? 'active' : '' %>">
+                <%= String(num).padStart(2, '0') %>
+            </a>
+        </li>
+      <% } %>
+      <% }); %>
+
+      <% if (pagination.hasNextPage) { %>
+      <li>
+        <a href="/shop?page=<%= pagination.nextPage %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>" class="pagination__link icon">
+            <i class="fi-rs-angle-double-small-right"></i>
+        </a>
+      </li>
+      <% } %> 
+         
+      </ul>
+      </section>
+    </div>
+  </div>
+
+  <!--=============== NEWSLETTER ===============-->
+  <section class="newsletter section">
+    <div class="newsletter__container container grid">
+      <h3 class="newsletter__title flex">
+        <img
+          src="./assets/img/icon-email.svg"
+          alt=""
+          class="newsletter__icon"
+        />
+        Sign in to Newsletter
+      </h3>
+      <p class="newsletter__description">
+        ...and receive $25 coupon for first shopping.
+      </p>
+      <form action="" class="newsletter__form">
+        <input
+          type="text"
+          placeholder="Enter Your Email"
+          class="newsletter__input"
+        />
+        <button type="submit" class="newsletter__btn">Subscribe</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+  const rangeInput = document.querySelectorAll(".range-input input");
+  const priceInput = document.querySelectorAll(".price-input input");
+  const range = document.querySelector(".slider-range");
+  const sliderTrack = document.querySelector(".slider-track");
+  let minVal = parseInt(rangeInput[0].value);
+  let maxVal = parseInt(rangeInput[1].value);
+  
+  rangeInput.forEach(input => {
+    input.addEventListener("input", e => {
+      let minVal = parseInt(rangeInput[0].value);
+      let maxVal = parseInt(rangeInput[1].value);
+      
+      if (maxVal - minVal < 1000) {
+        if (e.target.className === "range-min") {
+          rangeInput[0].value = maxVal - 1000;
+        } else {
+          rangeInput[1].value = minVal + 1000;
+        }
+      } else {
+        priceInput[0].value = minVal;
+        priceInput[1].value = maxVal;
+        range.style.left = (minVal / rangeInput[0].max) * 100 + "%";
+        range.style.right = 100 - (maxVal / rangeInput[1].max) * 100 + "%";
+      }
+    });
+  });
+  
+  priceInput.forEach(input => {
+    input.addEventListener("input", e => {
+      let minPrice = parseInt(priceInput[0].value);
+      let maxPrice = parseInt(priceInput[1].value);
+      
+      if (maxPrice - minPrice >= 1000 && maxPrice <= rangeInput[1].max) {
+        if (e.target.className === "input-min") {
+          rangeInput[0].value = minPrice;
+          range.style.left = (minPrice / rangeInput[0].max) * 100 + "%";
+        } else {
+          rangeInput[1].value = maxPrice;
+          range.style.right = 100 - (maxPrice / rangeInput[1].max) * 100 + "%";
+        }
+      }
+    });
+  });
+  
+  function handleNoneSelection(checkbox) {
+    if (checkbox.checked) {
+      document.querySelectorAll('.filters__checkbox').forEach(cb => {
+        if (cb.id !== 'none') {
+          cb.checked = false;
+        }
+      });
+    }
+  }
+
+  function handleCategorySelection(checkbox) {
+    if (checkbox.checked) {
+      document.getElementById('none').checked = false;
+    }
+  }
+
+  function applyFilters() {
+    const selectedCategories = Array.from(document.querySelectorAll('.filters__checkbox:checked'))
+      .map(checkbox => checkbox.id)
+      .filter(id => id !== 'none');
+    const sortBy = document.querySelector('.filters__sort-select').value;
+
+    const queryParams = new URLSearchParams(window.location.search);
+    if (selectedCategories.length > 0) {
+      queryParams.set('category', selectedCategories.join(","));
+    } else {
+      queryParams.delete('category');
+    }
+    if (sortBy) {
+      queryParams.set('sort', sortBy);
+    } else {
+      queryParams.delete('sort');
+    }
+
+    const updatedUrl = `/shop?${queryParams.toString()}`;
+    window.history.pushState({}, '', updatedUrl);
+    window.location.href = updatedUrl;
+  }
+
+  function applyPriceFilter() {
+    const minPrice = parseInt(document.querySelector('.input-min').value);
+    const maxPrice = parseInt(document.querySelector('.input-max').value);
+
+    const queryParams = new URLSearchParams(window.location.search);
+    queryParams.set('minPrice', minPrice);
+    queryParams.set('maxPrice', maxPrice);
+
+    const updatedUrl = `/shop?${queryParams.toString()}`;
+    window.history.pushState({}, '', updatedUrl);
+    window.location.href = updatedUrl;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const sortSelect = document.querySelector('.filters__sort-select');
+    sortSelect.value = '<%= selectedSort %>';
+
+    const minPriceInput = document.querySelector('.input-min');
+    const maxPriceInput = document.querySelector('.input-max');
+    minPriceInput.value = '<%= minPrice %>';
+    maxPriceInput.value = '<%= maxPrice %>';
+  });
+  </script>
+
+<!--=============== FOOTER ===============-->
+<%- include("../../views/partials/user/footer") %>

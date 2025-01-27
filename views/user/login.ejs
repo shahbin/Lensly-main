@@ -1,0 +1,80 @@
+<%- include("../../views/partials/user/header", { user: user }) %>
+    <!--=============== MAIN ===============-->
+    <main class="main">
+      <!--=============== BREADCRUMB ===============-->
+         <!--=============== BREADCRUMB ===============-->
+         <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
+            <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
+              <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
+              <li><span class="breadcrumb__link">></span></li>
+              <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Login / Register</a></li>
+          
+            </ul>
+        </section>
+
+      <div class="login-page container">
+        <div class="login-card">
+            <div class="login-card-body">
+                <div class="login-form mt-5">
+                    <h3 class="login-card-title text-center">Log In</h3>
+                    <form id="loginForm" method="post" action="/login">
+                        <div class="login-form-group mt-3px">
+                            <label for="email">Email address</label>
+                            <input
+                                type="email"
+                                class="login-form-control"
+                                name="email"
+                                id="email"
+                                placeholder="Enter email"
+                            />
+                            <div id="error1" class="login-error-message"></div>
+                        </div>
+                        <div class="login-form-group">
+                            <label for="password">Password</label>
+                            <input
+                                type="password"
+                                class="login-form-control"
+                                name="password"
+                                id="password"
+                                placeholder="Password"
+                            />
+                            <div id="error2" class="login-error-message"></div>
+                        </div>
+                        <% if(locals.message && message.length > 0){ %>
+                        <div class="alert alert-danger text-center" style="color: darkred">
+                            <%= message %>
+                        </div>
+                        <% } %>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" class="login-btn">Log In</button>
+                            <div>
+                                <a href="/reset-password">forgot password</a>
+                              </div>
+                            <div class="login-alt-options">
+                                <p>or log in with</p>
+                            </div>
+                            <div class="login-social-btns">
+                                <a href="/auth/google" class="login-google-btn">
+                                    <img
+                                        src="assets/img/googlesignup1.png"
+                                        alt="Google Logo"
+                                        style="width: 24px; height: 24px"
+                                    />
+                                    Google
+                                </a>
+                            </div>
+                            <div>
+                                <div class="login-separator-line"></div>
+                                <a href="/signup" class="header__top-action">
+                                    New to Lensly? Create an account
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <%- include("../../views/partials/user/footer") %>
