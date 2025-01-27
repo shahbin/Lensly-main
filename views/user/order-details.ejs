@@ -16,34 +16,45 @@
 
       <section class="order-details section--lg">
         <div class="order-details__container container">
-          <h2 class="section__title">Order Details</h2>
+          <h1 class="order-summary__title">Order Details</h1>
           <% if (order) { %>
             <div class="order-user">
               <h3 class="order-user__name"><%= user.name %></h3>
             </div>
+            <div style="display: flex; justify-content: space-between;">
             <div class="order-address">
-              <h3 class="order-address__title">Shipping Address</h3>
-              <% if (order.address) { %>
-                <p><%= order.address.name %></p>
-                <p><%= order.address.landMark %></p>
-                <p><%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %></p>
-                <p>Phone: <%= order.address.phone %></p>
-                <% if (order.address.altPhone) { %>
-                  <p>Alt Phone: <%= order.address.altPhone %></p>
-                <% } %>
+              <h2>Shipping Address</h2>
+              <% if (order.shippingAddress) { %>
+                <div class="address-details">
+                  <p class="address-name"><%= order.shippingAddress.name %></p>
+                  <% if (order.shippingAddress.landMark) { %>
+                    <p class="address-landmark"><%= order.shippingAddress.landMark %></p>
+                  <% } %>
+                  <p class="address-location">
+                    <%= order.shippingAddress.city %>, 
+                    <%= order.shippingAddress.state %> - 
+                    <%= order.shippingAddress.pincode %>
+                  </p>
+                  <p class="address-phone">Phone: <%= order.shippingAddress.phone %></p>
+                  <% if (order.shippingAddress.altPhone) { %>
+                    <p class="address-alt-phone">Alt Phone: <%= order.shippingAddress.altPhone %></p>
+                  <% } %>
+                </div>
               <% } else { %>
-                <p>Address not available</p>
+                <p class="no-address">Address not available</p>
               <% } %>
             </div>
             <div class="order-tracker">
-              <h3 class="order-tracker__title">Payment Method</h3>
+              <h2 class="order-tracker__title">Payment Method</h2>
               <p>Cash On Delivery</p>
+              <p>Status: Pending</p>
             </div>
             <br>
             <div class="order-tracker">
-              <h3 class="order-tracker__title">Order Tracker</h3>
+              <h2 class="order-tracker__title">Order Tracker</h2>
               <p>Status: <%= order.status %></p>
             </div>
+          </div>
             <div class="order-summary">
               <h3 class="order-summary__title">Order Summary</h3>
               <table class="order-summary__table">
@@ -61,6 +72,7 @@
                       <td>
                         <h3 class="table__title"><%= item.product.productName %></h3>
                         <p class="table__quantity">x <%= item.quantity %></p>
+                        <button class="cancel-btn">cancel</button>
                       </td>
                       <!-- <td><span class="table__price">₹<%= item.price.toFixed(2) %></span></td> -->
                     </tr>
@@ -93,5 +105,22 @@
         </div>
       </section>
     </main>
+
+    <style>
+      .cancel-btn {
+        background-color: #b21d1d;
+        color: #fff;
+        border: none;
+        padding: 7px 10px;
+        border-radius: 5px;
+        margin-top: 8px;
+        cursor: pointer;
+      }
+      .cancel-btn:hover {
+        background-color: #ffffff;
+        color: #b21d1d;
+        border: #b21d1d 1px solid;
+      }
+    </style>
 
     <%- include("../../views/partials/user/footer") %>

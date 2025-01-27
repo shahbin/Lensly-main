@@ -301,6 +301,7 @@
       });
 
       const data = await response.json();
+      
       if (response.ok) {
         showNotification('Order placed successfully!', 'success');
         window.location.href = `/order-details/${data.orderId}`;

@@ -22,6 +22,11 @@ const orderSchema = new Schema({
     price: {
       type: Number,
       default: 0
+    },
+    status: {
+      type: String,
+      default: 'Pending',
+      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
     }
   }],
   totalPrice: {
@@ -41,12 +46,16 @@ const orderSchema = new Schema({
     ref: 'Address',
     required: true
   },
+  userId:{
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   invoiceDate: {
     type: Date
   },
   status: {
     type: String,
-    required: true,
     enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
   },
   createdOn: {

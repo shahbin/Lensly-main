@@ -195,18 +195,6 @@ const placeOrder = async (req, res) => {
     const { addressId, paymentMethod } = req.body;
     const userId = req.session.user;
  
-    const address = await Address.findOne({ 
-      userId: userId, 
-      "addresses._id": addressId 
-    });
- 
-    if (!address) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid address'
-      });
-    }
- 
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     
     if (!cart || cart.items.length === 0) {
@@ -239,6 +227,8 @@ const placeOrder = async (req, res) => {
     await Promise.all(productUpdates);
  
     await Cart.deleteOne({ userId });
+
+    console.log('Order placed successfully:', order);
  
     res.status(200).json({ success: true, orderId: order._id });
  

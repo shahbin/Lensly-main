@@ -125,5 +125,5 @@ router.post('/place-order', userAuth, cartController.placeOrder);
 router.get('/order-details/:orderId', userAuth, orderController.getOrderDetails);
 
 router.get('/search', userController.searchProducts);
-
+router.get('/orders-list',userAuth,orderController.getOrdersList);
 module.exports = router;

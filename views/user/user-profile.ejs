@@ -656,7 +656,7 @@ body {
         </div>
 
 
-          <div class="dashboard-item" data-type="orders">
+          <div class="dashboard-item" data-type="orders" onclick="window.location.href='/orders-list'">
               <div class="icon-wrapper gold">
                   <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 8H3m4 8h10M7 4h10l2 4v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8l2-4z"/>
@@ -1423,9 +1423,17 @@ window.addEventListener('click', (event) => {
         }
     }
 
+function showMessage(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}-message notification`;
+    messageDiv.textContent = message;
 
-
-
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertBefore(messageDiv, container.firstChild);
+        setTimeout(() => messageDiv.remove(), 5000);
+    }
+}
 
     
 </script>

@@ -1,0 +1,33 @@
+<%- include("../../views/partials/user/header", { user: user }) %>
+
+<main class="main">
+  <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;">
+    <ul class="breadcrumb__list container" style="margin-left: -25px;">
+      <li><a href="/" class="breadcrumb__link" style="font-size: 12px;">Home</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px;">Orders</a></li>
+    </ul>
+  </section>
+
+  <section class="order-list section--lg">
+    <div class="order-list__container container">
+      <h2 class="section__title">My Orders</h2>
+      <% if (orders && orders.length > 0) { %>
+        <div class="order-list__items">
+          <% orders.forEach(order => { %>
+            <div class="order-item">
+              <h3 class="order-item__title">Order #<%= order._id %></h3>
+              <p class="order-item__date">Placed on: <%= new Date(order.createdAt).toLocaleDateString() %></p>
+              <p class="order-item__status">Status: <%= order.status %></p>
+              <a href="/order-details/<%= order._id %>" class="btn btn--sm">View Details</a>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="error-message">No orders found.</p>
+      <% } %>
+    </div>
+  </section>
+</main>
+
+<%- include("../../views/partials/user/footer") %>
