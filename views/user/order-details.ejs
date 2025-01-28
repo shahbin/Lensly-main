@@ -75,7 +75,7 @@
                       <td>
                         <h3 class="table__title"><%= item.product.productName %></h3>
                         <p class="table__quantity">x <%= item.quantity %></p>
-                        <p class="status <%= item.status?.toLowerCase() %>"><%= item.status || 'Pending' %></p>
+                        <p class="status  <%= item.status?.toLowerCase() %>" style="color: #d33; font-size: larger; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;"><%= item.status || 'Pending' %></p>
                         <% if (!item.status || item.status.toLowerCase() !== 'cancelled') { %>
                         <button class="cancel-btn" onclick="cancelOrderItem('<%= order._id %>', '<%= item._id %>')">Cancel</button>
                         <% } %>

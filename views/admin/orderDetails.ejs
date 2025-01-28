@@ -25,10 +25,6 @@
             gap: 5px;
         }
 
-        .breadcrumb {
-            color: #666;
-            margin-bottom: 10px;
-        }
 
         h1 {
             font-size: 24px;
@@ -116,12 +112,64 @@
             font-weight: 500;
             background: #f8f9fa;
         }
+        .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .status-select {
+        width: 100%;
+        padding: 8px;
+        margin: 10px 0;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+    .save-btn {
+        background: #0066cc;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .save-btn:hover {
+        background: #0052a3;
+    }
     </style>
 </head>
   <div class="main-body" style="margin-left:10px">
     <div class="navigation">
-        <div class="breadcrumb">Admin > Orders</div>
-        <a href="/admin/orders" class="back-link">← Back to Orders</a>
+       
+        <a href="/admin/orders" class="back-link" style="font-size: small;">← Back to Orders</a>
     </div>
 
     <h1>Order Details</h1>
@@ -183,17 +231,36 @@
         </thead>
         <tbody>
             <% order.orderedItems.forEach(item => { %>
-            <tr>
-                <td><%= item.product.productName %></td>
-                <td><%= item.quantity %></td>
-                <td>₹<%= item.price.toFixed(2) %></td>
-                <td>
-                    <span class="status-badge status-pending"><%= item.status %></span>
-                </td>
-                <td>
-                    <button class="edit-btn">Edit Status</button>
-                </td>
-            </tr>
+                <tr>
+                    <td><%= item.product.productName %></td>
+                    <td><%= item.quantity %></td>
+                    <td>₹<%= item.price.toFixed(2) %></td>
+                    <td>
+                        <span class="status-badge status-pending" id="status-<%= item._id %>"><%= item.status %></span>
+                    </td>
+                    <td>
+                        <button class="edit-btn" onclick="openModal('<%= item._id %>', '<%= item.status %>')">Edit Status</button>
+                    </td>
+                </tr>
+                
+                <div id="statusModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeModal()">&times;</span>
+                        <h2>Update Order Status</h2>
+                        <input type="hidden" id="currentItemId">
+                        <select id="statusSelect" class="status-select">
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Return Request">Return Request</option>
+                            <option value="Returned">Returned</option>
+                        </select>
+                        <button class="save-btn" onclick="updateStatus()">Save Changes</button>
+                    </div>
+                </div>
+                
             <% }); %>
             <tr class="total-row">
                 <td colspan="2">Total:</td>
@@ -202,5 +269,54 @@
         </tbody>
     </table>
   </div>
+
+  <script>
+    function openModal(itemId, currentStatus) {
+        document.getElementById('statusModal').style.display = 'block';
+        document.getElementById('currentItemId').value = itemId;
+        document.getElementById('statusSelect').value = currentStatus;
+    }
+
+    function closeModal() {
+        document.getElementById('statusModal').style.display = 'none';
+    }
+
+    async function updateStatus() {
+        const itemId = document.getElementById('currentItemId').value;
+        const newStatus = document.getElementById('statusSelect').value;
+        const orderId = '<%= order.orderId %>';
+
+        try {
+            const response = await fetch('/admin/orders/update-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    orderId,
+                    itemId,
+                    newStatus
+                })
+            });
+
+            if (response.ok) {
+                const statusElement = document.getElementById(`status-${itemId}`);
+                statusElement.textContent = newStatus;
+                closeModal();
+            } else {
+                alert('Failed to update status. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while updating the status.');
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('statusModal')) {
+            closeModal();
+        }
+    }
+</script>
 
     <%- include("../../views/partials/admin/footer") %>

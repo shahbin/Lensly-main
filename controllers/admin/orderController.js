@@ -98,8 +98,59 @@ const getOrderDetails = async (req, res) => {
   }
 
 
+  const updateOrderItemStatus = async (req, res) => {
+    try {
+        const { orderId, itemId, newStatus } = req.body;
+
+        const order = await Order.findOne({ orderId: orderId });
+        
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        const orderItem = order.orderedItems.id(itemId);
+        
+        if (!orderItem) {
+            return res.status(404).json({ message: 'Order item not found' });
+        }
+
+        if (orderItem.status == "Cancelled"){
+          return res.status(400).json({success: false, error:"Cannot change status of a cancelled item"})
+        }
+
+        orderItem.status = newStatus;
+        await order.save();
+
+        const itemStatuses = order.orderedItems.map(item => item.status);
+        if (itemStatuses.every(s => s === "Delivered")) {
+            order.status = "Delivered";
+        } else if (itemStatuses.some(s => s === "Processing" || s === "Shipped" || s === "Delivered")) {
+            order.status = "Processing";
+        } else if (itemStatuses.some(s => s === "Pending")) {
+            order.status = "Pending";
+        } else if (itemStatuses.some(s => s === "Cancelled" || s === "Return request" || s === "Returned")) {
+            order.status = "Cancelled";
+        } else {
+            order.status = "Pending";
+        }
+        await order.save();
+
+        res.status(200).json({ 
+            message: 'Status updated successfully',
+            newStatus: newStatus
+        });
+
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).json({ 
+            message: 'Error updating order status',
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     getAllOrders,
     updateOrderStatus,
-    getOrderDetails
+    getOrderDetails,
+    updateOrderItemStatus
 }

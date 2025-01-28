@@ -43,7 +43,7 @@ router.get('/editProduct',adminAuth,productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,handleUpload, productController.updateProduct);
 
 router.get('/orders', adminAuth, orderController.getAllOrders)
-router.post('/updateOrderStatus', adminAuth, orderController.updateOrderStatus)
+router.post('/orders/update-status', adminAuth, orderController. updateOrderItemStatus);
 router.get('/orderDetails/:orderId', adminAuth, orderController.getOrderDetails);
 
 module.exports = router;
