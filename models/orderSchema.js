@@ -66,6 +66,9 @@ const orderSchema = new Schema({
   couponApplied: {
     type: Boolean,
     default: false
+  },
+  paymentMethod:{
+    type:String
   }
 });
 

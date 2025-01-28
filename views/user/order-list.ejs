@@ -147,7 +147,7 @@
                   <span class="order-id">#<%= order._id %></span>
                 </td>
                 <td>
-                  <span class="order-date"><%= new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></span>
+                  <span class="order-date"><%= order.createdOn.toLocaleDateString()%></span>
                 </td>
                 <td>
                   <span class="order-status status-<%= order.status.toLowerCase() %>"><%= order.status %></span>

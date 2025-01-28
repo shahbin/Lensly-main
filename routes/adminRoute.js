@@ -44,5 +44,6 @@ router.post('/editProduct/:id',adminAuth,handleUpload, productController.updateP
 
 router.get('/orders', adminAuth, orderController.getAllOrders)
 router.post('/updateOrderStatus', adminAuth, orderController.updateOrderStatus)
+router.get('/orderDetails/:orderId', adminAuth, orderController.getOrderDetails);
 
 module.exports = router;

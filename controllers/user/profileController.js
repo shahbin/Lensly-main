@@ -1,10 +1,8 @@
-// Backend Controller (userController.js)
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 
-// In your userProfile controller
 const userProfile = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -17,7 +15,6 @@ const userProfile = async (req, res) => {
       return res.redirect("/login");
     }
 
-    // Add this script tag in your template with the current user data
     const userData = `
             <script>
                 const currentUserData = {
@@ -29,7 +26,7 @@ const userProfile = async (req, res) => {
 
     res.render("user-profile", {
       user,
-      userData, // Pass this to your template
+      userData, 
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -83,16 +80,14 @@ const changePassword = async (req, res) => {
   }
 }
 
-// ...existing code...
+
 
 const getAddresses = async (req, res) => {
     try {
-        // Get user ID from authenticated user
+        
         const userId = req.session.user;
-        // Find addresses for the user
         const userAddress = await Address.findOne({ userId });
 
-        // If no addresses found, return empty array
         if (!userAddress) {
             return res.status(200).json({
                 success: true,
@@ -100,17 +95,16 @@ const getAddresses = async (req, res) => {
             });
         }
 
-        // Return found addresses
         return res.status(200).json({
             success: true,
             addresses: userAddress.addresses.map(address => ({
                 _id: address._id,
-                addressType: address.addressType, // Ensure addressType is included
+                addressType: address.addressType, 
                 name: address.name,
                 phone: address.phone,
                 altPhone: address.altPhone,
                 city: address.city,
-                landMark: address.landMark, // Ensure landMark is included
+                landMark: address.landMark, 
                 state: address.state,
                 pincode: address.pincode,
                 createdAt: address.createdAt
@@ -129,16 +123,14 @@ const getAddresses = async (req, res) => {
 
 const addAddress = async (req, res) => {
     try {
-        // Input validation helper function
         const validateInput = (data) => {
             const errors = [];
             const phoneRegex = /^\d{10}$/;
             const pincodeRegex = /^[1-9][0-9]{5}$/;
             const alphaRegex = /^[a-zA-Z\s]+$/;
             const validAddressTypes = ['home', 'work', 'other'];
-            const invalidPhonePattern = /0{7,}/; // Pattern to check for 7 or more consecutive zeros
+            const invalidPhonePattern = /0{7,}/; 
 
-            // Destructure and trim all string inputs
             const {
                 addressType,
                 name = '',
@@ -150,7 +142,6 @@ const addAddress = async (req, res) => {
                 pincode = ''
             } = data;
 
-            // Required field validations with specific error messages
             if (!addressType || !validAddressTypes.includes(addressType.toLowerCase())) {
                 errors.push('Please select a valid address type (home, work, or other)');
             }
@@ -181,7 +172,6 @@ const addAddress = async (req, res) => {
                 errors.push('Pincode must be a valid 6-digit number not starting with 0');
             }
 
-            // Optional field validations
             if (altPhone && (!phoneRegex.test(altPhone) || invalidPhonePattern.test(altPhone))) {
                 errors.push('Alternative phone number must be exactly 10 digits and cannot contain 7 or more consecutive zeros');
             }
@@ -193,7 +183,6 @@ const addAddress = async (req, res) => {
             return errors;
         };
 
-        // Validate input
         const validationErrors = validateInput(req.body);
         if (validationErrors.length > 0) {
             return res.status(400).json({
@@ -203,7 +192,6 @@ const addAddress = async (req, res) => {
             });
         }
 
-        // Sanitize and prepare address data
         const addressData = {
             addressType: req.body.addressType.toLowerCase().trim(),
             name: req.body.name.replace(/[^a-zA-Z\s]/g, '').trim(),
@@ -216,13 +204,11 @@ const addAddress = async (req, res) => {
             createdAt: new Date()
         };
 
-        // Check for existing addresses for this user
         const userId = req.session.user;
         console.log("usersId",userId)
         let userAddress = await Address.findOne({ userId });
 
-        // Check maximum addresses limit (optional)
-        const MAX_ADDRESSES = 5; // Configurable limit
+        const MAX_ADDRESSES = 5; 
         if (userAddress && userAddress.addresses.length >= MAX_ADDRESSES) {
             return res.status(400).json({
                 success: false,
@@ -230,9 +216,7 @@ const addAddress = async (req, res) => {
             });
         }
 
-        // Save the address
         if (userAddress) {
-            // Check for duplicate addresses
             const isDuplicate = userAddress.addresses.some(addr => 
                 addr.phone === addressData.phone &&
                 addr.pincode === addressData.pincode &&
@@ -256,7 +240,6 @@ const addAddress = async (req, res) => {
             await userAddress.save();
         }
 
-        // Return success response
         return res.status(201).json({
             success: true,
             message: 'Address added successfully',
@@ -267,10 +250,9 @@ const addAddress = async (req, res) => {
         });
 
     } catch (error) {
-        // Log error for debugging
+
         console.error('Address addition error:', error);
 
-        // Return appropriate error response
         if (error.name === 'ValidationError') {
             return res.status(400).json({
                 success: false,
@@ -296,18 +278,17 @@ const addAddress = async (req, res) => {
 
 const editAddress = async (req, res) => {
     try {
-        // Get addressId from params and userId from session
-        const { id: addressId } = req.params; // Corrected the destructuring
+        
+        const { id: addressId } = req.params; 
         const userId = req.session.user;
 
-        // Input validation helper function
         const validateInput = (data) => {
             const errors = [];
             const phoneRegex = /^\d{10}$/;
             const pincodeRegex = /^[1-9][0-9]{5}$/;
             const alphaRegex = /^[a-zA-Z\s]+$/;
             const validAddressTypes = ['home', 'work', 'other'];
-            const invalidPhonePattern = /0{7,}/; // Pattern to check for 7 or more consecutive zeros
+            const invalidPhonePattern = /0{7,}/; 
 
             const {
                 addressType,
@@ -357,7 +338,6 @@ const editAddress = async (req, res) => {
             return errors;
         };
 
-        // Validate input
         const validationErrors = validateInput(req.body);
         if (validationErrors.length > 0) {
             return res.status(400).json({
@@ -367,7 +347,6 @@ const editAddress = async (req, res) => {
             });
         }
 
-        // Find the user's address document
         const addressDoc = await Address.findOne({ userId });
         
         if (!addressDoc) {
@@ -377,7 +356,6 @@ const editAddress = async (req, res) => {
             });
         }
 
-        // Find the address to update
         const addressIndex = addressDoc.addresses.findIndex(
             addr => addr._id.toString() === addressId
         );
@@ -389,7 +367,6 @@ const editAddress = async (req, res) => {
             });
         }
 
-        // Prepare sanitized update data
         const updatedAddress = {
             addressType: req.body.addressType.toLowerCase().trim(),
             name: req.body.name.replace(/[^a-zA-Z\s]/g, '').trim(),
@@ -402,7 +379,6 @@ const editAddress = async (req, res) => {
             updatedAt: new Date()
         };
 
-        // Check for duplicate addresses (excluding current address)
         const isDuplicate = addressDoc.addresses.some((addr, index) => 
             index !== addressIndex && 
             addr.phone === updatedAddress.phone &&
@@ -417,16 +393,13 @@ const editAddress = async (req, res) => {
             });
         }
 
-        // Update the address while preserving the _id
         addressDoc.addresses[addressIndex] = {
             _id: addressDoc.addresses[addressIndex]._id,
             ...updatedAddress
         };
 
-        // Save the updated document
         await addressDoc.save();
 
-        // Return success response
         return res.status(200).json({
             success: true,
             message: 'Address updated successfully',
@@ -454,10 +427,9 @@ const editAddress = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
     try {
-        const { id: addressId } = req.params; // Corrected the destructuring
+        const { id: addressId } = req.params; 
         const userId = req.session.user;
 
-        // Find the user's address document
         const addressDoc = await Address.findOne({ userId });
 
         if (!addressDoc) {
@@ -467,7 +439,6 @@ const deleteAddress = async (req, res) => {
             });
         }
 
-        // Find the address to delete
         const addressIndex = addressDoc.addresses.findIndex(
             addr => addr._id.toString() === addressId
         );
@@ -479,13 +450,10 @@ const deleteAddress = async (req, res) => {
             });
         }
 
-        // Remove the address from the array
         addressDoc.addresses.splice(addressIndex, 1);
 
-        // Save the updated document
         await addressDoc.save();
 
-        // Return success response
         return res.status(200).json({
             success: true,
             message: 'Address deleted successfully'
@@ -584,9 +552,9 @@ const verifyEmailOtp = async (req, res) => {
       }
 
       if (otp === req.session.userOtp) {
-          // Add a flag to indicate OTP is verified
+    
           req.session.isOtpVerified = true;
-          // Make sure email is still in session
+          
           console.log("Email in session during OTP verify:", req.session.email);
           res.json({ success: true, redirectUrl: '/create-password' });
       } else {
@@ -600,7 +568,7 @@ const verifyEmailOtp = async (req, res) => {
 
 const resendEmailOtp = async (req, res) => {
     try {
-        const email = req.session.email;  // Changed from req.session.userData.email
+        const email = req.session.email;  
         if (!email) {
             return res.status(400).json({ 
                 success: false, 
@@ -646,7 +614,7 @@ const createPassword = async(req,res) => {
       if (!req.session.email || !req.session.isOtpVerified) {
           return res.redirect('/login');
       }
-        // console.log("Entering createPassword controller");
+       
         res.render('new-password');
     } catch (error) {
         console.error("Error in createPassword:", error);
@@ -661,7 +629,6 @@ const saveNewPassword = async(req, res) => {
       const {newPassword, confirmPassword} = req.body;
       const email = req.session.email;
 
-      // Session validation
       if(!email || !req.session.isOtpVerified) {
           console.log("Invalid session state");
           return res.json({
@@ -670,7 +637,6 @@ const saveNewPassword = async(req, res) => {
           });
       }
 
-      // Password validation
       if(newPassword !== confirmPassword) {
           return res.json({
               success: false,
@@ -691,19 +657,14 @@ const saveNewPassword = async(req, res) => {
               throw new Error('Password update failed');
           }
           
-          // Clear session
           await new Promise((resolve, reject) => {
               req.session.destroy((err) => {
                   if(err) reject(err);
                   else resolve();
               });
           });
-          
-          return res.json({
-              success: true,
-              message: "Password updated successfully"
-          });
-          
+          return res.redirect('/login')
+
       } catch (dbError) {
           console.error("Database error:", dbError);
           return res.json({
@@ -738,7 +699,7 @@ module.exports = {
   getAddresses,
   addAddress,
   editAddress,
-  deleteAddress, // Added deleteAddress to exports
+  deleteAddress, 
   forgotPassword,
   securePassword, 
   forgotEmailValid,

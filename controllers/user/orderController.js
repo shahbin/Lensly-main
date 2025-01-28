@@ -7,7 +7,6 @@ const getOrderDetails = async (req, res) => {
     const { orderId } = req.params;
     const userId = req.session.user;
 
-    // Fetch order with populated product details
     const order = await Order.findOne({ _id: orderId, userId })
       .populate('orderedItems.product');
 
@@ -19,15 +18,12 @@ const getOrderDetails = async (req, res) => {
       });
     }
 
-    // Fetch address details separately
     const addressDoc = await Address.findOne({ userId });
     console.log('Address doc:', addressDoc);
     if (addressDoc && addressDoc.addresses) {
-      // Find the specific address used in this order
       const orderAddress = addressDoc.addresses.find(
         addr => addr._id.toString() === order.address.toString()
       );
-      // Attach the address to the order object
       order.shippingAddress = orderAddress || null;
     }
 
@@ -49,27 +45,26 @@ const getOrderDetails = async (req, res) => {
 
 const getOrdersList = async (req, res) => {
   try {
-    const userId = req.session.user; // Ensure user ID is correctly retrieved
+    const userId = req.session.user; 
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
 
     const orders = await Order.find({ userId })
       .populate('orderedItems.product')
-      .sort({ createdAt: -1 })
+      .sort({ createdOn: -1 })
       .skip(skip)
       .limit(limit)
-      .lean(); // Ensure the documents are plain JavaScript objects
+      .lean(); 
 
     const totalOrders = await Order.countDocuments({ userId });
     const totalPages = Math.ceil(totalOrders / limit);
 
-    // Check if the request is an AJAX request
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
       return res.json({ orders });
     }
 
-    res.render('order-list', { // Ensure the correct path to the view
+    res.render('order-list', { 
       orders, 
       error: null,
       user: req.session.user,
