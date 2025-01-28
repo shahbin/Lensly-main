@@ -75,7 +75,10 @@
                       <td>
                         <h3 class="table__title"><%= item.product.productName %></h3>
                         <p class="table__quantity">x <%= item.quantity %></p>
+                        <p class="status <%= item.status?.toLowerCase() %>"><%= item.status || 'Pending' %></p>
+                        <% if (!item.status || item.status.toLowerCase() !== 'cancelled') { %>
                         <button class="cancel-btn" onclick="cancelOrderItem('<%= order._id %>', '<%= item._id %>')">Cancel</button>
+                        <% } %>
                       </td>
                       <!-- <td><span class="table__price">₹<%= item.price.toFixed(2) %></span></td> -->
                     </tr>
@@ -109,53 +112,98 @@
       </section>
     </main>
 
-    <style>
-      .cancel-btn {
-        background-color: #b21d1d;
-        color: #fff;
-        border: none;
-        padding: 7px 10px;
-        border-radius: 5px;
-        margin-top: 8px;
-        cursor: pointer;
-      }
-      .cancel-btn:hover {
-        background-color: #ffffff;
-        color: #b21d1d;
-        border: #b21d1d 1px solid;
-      }
-    </style>
 
-    <script>
-      async function cancelOrderItem(orderId, itemId) {
-        try {
-          const result = await Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, cancel it!'
-          });
+<!-- Add this in your EJS template -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-          if (result.isConfirmed) {
-            const response = await fetch(`/cancel-order-item/${orderId}/${itemId}`, {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json'
+<script>
+  function cancelOrderItem(orderId, itemId) {
+    // Initial confirmation dialog
+    Swal.fire({
+      title: 'Cancel Order Item',
+      text: 'Are you sure you want to cancel this item?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, cancel it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show loading state
+        Swal.fire({
+          title: 'Processing...',
+          text: 'Cancelling your order item',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Make the cancellation request
+        fetch(`/cancel-order-item/${orderId}/${itemId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Success dialog
+            Swal.fire({
+              title: 'Cancelled Successfully!',
+              text: 'Your order item has been cancelled.',
+              icon: 'success',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'OK'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                location.reload();
               }
             });
-
-            if (!response.ok) throw new Error('Cancel failed');
-
-            location.reload();
+          } else {
+            throw new Error(data.message || 'Cancellation failed');
           }
-        } catch (error) {
-          console.error('Error cancelling item:', error);
-          Swal.fire('Failed to cancel item. Please try again.');
-        }
+        })
+        .catch(error => {
+          // Error dialog
+          Swal.fire({
+            title: 'Cancellation Failed',
+            text: 'There was an error cancelling your order item. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+          });
+        });
       }
-    </script>
+    });
+  }
+</script>
+
+<!-- Add this CSS for better button styling -->
+<style>
+  .cancel-btn {
+    background-color: #d33;
+    color: white;
+    border: 1px solid #d33;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .cancel-btn:hover {
+    background-color: white;
+    color: #d33;
+  }
+
+  .swal2-popup {
+    font-size: 0.9rem !important;
+  }
+</style>
 
     <%- include("../../views/partials/user/footer") %>

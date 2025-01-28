@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
 const Address = require("../../models/addressSchema")
+const Product = require('../../models/productSchema')
 
 const getOrderDetails = async (req, res) => {
   try {
@@ -83,22 +84,59 @@ const cancelOrderItem = async (req, res) => {
     const userId = req.session.user;
 
     const order = await Order.findOne({ _id: orderId, userId });
+    
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Order not found' 
+      });
     }
 
-    const itemIndex = order.orderedItems.findIndex(item => item._id.toString() === itemId);
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: 'Item not found in order' });
+    // Find the specific item
+    const orderItem = order.orderedItems.id(itemId);
+    if (!orderItem) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Order item not found' 
+      });
     }
 
-    order.orderedItems.splice(itemIndex, 1);
+    if(orderItem.status == 'Cancelled'){
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Order alredy caled' 
+      })
+    }
+
+    const product = await Product.findOne({_id : orderItem.product})
+    product.quantity += orderItem.quantity
+    product.save();
+
+    orderItem.status = 'Cancelled';
+
+    const allItemsCancelled = order.orderedItems.every(item => item.status === 'Cancelled');
+    if (allItemsCancelled) {
+      order.status = 'Cancelled';
+    }
+
+    const activeItems = order.orderedItems.filter(item => item.status !== 'Cancelled');
+    order.totalPrice = activeItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    order.finalAmount = order.totalPrice + 49 - order.discount; 
+
     await order.save();
 
-    res.status(200).json({ message: 'Item cancelled successfully' });
+    res.status(200).json({ 
+      success: true, 
+      message: 'Order item cancelled successfully',
+      newTotal: order.finalAmount
+    });
+
   } catch (error) {
     console.error('Error cancelling order item:', error);
-    res.status(500).json({ message: 'Failed to cancel order item' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to cancel order item' 
+    });
   }
 };
 

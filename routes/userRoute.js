@@ -59,6 +59,7 @@ router.get('/order-details/:orderId', userAuth, orderController.getOrderDetails)
 
 router.get('/search', userController.searchProducts);
 router.get('/orders-list',userAuth,orderController.getOrdersList);
-router.delete('/cancel-order-item/:orderId/:itemId', orderController.cancelOrderItem);
+router.patch('/cancel-order-item/:orderId/:itemId', userAuth, orderController.cancelOrderItem);
+
 
 module.exports = router;
