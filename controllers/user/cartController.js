@@ -204,7 +204,8 @@ const placeOrder = async (req, res) => {
     const orderItems = cart.items.map(item => ({
       product: item.productId,
       quantity: item.quantity,
-      price: item.price
+      price: item.price,
+      dateAdded: new Date() // Ensure dateAdded is set
     }));
  
     const order = new Order({
@@ -214,7 +215,8 @@ const placeOrder = async (req, res) => {
       status: 'Pending',
       totalPrice: cart.items.reduce((total, item) => total + item.totalPrice, 0),
       finalAmount: cart.items.reduce((total, item) => total + item.totalPrice, 0) + 49,
-      paymentMethod
+      paymentMethod,
+      createdAt: new Date() // Ensure createdAt is set
     });
  
     await order.save();

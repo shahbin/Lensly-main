@@ -1,0 +1,317 @@
+<%- include("../../views/partials/admin/header") %>
+
+<main class="order-management">
+  
+    <div class="page-header">
+        <h1>Order Status Management</h1>
+        <p class="subtitle">Manage and track all orders</p>
+    </div>
+
+    <div class="table-container">
+        <% if (orders && orders.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer Details</th>
+                        <th>Shipping Address</th>
+                        <th>Current Status</th>
+                        <th>Update Status</th>
+                        <th>Order Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td class="order-id">
+                                <span class="id-label">#</span>
+                                <%= order.orderId || 'N/A' %>
+                            </td>
+                            <td>
+                                <div class="customer-info">
+                                    <span class="customer-name"><%= order.customerName || 'N/A' %></span>
+                                    <span class="customer-email"><%= order.email || 'N/A' %></span>
+                                </div>
+                            </td>
+                            <td><%= order.shippingAddress || 'No address provided' %></td>
+                            <td>
+                                <% const statusClass = order.status ? order.status.toLowerCase().replace(/\s+/g, '-') : 'unknown' %>
+                                <span class="status-badge <%= statusClass %>">
+                                    <%= order.status || 'Unknown' %>
+                                </span>
+                            </td>
+                            <td>
+                                <form action="/admin/updateOrderStatus" method="POST" class="status-form">
+                                    <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                                    <select name="status" class="status-select">
+                                        <% const statuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned'] %>
+                                        <% statuses.forEach(status => { %>
+                                            <option value="<%= status %>" <%= (order.status === status) ? 'selected' : '' %>>
+                                                <%= status %>
+                                            </option>
+                                        <% }) %>
+                                    </select>
+                                    <button type="submit" class="update-btn">Update</button>
+                                </form>
+                            </td>
+                            <td class="order-date">
+                                <% if (order.orderDate) { %>
+                                    <%= new Date(order.orderDate).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    }) %>
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="no-orders">
+                <p>No orders found</p>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" class="pagination-btn">Previous</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %>" class="pagination-btn <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>" class="pagination-btn">Next</a>
+        <% } %>
+    </div>
+  
+</main>
+
+<style>
+    .order-management {
+        margin: 0;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        min-height: 100vh;
+       
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        color: #2c3e50;
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .table-container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background-color: white;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+        font-size: 0.875rem;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .order-id {
+        font-family: monospace;
+        font-size: 0.875rem;
+    }
+
+    .id-label {
+        color: #6c757d;
+        margin-right: 2px;
+    }
+
+    .customer-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .customer-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .customer-email {
+        color: #6c757d;
+        font-size: 0.8125rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .status-badge.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.processing {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+
+    .status-badge.shipped {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-badge.delivered {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-badge.cancelled {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .status-badge.return {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    .status-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .status-select {
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        color: #495057;
+        background-color: #fff;
+        min-width: 140px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2rem;
+    }
+
+    .status-select:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .update-btn {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .update-btn:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-1px);
+    }
+
+    .update-btn:active {
+        transform: translateY(0);
+    }
+
+    .order-date {
+        color: #6c757d;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    @media (max-width: 1024px) {
+        .order-management {
+            padding: 1rem;
+        }
+
+        table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .pagination-btn {
+        margin: 0 0.25rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #495057;
+        background-color: #fff;
+        transition: background-color 0.2s ease;
+    }
+
+    .pagination-btn:hover {
+        background-color: #e9ecef;
+    }
+
+    .pagination-btn.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>
+
+<%- include("../../views/partials/admin/footer") %>

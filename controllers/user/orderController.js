@@ -58,7 +58,8 @@ const getOrdersList = async (req, res) => {
       .populate('orderedItems.product')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Ensure the documents are plain JavaScript objects
 
     const totalOrders = await Order.countDocuments({ userId });
     const totalPages = Math.ceil(totalOrders / limit);
@@ -81,7 +82,33 @@ const getOrdersList = async (req, res) => {
   }
 };
 
+const cancelOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const userId = req.session.user;
+
+    const order = await Order.findOne({ _id: orderId, userId });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const itemIndex = order.orderedItems.findIndex(item => item._id.toString() === itemId);
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: 'Item not found in order' });
+    }
+
+    order.orderedItems.splice(itemIndex, 1);
+    await order.save();
+
+    res.status(200).json({ message: 'Item cancelled successfully' });
+  } catch (error) {
+    console.error('Error cancelling order item:', error);
+    res.status(500).json({ message: 'Failed to cancel order item' });
+  }
+};
+
 module.exports = {
   getOrderDetails,
-  getOrdersList
+  getOrdersList,
+  cancelOrderItem
 };

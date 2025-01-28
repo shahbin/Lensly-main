@@ -5,13 +5,14 @@ const customerController = require("../controllers/admin/customerController")
 const categoryController = require("../controllers/admin/categoryController")
 const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
-const {userAuth,adminAuth} = require("../middlewares/auth")
+const orderController = require("../controllers/admin/orderController")
+const {userAuth,adminAuth, checkAdmin} = require("../middlewares/auth")
 const uploads = require("../helpers/multer")
 const handleUpload = require("../helpers/multer")
 
 
 router.get('/pageError',adminController.pageError)
-router.get('/',adminController.loadLogin)
+router.get('/',checkAdmin,adminController.loadLogin)
 router.post('/',adminController.login)
 router.get('/dashboard',adminAuth,adminController.loadDashboard)
 router.get('/logout',adminController.logout)
@@ -41,5 +42,7 @@ router.get('/unblockProduct',adminAuth,productController.unblockProduct)
 router.get('/editProduct',adminAuth,productController.getEditProduct)
 router.post('/editProduct/:id',adminAuth,handleUpload, productController.updateProduct);
 
+router.get('/orders', adminAuth, orderController.getAllOrders)
+router.post('/updateOrderStatus', adminAuth, orderController.updateOrderStatus)
 
 module.exports = router;
