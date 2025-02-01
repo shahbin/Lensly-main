@@ -331,6 +331,99 @@ async function cleanupTempFiles(files) {
 
 
 
+const addProductOffer = async (req, res) => {
+    try {
+        const percentage = parseInt(req.body.percentage);
+        const productId = req.body.productId;
+
+        // Find product
+        const product = await Product.findById(productId);
+        
+        if (!product) {
+            return res.status(400).json({
+                status: false, 
+                message: "Product not found"
+            });
+        }
+
+        // // Check if category has higher offer
+        // const category = await Category.findById(product.category);
+        // if (category && category.categoryOffer > percentage) {
+        //     return res.status(400).json({
+        //         status: false,
+        //         message: "Category has a higher offer percentage"
+        //     });
+        // }
+
+        // Calculate new sale price with product offer
+        const discountAmount = (product.regularPrice * percentage) / 100;
+        product.salePrice = product.regularPrice - discountAmount;
+        product.productOffer = percentage;
+        product.offerAmount = discountAmount;
+
+        await product.save();
+
+        res.status(200).json({
+            status: true,
+            message: "Product offer applied successfully"
+        });
+
+    } catch (error) {
+        console.error('Error in addProductOffer:', error);
+        res.status(500).json({
+            status: false, 
+            message: "Internal Server Error"
+        });
+    }
+};
+
+const removeProductOffer = async (req, res) => {
+    try {
+        const productId = req.body.productId;
+        
+        // Find product
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return res.status(400).json({
+                status: false, 
+                message: "Product not found"
+            });
+        }
+
+        // Check if category has an offer
+        const category = await Category.findById(product.category);
+        if (category && category.categoryOffer > 0) {
+            // Apply category offer instead
+            const discountAmount = (product.regularPrice * category.categoryOffer) / 100;
+            product.salePrice = product.regularPrice - discountAmount;
+            product.offerAmount = discountAmount;
+        } else {
+            // Reset to regular price if no category offer
+            product.salePrice = product.regularPrice;
+            product.offerAmount = 0;
+        }
+
+        // Remove product offer
+        product.productOffer = 0;
+        await product.save();
+
+        res.status(200).json({
+            status: true,
+            message: "Product offer removed successfully"
+        });
+
+    } catch (error) {
+        console.error('Error in removeProductOffer:', error);
+        res.status(500).json({
+            status: false, 
+            message: "Internal Server Error"
+        });
+    }
+};
+
+
+
 
 module.exports = {
     getProductAddPage,
@@ -339,5 +432,7 @@ module.exports = {
     blockProduct,
     unblockProduct,
     getEditProduct,
-    updateProduct
+    updateProduct,
+    addProductOffer,
+    removeProductOffer
 };

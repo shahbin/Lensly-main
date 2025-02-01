@@ -343,6 +343,7 @@ body {
 
 .message-container {
   margin-bottom: 1rem;
+
 }
 
 .notification {
@@ -350,6 +351,8 @@ body {
   top: 1rem;
   right: 1rem;
   padding: 1rem;
+  color: #ffff;
+  background-color: #059669;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -929,9 +932,13 @@ window.addEventListener('click', (event) => {
                     if (result.success) {
                         document.getElementById('profileName').textContent = data.name;
                         document.getElementById('profilePhone').textContent = data.phone;
-                        showMessage(result.message, 'success');
+                        sessionStorage.setItem('profileUpdateMessage', result.message);
                         closeModals();
-                    } else {
+                        
+                        window.location.href = "/userProfile"
+                        
+                    } 
+                    else {
                         result.errors.forEach(error => {
                             if (error.toLowerCase().includes('name')) {
                                 showValidationError('editName', error);
@@ -943,7 +950,15 @@ window.addEventListener('click', (event) => {
                 } catch (error) {
                     showMessage('An error occurred', 'error');
                 }
-            });
+            })
+            const message = sessionStorage.getItem('profileUpdateMessage');
+      if (message) {
+          showMessage(message, 'success'); // Show success message
+
+          // Clear the message from sessionStorage to prevent repeated alerts
+          sessionStorage.removeItem('profileUpdateMessage');
+      }
+          
         }
 
         // Change Password Form Submission

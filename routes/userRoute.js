@@ -6,6 +6,7 @@ const productController = require("../controllers/user/productController");
 const profileController = require("../controllers/user/profileController");
 const cartController = require("../controllers/user/cartController");
 const orderController = require("../controllers/user/orderController");
+const wishlistController = require("../controllers/user/wishlistController")
 const { userAuth, adminAuth, checkUser } = require("../middlewares/auth");
 
 router.get("/pageNotFound", userController.pageNotFound);
@@ -55,11 +56,21 @@ router.delete('/removeFrom-cart/:productId', userAuth, cartController.removeFrom
 
 router.get('/checkout', userAuth, cartController.getCheckout);
 router.post('/place-order', userAuth, cartController.placeOrder);
+
+router.post('/placeOrderRazorPay',userAuth,orderController.orderRazorpay)
+router.post('/verifyRazorPayOrder',userAuth,orderController.verifyRazorPayOrder)
 router.get('/order-details/:orderId', userAuth, orderController.getOrderDetails);
 
 router.get('/search', userController.searchProducts);
 router.get('/orders-list',userAuth,orderController.getOrdersList);
 router.patch('/cancel-order-item/:orderId/:itemId', userAuth, orderController.cancelOrderItem);
 
+router.get('/wishlist',userAuth,wishlistController.getWishlist)
+router.post('/add/:productId', userAuth, wishlistController.addToWishlist);
+router.post('/remove/:productId', userAuth, wishlistController.removeFromWishlist);
+router.get('/check-wishlist/:productId', userAuth, wishlistController.checkWishlist);
+
+router.get("/available-coupons",userAuth,orderController.getAvailableCoupons);
+router.post('/apply-coupon',userAuth,orderController.applyCoupon);
 
 module.exports = router;

@@ -1,5 +1,15 @@
 <%- include("../../views/partials/user/header", { user: user }) %>
 
+<style>
+  .save__price {
+  background: #088179;
+  color: white;
+  padding: 0.25rem 0.25rem;
+  border-radius: 4px;
+  margin-left: -0rem;
+}
+</style>
+
 
     <!--=============== MAIN ===============-->
     <main class="main">
@@ -159,10 +169,31 @@
                     <i class="fi fi-rs-star"></i>
                   </div>
                   <div class="product__price">
-                    <span class="new__price">₹<%= products[i].salePrice %></span>
+                    <% 
+                        // Get offers
+                        const productOffer = products[i].productOffer || 0;
+                        const categoryOffer = products[i].category?.categoryOffer || 0;
+                        
+                        // Get the best offer
+                        const bestOffer = Math.max(productOffer, categoryOffer);
+                        
+                        // Calculate final price
+                        const regularPrice = products[i].regularPrice;
+                        const finalPrice = bestOffer > 0 
+                            ? Math.floor(regularPrice - (regularPrice * bestOffer / 100)) 
+                            : products[i].salePrice;
+                    %>
+                
+                    <span class="new__price">₹<%= finalPrice %></span>
                     <br>
-                    <span class="old__price">₹<%= products[i].regularPrice %></span>
-                  </div>
+                    <% if (bestOffer > 0 && finalPrice < regularPrice) { %>
+                        <span class="old__price">₹<%= regularPrice %></span>
+                        <span class="save__price">
+                            <%= bestOffer %>% Off
+                        </span>
+                    <% } %>
+                </div>
+                
                   <a
                     href="/addToCart?id=<%= products[i]._id %>"
                     class="action__btn cart__btn"

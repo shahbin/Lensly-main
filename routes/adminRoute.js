@@ -6,6 +6,7 @@ const categoryController = require("../controllers/admin/categoryController")
 const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const orderController = require("../controllers/admin/orderController")
+const couponController = require("../controllers/admin/couponController")
 const {userAuth,adminAuth, checkAdmin} = require("../middlewares/auth")
 const uploads = require("../helpers/multer")
 const handleUpload = require("../helpers/multer")
@@ -23,6 +24,8 @@ router.get("/unblockCustomer",adminAuth,customerController.customerUnBlocked)
 
 router.get('/category',adminAuth,categoryController.categoryInfo)
 router.post('/addCategory',adminAuth,categoryController.addCategory)
+router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
+router.post('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
 router.get('/listCategory',adminAuth,categoryController.getListCategory)
 router.get('/unListCategory',adminAuth,categoryController.getUnListCategory)
 router.get('/editCategory',adminAuth,categoryController.getEditCategory)
@@ -37,6 +40,8 @@ router.get("/deleteBrand",adminAuth,brandController.deleteBrand)
 router.get('/addProducts',adminAuth,productController.getProductAddPage)
 router.post('/addProducts',adminAuth,handleUpload,productController.addProducts)
 router.get('/products',adminAuth,productController.getAllProducts)
+router.post('/addProductOffer', adminAuth,productController.addProductOffer);
+router.post('/removeProductOffer', adminAuth,productController.removeProductOffer);
 router.get('/blockProduct',adminAuth,productController.blockProduct)
 router.get('/unblockProduct',adminAuth,productController.unblockProduct)
 router.get('/editProduct',adminAuth,productController.getEditProduct)
@@ -45,5 +50,11 @@ router.post('/editProduct/:id',adminAuth,handleUpload, productController.updateP
 router.get('/orders', adminAuth, orderController.getAllOrders)
 router.post('/orders/update-status', adminAuth, orderController. updateOrderItemStatus);
 router.get('/orderDetails/:orderId', adminAuth, orderController.getOrderDetails);
+
+router.get('/coupon',adminAuth,couponController.getCouponPage)
+router.post('/createCoupon',adminAuth,couponController.createCoupon)
+router.get('/editCoupon',adminAuth,couponController.getEditCoupon)
+router.post('/updateCoupon',adminAuth,couponController.updateCoupon)
+router.get('/deleteCoupon',adminAuth,couponController.deleteCoupon)
 
 module.exports = router;

@@ -1,0 +1,206 @@
+<%- include("../../views/partials/user/header", { user: user }) %>
+
+<style>
+  .empty-wishlist {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.empty-wishlist__title {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.empty-wishlist__text {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.empty-wishlist .btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.empty-wishlist .btn:hover {
+  background-color: #0056b3;
+}
+</style>
+
+<main class="main">
+    <!--=============== BREADCRUMB ===============-->
+    <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;">
+      <ul class="breadcrumb__list container" style="margin-left: -25px;">
+        <li><a href="/" class="breadcrumb__link" style="font-size: 12px;">Home</a></li>
+        <li><span class="breadcrumb__link">></span></li>
+        <li><a class="breadcrumb__link" style="font-size: 12px;">Wishlist</a></li>
+      </ul>
+    </section>
+    
+
+    <!--=============== WISHLIST ===============-->
+    <section class="wishlist section--lg container">
+      <div class="table__container" >
+        <% if (wishlist && wishlist.length > 0) { %>
+          <div class="tb" style="margin-left: -90px;">
+          <div class="tb" style="margin-left: -90px;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock Status</th>
+                <th>Action</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% wishlist.forEach(item => { %>
+                <tr>
+                  <td>
+                    <img
+                      src="/admin-assets/imgs/brands/<%= item.product.productImage[0] %>"
+                      alt="<%= item.product.productName %>"
+                      class="table__img"
+                    />
+                  </td>
+                  <td>
+                    <h3 class="table__title">
+                      <%= item.product.productName %>
+                    </h3>
+                  </td>
+                  <td>
+                    <span class="table__price">₹<%= item.product.price %></span>
+                  </td>
+                  <td>
+                    <span class="table__stock <%= item.product.quantity > 0 ? 'in-stock' : 'out-of-stock' %>">
+                      <%= item.product.quantity > 0 ? 'In Stock' : 'Out of Stock' %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (item.product.quantity > 0) { %>
+                      <a href="/cart/add/<%= item.product._id %>" class="btn btn--sm">Add to Cart</a>
+                    <% } else { %>
+                      <button class="btn btn--sm" disabled>Add to Cart</button>
+                    <% } %>
+                  </td>
+                  <td>
+                    <button class="btn-remove" data-product-id="<%= item.product._id %>">
+                      <i class="fi fi-rs-trash table__trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+          <div class="empty-cart" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; justify-content: center;">
+            <h2 style="font-size: 24px; color: #333; margin: 0 0 10px 0;">Your wishlist is empty</h2>
+            <p style="color: #666; margin: 0 0 30px 0;">Looks like you haven't added anything to your wishlist yet.</p>
+            <a href="/shop" class="btn flex btn__md" style="display: flex; align-items: center; background-color: #2b5741; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; line-height: 1;">
+              <i class="fi-rs-shopping-bag" style="margin-right: 8px;"></i> Continue Shopping
+            </a>
+          </div>
+        <% } %>
+      
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('click', async function (event) {
+    const button = event.target.closest('.btn-remove');
+
+    if (button) {
+        const productId = button.dataset.productId;
+    
+      if (!productId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Product ID not found!',
+        });
+        return;
+      }
+
+      try {
+        const response = await fetch(`/remove/${productId}`, {
+          method: 'POST', 
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ productId }) 
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const row = button.closest('tr');
+          if (row) {
+            row.remove();
+          }
+
+          const tbody = document.querySelector('tbody');
+          if (!tbody || !tbody.querySelector('tr')) {
+            const tableContainer = document.querySelector('.table__container');
+            if (tableContainer) {
+              tableContainer.innerHTML = `<div class="empty-cart" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; justify-content: center;">
+            <h2 style="font-size: 24px; color: #333; margin: 0 0 10px 0;">Your wishlist is empty</h2>
+            <p style="color: #666; margin: 0 0 30px 0;">Looks like you haven't added anything to your wishlist yet.</p>
+            <a href="/shop" class="btn flex btn__md" style="display: flex; align-items: center; background-color: #2b5741; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; line-height: 1;">
+              <i class="fi-rs-shopping-bag" style="margin-right: 8px;"></i> Continue Shopping
+            </a>
+          </div>`;
+            }
+          }
+
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Product removed from wishlist',
+            showConfirmButton: false,
+            timer: 2000
+          });
+
+        } else {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: data.message || 'Failed to remove product',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'error',
+          title: 'Failed to remove product',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      }
+    }
+  });
+});
+
+
+
+  
+
+  </script>
+
+<%- include("../../views/partials/user/footer") %>

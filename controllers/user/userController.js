@@ -4,7 +4,6 @@ const Product = require("../../models/productSchema")
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
-// const shopController = require("./shopController");
 
 const loadHomePage = async (req,res)=>{
     try{
@@ -69,8 +68,8 @@ const loadShopPage = async (req, res) => {
       } else if (selectedSort === 'priceHighToLow') {
         sort.salePrice = -1;
       } else if (selectedSort === 'popularity') {
-        sort.orders = -1; // Assuming 'orders' field tracks the number of orders
-        limit = 6; // Limit to 6 products
+        sort.orders = -1; 
+        limit = 6; 
       } else if (selectedSort === 'featured') {
         const categories = await Category.find({});
         const featuredProducts = [];
@@ -95,7 +94,7 @@ const loadShopPage = async (req, res) => {
         });
       } else if (selectedSort === 'newArrivals') {
         sort.createdOn = -1;
-        limit = 4; // Limit to 4 products
+        limit = 4; 
       } else if (selectedSort === 'aToZ') {
         sort.productName = 1;
       } else if (selectedSort === 'zToA') {
@@ -107,7 +106,7 @@ const loadShopPage = async (req, res) => {
 
     const product = await Product.find(query)
       .populate('category')
-      .collation({ locale: 'en', strength: 2 }) // Case-sensitive collation
+      .collation({ locale: 'en', strength: 2 })
       .sort(sort)
       .skip(skip)
       .limit(limit);

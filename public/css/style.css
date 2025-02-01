@@ -676,18 +676,18 @@ table {
   -o-transform: translateX(-50%);
 }
 
-.action__btn::before {
+/* .action__btn::before {
   content: "";
   top: -2px;
   border: 0.5rem solid transparent;
   border-top-color: var(--first-color);
-}
+} */
 
 .action__btn::after {
   content: attr(aria-label);
   bottom: 100%;
   background-color: var(--first-color);
-  color: var(--body-color);
+  color: var(--body-color);  
   font-size: var(--tiny-font-size);
   white-space: nowrap;
   padding-inline: 0.625rem;
@@ -703,7 +703,7 @@ table {
   position: absolute;
   left: 1.25rem;
   top: 1.25rem;
-  background-color: var(--first-color);
+  background-color: var(--first-color);  
   color: var(--body-color);
   padding: 0.25rem 0.625rem;
   font-size: var(--tiny-font-size);
@@ -809,6 +809,10 @@ table {
   background-color: var(--first-color);
   border-color: var(--first-color);
   color: var(--body-color);
+}
+
+.action__btn ::after{
+  color: var(--color-danger);
 }
 
 /*=============== DEALS ===============*/
@@ -1427,7 +1431,6 @@ table {
 
 /*=============== CART ===============*/
 .table__container {
-  overflow-x: auto;
   margin: 110px;
   margin-top: -1px;
 }
