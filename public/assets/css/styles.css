@@ -630,7 +630,7 @@ table {
   left: 0;
 }
 
-.product__actions {
+/* .product__actions {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -646,15 +646,15 @@ table {
   -moz-transition: all 0.2s var(--transition);
   -ms-transition: all 0.2s var(--transition);
   -o-transition: all 0.2s var(--transition);
-}
+} */
 
-.action__btn {
+/* .action__btn {
   position: relative;
   width: 40px;
   height: 40px;
   line-height: 42px;
   text-align: center;
-  background-color: var(--first-color-alt);
+  background-color: var(--first-color-alt); 
   border: 1px solid var(--border-color);
   color: var(--text-color);
   font-size: var(--small-font-size);
@@ -663,47 +663,60 @@ table {
   -moz-border-radius: 50%;
   -ms-border-radius: 50%;
   -o-border-radius: 50%;
-}
+} */
 
-.action__btn::before,
-.action__btn::after {
+  /* .action__btn::before,
+  .action__btn::after {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+  } */
+
+/* .action__btn {
+  position: relative;
+  background-color: #eaf6ea;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease-in-out;
+} */
+
+
+
+
+
+ /* .action__btn::after {
+  content: attr(aria-label);  
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  -webkit-transform: translateX(-50%);
-  -moz-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  -o-transform: translateX(-50%);
-}
-
-.action__btn::before {
-  content: "";
-  top: -2px;
-  border: 0.5rem solid transparent;
-  border-top-color: var(--first-color);
-}
-
-.action__btn::after {
-  content: attr(aria-label);
   bottom: 100%;
-  background-color: var(--first-color);
+   background-color: var(--first-color); 
   color: var(--body-color);
   font-size: var(--tiny-font-size);
   white-space: nowrap;
   padding-inline: 0.625rem;
   line-height: 2.58;
   border-radius: 0.25rem;
-  -webkit-border-radius: 0.25rem;
-  -moz-border-radius: 0.25rem;
-  -ms-border-radius: 0.25rem;
-  -o-border-radius: 0.25rem;
-}
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}  
 
-.product__badge {
+.action__btn:hover::after {
+   opacity: 1; 
+} */
+
+
+ .product__badge {
   position: absolute;
   left: 1.25rem;
   top: 1.25rem;
-  background-color: var(--first-color);
+  /* background-color: var(--first-color); */
   color: var(--body-color);
   padding: 0.25rem 0.625rem;
   font-size: var(--tiny-font-size);
@@ -712,7 +725,7 @@ table {
   -moz-border-radius: 2.5rem;
   -ms-border-radius: 2.5rem;
   -o-border-radius: 2.5rem;
-}
+} 
 
 .product__badge.light-pink {
   background-color: hsl(341, 100%, 73%);
@@ -761,37 +774,37 @@ table {
   right: 1.25rem;
 }
 
-/* Active Tab */
+
 .tab__btn.active-tab {
-  color: var(--first-color);
-  background-color: var(--second-color);
-}
+   color: var(--first-color); 
+   background-color: var(--second-color); 
+} 
 
 .tab__item:not(.active-tab) {
   display: none;
 }
 
-/* Product Hover */
-.product__img.hover,
+
+/* .product__img.hover,
 .product__actions,
 .action__btn::before,
 .action__btn::after,
 .product__item:hover .product__img.default {
-  opacity: 0;
-}
+  opacity: 1;
+} */
 
 .product__item:hover {
   box-shadow: 0 0 10px hsl(0, 0%, 0%, 0.1);
 }
 
-.product__item:hover .product__img.hover,
+/* .product__item:hover .product__img.hover,
 .product__item:hover .product__actions,
 .action__btn:hover::before,
 .action__btn:hover::after {
   opacity: 1;
-}
+} */
 
-.action__btn:hover::before,
+/* .action__btn:hover::before,
 .action__btn:hover::after {
   transform: translateX(-50%) translateY(-0.5rem);
   transition: all 0.3s cubic-bezier(0.71, 1.7, 0.77, 1.24);
@@ -803,13 +816,13 @@ table {
   -moz-transform: translateX(-50%) translateY(-0.5rem);
   -ms-transform: translateX(-50%) translateY(-0.5rem);
   -o-transform: translateX(-50%) translateY(-0.5rem);
-}
-
+} */
+/* 
 .action__btn:hover {
   background-color: var(--first-color);
   border-color: var(--first-color);
   color: var(--body-color);
-}
+} */
 
 /*=============== DEALS ===============*/
 

@@ -2164,7 +2164,7 @@ progress {
 }
 
 .table-responsive {
-  overflow-x: auto;
+  /* overflow-x: auto; */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -6682,14 +6682,14 @@ fieldset:disabled .btn {
   border-left-color: #000;
 }
 
-.tooltip-inner {
+/* .tooltip-inner {
   max-width: 200px;
   padding: 0.25rem 0.5rem;
   color: #fff;
   text-align: center;
   background-color: #000;
   border-radius: 0.25rem;
-}
+} */
 
 .popover {
   position: absolute;

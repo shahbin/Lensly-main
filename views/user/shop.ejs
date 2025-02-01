@@ -275,6 +275,51 @@ input[type="range"]::-moz-range-thumb:active {
   flex: 1;
   min-width: 0;
 }
+
+.save__price {
+  background: #088179;
+  color: white;
+  padding: 0.25rem 0.25rem;
+  border-radius: 4px;
+  margin-left: -0rem;
+}
+
+
+.fi-rs-heart {
+    color: black !important;
+    fill: none !important; /* Keep the heart empty */
+    stroke: black !important; /* Keep the border visible */
+    background-color: transparent !important;
+}
+
+.fi-sr-heart {
+    color: red !important;
+    fill: red !important; /* Fill heart with red */
+    stroke: black !important; /* Keep border visible */
+    background-color: transparent !important;
+}
+.fi-rs-heart {
+    fill: red; /* or any other color you want for the outline */
+}
+
+/* Ensure the button background (circle) remains unchanged */
+.action__btn {
+    background-color: rgba(255, 255, 255, 0.8) !important; /* Keeps the circle light */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    transition: background-color 0.2s ease;
+}
+
+/* Smooth transition effect */
+.action__btn i {
+    transition: color 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
+}
+
+
+
 </style>
 
 <!--=============== MAIN ===============-->
@@ -390,16 +435,15 @@ input[type="range"]::-moz-range-thumb:active {
                 />
               </a>
               <div class="product__actions">
-                <a href="#" class="action__btn" aria-label="Quick View">
+                <a href="#" class="action__btn" >
                   <i class="fi fi-rs-eye"></i>
                 </a>
-                <a
-                  href="/addToWishlist?id=<%= product._id %>"
-                  class="action__btn"
-                  aria-label="Add to Wishlist"
-                >
-                  <i class="fi fi-rs-heart"></i>
-                </a>
+                <a href="/add/<%= product._id %>" class="action__btn">
+                  <i class="fi fi-rs-heart"></i> 
+              </a>
+              
+              
+              
               </div>
               <div class="product__badge light-pink">Now Available</div>
             </div>
@@ -416,10 +460,28 @@ input[type="range"]::-moz-range-thumb:active {
                 <i class="fi fi-rs-star"></i>
               </div>
               <div class="product__price">
-                <span class="new__price">₹<%= product.salePrice %></span>
+                <% 
+                  const productOffer = product.productOffer || 0;
+                  const categoryOffer = product.category?.categoryOffer || 0;
+                  const bestOffer = Math.max(productOffer, categoryOffer);
+                  
+                  const regularPrice = product.regularPrice;
+                  const finalPrice = bestOffer > 0 
+                    ? Math.floor(regularPrice - (regularPrice * bestOffer / 100)) 
+                    : product.salePrice;
+                %>
+                
+                <span class="new__price">₹<%= finalPrice %></span>
                 <br>
-                <span class="old__price">₹<%= product.regularPrice %></span>
-              </div>
+            
+                <% if(bestOffer > 0 && finalPrice < regularPrice) { %>  
+                    <span class="old__price">₹<%= regularPrice %></span>
+                    <span class="save__price">
+                      <%= bestOffer %>% Off
+                    </span>
+                <% } %>
+            </div>
+            
               <a
                 href="/addToCart?id=<%= product._id %>"
                 class="action__btn cart__btn"
@@ -521,7 +583,12 @@ input[type="range"]::-moz-range-thumb:active {
       </form>
     </div>
   </section>
+  
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
 <script>
   const rangeInput = document.querySelectorAll(".range-input input");
@@ -629,6 +696,73 @@ input[type="range"]::-moz-range-thumb:active {
     minPriceInput.value = '<%= minPrice %>';
     maxPriceInput.value = '<%= maxPrice %>';
   });
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const wishlistBtns = document.querySelectorAll('.action__btn');
+
+    wishlistBtns.forEach(button => {
+        button.addEventListener('click', async function (e) {
+            e.preventDefault(); // Prevent default navigation
+
+            const heartIcon = this.querySelector('i');
+            if (!heartIcon) return;
+
+            const productId = this.getAttribute('href').split('/').pop(); // Get product ID
+
+            try {
+                // Check if product is in the wishlist
+                const checkResponse = await fetch(`/check-wishlist/${productId}`);
+                if (!checkResponse.ok) return console.error('Error checking wishlist');
+
+                const checkData = await checkResponse.json();
+                const isInWishlist = checkData.inWishlist;
+
+                // Toggle heart icon visibility
+                if (isInWishlist) {
+                    heartIcon.style.fill = 'none'; // Remove fill color
+                } else {
+                    heartIcon.style.fill = 'red'; // Fill with red color
+                }
+
+                // Send request to add/remove from wishlist
+                const url = isInWishlist ? `/remove/${productId}` : `/add/${productId}`;
+                await fetch(url, { method: "POST" });
+
+                // Show confirmation message
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: isInWishlist ? 'info' : 'success',
+                    title: isInWishlist ? 'Removed from Wishlist!' : 'Added to Wishlist!',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+    // Ensure correct icon state on page load
+    wishlistBtns.forEach(button => {
+        const heartIcon = button.querySelector('i');
+        if (!heartIcon) return;
+
+        const productId = button.getAttribute('href').split('/').pop();
+
+        fetch(`/check-wishlist/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.inWishlist) {
+                    heartIcon.style.fill = 'red';
+                } else {
+                    heartIcon.style.fill = 'none';
+                }
+            });
+    });
+});
   </script>
 
 <!--=============== FOOTER ===============-->

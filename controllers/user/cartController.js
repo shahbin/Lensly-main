@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
 const { v4: uuidv4 } = require('uuid');
 
-// Get Cart
 const getCart = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -32,25 +31,28 @@ const getCart = async (req, res) => {
 
   } catch (error) {
     console.error('Cart error:', error);
-    // Do not send a response to the client with the error message
   }
 }
 
-// Add to Cart
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
     const userId = req.session.user;
 
     const product = await Product.findById(productId);
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ success: false, status:'not_found', message: 'Product not found' });
+    }
+
+    // Check if the product is out of stock
+    if (product.quantity === 0) {
+      return res.status(200).json({ success: false, status: "out_of_stock", message: 'Product is out of stock' });
+    }
 
     let cart = await Cart.findOne({ userId });
     if (!cart) cart = new Cart({ userId, items: [] });
 
-    const existingItem = cart.items.find(item => 
-      item.productId.toString() === productId
-    );
+    const existingItem = cart.items.find(item => item.productId.toString() === productId);
 
     const maxQuantity = Math.min(product.quantity, 5);
 
@@ -67,21 +69,20 @@ const addToCart = async (req, res) => {
     }
 
     await cart.save();
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, status: 'added', message: 'Item added to cart successfully' });
 
   } catch (error) {
     console.error('Add to cart error:', error);
-    res.status(500).json({ success: false, message: 'Failed to add item', error: error.message });
+    res.status(500).json({ success: false, status: 'error' , message: 'Failed to add item'});
   }
-}
+};
 
-// Update Cart
+
 const updateCart = async (req, res) => {
   try {
     const { productId, action } = req.body;
     const userId = req.session.user;
 
-    // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ 
         success: false, 
@@ -139,7 +140,6 @@ const updateCart = async (req, res) => {
   }
 }
 
-// Remove from Cart
 const removeFromCart = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -185,15 +185,17 @@ const getCheckout = async (req, res) => {
 
   } catch (error) {
     console.error('Error getting checkout:', error);
-    console.log(error.stack); // Log the error stack
-    // Do not send a response to the client with the error message
+    console.log(error.stack); 
   }
 }
 
 const placeOrder = async (req, res) => {
   try {
-    const { addressId, paymentMethod } = req.body;
+    const { addressId, paymentMethod, cartId, couponCode, subtotal, discount, totalAmount } = req.body;
+    console.log("placeOrder",addressId,paymentMethod,cartId,couponCode,subtotal,discount,totalAmount)
     const userId = req.session.user;
+    console.log("ooo",userId);
+    
  
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     
@@ -205,8 +207,12 @@ const placeOrder = async (req, res) => {
       product: item.productId,
       quantity: item.quantity,
       price: item.price,
-      dateAdded: new Date() // Ensure dateAdded is set
+      dateAdded: new Date() 
+      
     }));
+    console.log("orderItems",orderItems)
+
+
  
     const order = new Order({
       userId,
@@ -214,9 +220,10 @@ const placeOrder = async (req, res) => {
       address: addressId,
       status: 'Pending',
       totalPrice: cart.items.reduce((total, item) => total + item.totalPrice, 0),
-      finalAmount: cart.items.reduce((total, item) => total + item.totalPrice, 0) + 49,
+      discount:discount,
+      finalAmount: totalAmount,
       paymentMethod,
-      createdAt: new Date() // Ensure createdAt is set
+      createdAt: new Date() 
     });
  
     await order.save();

@@ -7,47 +7,47 @@ const addressSchema = new Schema({
         ref: "User",
         required: true,
     },
-    addresses: [ // Changed to "addresses" for consistency
+    addresses: [ 
         {
             addressType: {
                 type: String,
-                required: true, // Added required constraint
-                enum: ["home", "work", "other"], // Valid address types
+                required: true, 
+                enum: ["home", "work", "other"],
             },
             name: {
                 type: String,
-                required: true, // Added required constraint
-                minlength: 3, // Ensures name is at least 3 characters
+                required: true, 
+                minlength: 3, 
             },
             city: {
                 type: String,
-                required: true, // Added required constraint
+                required: true, 
             },
             landMark: {
                 type: String,
-                maxlength: 100, // Restrict to 100 characters
+                maxlength: 100, 
             },
             state: {
                 type: String,
-                required: true, // Added required constraint
+                required: true, 
             },
             pincode: {
-                type: String, // Changed to String for flexibility
-                required: true, // Added required constraint
-                match: /^[1-9][0-9]{5}$/, // Regex for Indian pincodes
+                type: String, 
+                required: true, 
+                match: /^[1-9][0-9]{5}$/, 
             },
             phone: {
                 type: String,
-                required: true, // Added required constraint
-                match: /^\d{10}$/, // Regex for 10-digit phone numbers
+                required: true,
+                match: /^\d{10}$/, 
             },
             altPhone: {
                 type: String,
-                match: /^\d{10}$/, // Optional, but must match 10 digits
+                match: /^\d{10}$/, 
             },
             createdAt: {
                 type: Date,
-                default: Date.now, // Added to track creation time
+                default: Date.now, 
             },
         },
     ],

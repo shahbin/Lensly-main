@@ -122,6 +122,8 @@
   <ul class="breadcrumb__list container" style="margin-left: -25px;">
     <li><a href="/" class="breadcrumb__link" style="font-size: 12px;">Home</a></li>
     <li><span class="breadcrumb__link">></span></li>
+    <li><a href="/userProfile" class="breadcrumb__link" style="font-size: 12px;">Profile</a></li>
+    <li><span class="breadcrumb__link">></span></li>
     <li><a  class="breadcrumb__link" style="font-size: 12px;">Orders</a></li>
   </ul>
 </section>
@@ -134,6 +136,7 @@
           <tr>
             <th>Order ID</th>
             <th>Placed on</th>
+            <th>Amount</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -148,6 +151,9 @@
                 </td>
                 <td>
                   <span class="order-date"><%= order.createdOn.toLocaleDateString()%></span>
+                </td>
+                <td>
+                  <span class="order-date"><%= order.totalPrice%></span>
                 </td>
                 <td>
                   <span class="order-status status-<%= order.status.toLowerCase() %>"><%= order.status %></span>

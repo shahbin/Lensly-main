@@ -14,10 +14,10 @@ const categorySchema = new mongoose.Schema({
         type : Boolean,
         default : true
     },
-    // categoryOffer: {
-    //     type : Number,
-    //     default : 0
-    // },
+    categoryOffer: {
+        type : Number,
+        default : 0
+    },
 
     createdAt: {
         type : Date,

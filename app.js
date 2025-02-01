@@ -8,8 +8,7 @@ const passport = require("./config/passport")
 const db = require("./config/db")
 const userRoute = require("./routes/userRoute")
 const adminRoute = require("./routes/adminRoute")
-// const flash = require('connect-flash'); // Remove this line
-const { ensureAuthenticated, setUser } = require('./middleware/auth');
+const { ensureAuthenticated, setUser } = require('./middlewares/auth');
 db();
 
 app.use(express.json())
@@ -37,7 +36,7 @@ app.set("view engine","ejs")
 app.set("views",[path.join(__dirname,'views/user'),path.join(__dirname,'views/admin')])
 app.use(express.static(path.join(__dirname,'public')))
 
-app.use(setUser); // Apply the setUser middleware
+app.use(setUser); 
 app.use("/",userRoute)
 app.use("/admin",adminRoute)
 app.use('/user', ensureAuthenticated, userRoute);

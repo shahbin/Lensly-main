@@ -3,15 +3,38 @@
 <!--=============== MAIN ===============-->
 <main class="main">
   <!--=============== BREADCRUMB ===============-->
-  <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
-    <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
-      <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
+  <section
+    class="breadcrumb"
+    style="
+      width: 100%;
+      height: 80px;
+      display: flex;
+      margin-top: -40px;
+      justify-content: center;
+      align-items: center;
+      background-color: #ffff;
+    "
+  >
+    <ul class="breadcrumb__list container" style="margin-left: -25px">
+      <li>
+        <a href="/" class="breadcrumb__link" style="font-size: 12px">Home</a>
+      </li>
       <li><span class="breadcrumb__link">></span></li>
-      <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Shop</a></li>
+      <li>
+        <a href="/shop" class="breadcrumb__link" style="font-size: 12px"
+          >Shop</a
+        >
+      </li>
       <li><span class="breadcrumb__link">></span></li>
-      <li><a href="/cart" class="breadcrumb__link" style="font-size: 12px ;">Cart</a></li>
+      <li>
+        <a href="/cart" class="breadcrumb__link" style="font-size: 12px"
+          >Cart</a
+        >
+      </li>
       <li><span class="breadcrumb__link">></span></li>
-      <li><span class="breadcrumb__link" style="font-size: 12px ;">Checkout</span></li>
+      <li>
+        <span class="breadcrumb__link" style="font-size: 12px">Checkout</span>
+      </li>
     </ul>
   </section>
 
@@ -23,7 +46,9 @@
         <div class="address-list">
           <!-- Address cards will be populated here -->
         </div>
-        <button class="btn btn--md" onclick="showAddressForm()">Add New Address</button>
+        <button class="btn btn--md" onclick="showAddressForm()">
+          Add New Address
+        </button>
       </div>
       <div class="checkout__group">
         <h3 class="section__title">Cart Totals</h3>
@@ -36,57 +61,139 @@
             </tr>
           </thead>
           <tbody id="cartItems">
-            <% if (cart && cart.items.length > 0) { %>
-              <% cart.items.forEach(item => { %>
-                <% if (item.productId) { %>
-                  <tr>
-                    <td><img src="/admin-assets/imgs/brands/<%= item.productImage %>" alt="Product Image" class="order__img" /></td>
-                    <td>
-                      <h3 class="table__title"><%= item.productName %></h3>
-                      <p class="table__quantity">x <%= item.quantity %></p>
-                    </td>
-                    <td><span class="table__price">₹<%= item.totalPrice.toFixed(2) %></span></td>
-                  </tr>
-                <% } %>
-              <% }) %>
-              <tr>
-                <td><span class="order__subtitle">Subtotal</span></td>
-                <td colspan="2"><span class="table__price">₹<%= cart.items.reduce((total, item) => total + item.totalPrice, 0).toFixed(2) %></span></td>
-              </tr>
-              <tr>
-                <td><span class="order__subtitle">Shipping</span></td>
-                <td colspan="2"><span class="table__price">₹49.00</span></td>
-              </tr>
-              <tr>
-                <td><span class="order__subtitle">Discount</span></td>
-                <td colspan="2"><span class="table__price">₹0.00</span></td>
-              </tr>
-              <tr>
-                <td><span class="order__subtitle">Total</span></td>
-                <td colspan="2"><span class="order__grand-total">₹<%= (cart.items.reduce((total, item) => total + item.totalPrice, 0) + 49 - discount).toFixed(2) %></span></td>
-              </tr>
+            <% if (cart && cart.items.length > 0) { %> <%
+            cart.items.forEach(item => { %> <% if (item.productId) { %>
+            <tr>
+              <td>
+                <img
+                  src="/admin-assets/imgs/brands/<%= item.productImage %>"
+                  alt="Product Image"
+                  class="order__img"
+                />
+              </td>
+              <td>
+                <h3 class="table__title"><%= item.productName %></h3>
+                <p class="table__quantity">x <%= item.quantity %></p>
+              </td>
+              <td>
+                <span class="table__price"
+                  >₹<%= item.totalPrice.toFixed(2) %></span
+                >
+              </td>
+            </tr>
+            <% } %> <% }) %>
+            <tr>
+              <td><span class="order__subtitle">Subtotal</span></td>
+              <td colspan="2">
+                <span class="table__price"
+                  >₹<%= cart.items.reduce((total, item) => total +
+                  item.totalPrice, 0).toFixed(2) %></span
+                >
+              </td>
+            </tr>
+            <tr>
+              <td><span class="order__subtitle">Shipping</span></td>
+              <td colspan="2"><span class="table__price">₹49</span></td>
+            </tr>
+            <tr>
+    <td><span class="order__subtitle">Discount</span></td>
+    <td colspan="2"><span class="table__price order__discount">₹0.00</span></td>
+</tr>
+
+            <tr>
+              <td><span class="order__subtitle">Total</span></td>
+              <td colspan="2">
+                <span class="order__grand-total"
+                  >₹<%= (cart.items.reduce((total, item) => total +
+                  item.totalPrice, 0) + 49 - discount).toFixed(2) %></span
+                >
+              </td>
+            </tr>
             <% } else { %>
-              <tr><td colspan="3">No items in cart</td></tr>
+            <tr>
+              <td colspan="3">No items in cart</td>
+            </tr>
             <% } %>
           </tbody>
         </table>
-        <div style="margin-bottom: 20px;"></div>
-        <div class="coupon-container" style="display: flex; gap: 10px;">
-          <input type="text" id="couponCode" placeholder="Enter coupon code" class="form-input" />
-          <button class="btn btn--md" onclick="applyCoupon()">Apply</button>
+  
+        <a
+          href="javascript:void(0);"
+          onclick="openCouponsModal()"
+          class="available-coupons-link"
+          >View Available Coupons</a
+        >
+
+        <div class="coupons-modal" id="couponsModal">
+          <div class="coupons-modal-content">
+            <div class="coupons-modal-header">
+              <h2>Available Coupons</h2>
+              <button class="coupons-close-btn" onclick="closeCouponsModal()">
+                &times;
+              </button>
+            </div>
+            <div class="coupons-modal-body">
+              <ul id="availableCouponsList" class="coupons-list">
+                <li>Loading coupons...</li>
+              </ul>
+            </div>
+            <div class="coupons-modal-footer">
+              <button
+                class="coupons-action-btn secondary"
+                onclick="closeCouponsModal()"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px"></div>
+        <div class="coupon-container" style="display: flex; gap: 10px">
+          <input
+            type="text"
+            id="couponCode"
+            placeholder="Enter coupon code"
+            class="form-input"
+          />
+          <input
+            type="hidden"
+            id="subtotal"
+            value="<%= cart.items.reduce((total, item) => total + item.totalPrice, 0).toFixed(2) %>"
+          />
+          <button class="btn btn--md" onclick="applyCouponCode()">Apply</button>
         </div>
         <div class="payment__methods">
           <h3 class="checkout__title payment__title">Payment</h3>
           <div class="payment__option flex">
-            <input type="radio" name="paymentMethod" id="cod" value="cod" checked class="payment__input" />
+            <input
+              type="radio"
+              name="paymentMethod"
+              id="cod"
+              value="cod"
+              checked
+              class="payment__input"
+            />
             <label for="cod" class="payment__label">Cash on Delivery</label>
           </div>
           <div class="payment__option flex">
-            <input type="radio" name="paymentMethod" id="online" value="online" class="payment__input" />
-            <label for="online" class="payment__label">Online Payment</label>
+            <input
+              type="radio"
+              name="paymentMethod"
+              id="razorPay"
+              value="online"
+              class="payment__input"
+            />
+            <label for="razorPay" class="payment__label">Razor Pay</label>
           </div>
           <div class="payment__option flex">
-            <input type="radio" name="paymentMethod" id="wallet" value="wallet" class="payment__input" />
+            <input
+              type="radio"
+              name="paymentMethod"
+              id="wallet"
+              value="wallet"
+              class="payment__input"
+            />
             <label for="wallet" class="payment__label">Wallet Payment</label>
           </div>
         </div>
@@ -101,7 +208,9 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 id="addressFormTitle">Add New Address</h2>
-      <button class="close-btn" aria-label="Close" onclick="closeAddressForm()">&times;</button>
+      <button class="close-btn" aria-label="Close" onclick="closeAddressForm()">
+        &times;
+      </button>
     </div>
     <div class="modal-body">
       <form class="address-form" id="addressForm" onsubmit="saveAddress(event)">
@@ -116,49 +225,55 @@
           </div>
           <div class="form-group">
             <label for="name">Full Name</label>
-            <input type="text" class="form-input" id="name" maxlength="50">
+            <input type="text" class="form-input" id="name" maxlength="50" />
             <div class="validation-message"></div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="city">City</label>
-            <input type="text" class="form-input" id="city">
+            <input type="text" class="form-input" id="city" />
             <div class="validation-message"></div>
           </div>
           <div class="form-group">
             <label for="landmark">Landmark</label>
-            <input type="text" class="form-input" id="landmark" required>
+            <input type="text" class="form-input" id="landmark" required />
             <div class="validation-message"></div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="state">State</label>
-            <input type="text" class="form-input" id="state">
+            <input type="text" class="form-input" id="state" />
             <div class="validation-message"></div>
           </div>
           <div class="form-group">
             <label for="pincode">Pincode</label>
-            <input type="text" class="form-input" id="pincode" maxlength="6">
+            <input type="text" class="form-input" id="pincode" maxlength="6" />
             <div class="validation-message"></div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label for="phone">Phone Number</label>
-            <input type="tel" class="form-input" id="phone" pattern="\d{10}">
+            <input type="tel" class="form-input" id="phone" pattern="\d{10}" />
             <div class="validation-message"></div>
           </div>
           <div class="form-group">
             <label for="altPhone">Alternative Phone Number</label>
-            <input type="tel" class="form-input" id="altPhone" required>
+            <input type="tel" class="form-input" id="altPhone" required />
             <div class="validation-message"></div>
           </div>
         </div>
         <div class="modal-footer">
           <button type="submit" class="action-btn">Save Address</button>
-          <button type="button" class="action-btn secondary" onclick="closeAddressForm()">Cancel</button>
+          <button
+            type="button"
+            class="action-btn secondary"
+            onclick="closeAddressForm()"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
@@ -166,8 +281,14 @@
 </div>
 
 <!-- Add SweetAlert2 CSS and JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+/>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 <script>
   let addresses = [];
@@ -175,107 +296,146 @@
   let editingAddressId = null;
   let discount = 0;
 
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     fetchAddresses();
     // fetchCartItems();
   });
 
   async function fetchAddresses() {
     try {
-      const response = await fetch('/addresses');
+      const response = await fetch("/addresses");
       const data = await response.json();
       if (response.ok) {
         addresses = data.addresses;
         renderAddresses();
       } else {
-        showNotification('Failed to load addresses', 'error');
+        showNotification("Failed to load addresses", "error");
       }
     } catch (error) {
-      console.error('Error fetching addresses:', error);
-      showNotification('Failed to load addresses', 'error');
+      console.error("Error fetching addresses:", error);
+      showNotification("Failed to load addresses", "error");
     }
   }
 
   function renderAddresses() {
-    const addressList = document.querySelector('.address-list');
+    const addressList = document.querySelector(".address-list");
     if (!addresses.length) {
       addressList.innerHTML = `<div class="no-addresses">No addresses found. Click "Add New Address" to add one.</div>`;
       return;
     }
-    addressList.innerHTML = addresses.map(address => `
+    addressList.innerHTML = addresses
+      .map(
+        (address) => `
       <div class="address-card">
         <div class="address-select">
-          <input type="radio" name="addressId" id="address-${address._id}" value="${address._id}" class="address__input" onclick="selectAddress('${address._id}')" />
+          <input type="radio" name="addressId" id="address-${
+            address._id
+          }" value="${
+          address._id
+        }" class="address__input" onclick="selectAddress('${address._id}')" />
         </div>
         <div class="address-details" onclick="selectAddress('${address._id}')">
           <span class="address-type">${address.addressType}</span>
           <div class="address-content">
             <p class="name">${address.name}</p>
-            ${address.landMark ? `<p class="landmark">${address.landMark}</p>` : ''}
-            <p class="location">${address.city}, ${address.state} ${address.pincode}</p>
+            ${
+              address.landMark
+                ? `<p class="landmark">${address.landMark}</p>`
+                : ""
+            }
+            <p class="location">${address.city}, ${address.state} ${
+          address.pincode
+        }</p>
             <p class="phone">Phone: ${address.phone}</p>
-            ${address.altPhone ? `<p class="alt-phone">Alt Phone: ${address.altPhone}</p>` : ''}
+            ${
+              address.altPhone
+                ? `<p class="alt-phone">Alt Phone: ${address.altPhone}</p>`
+                : ""
+            }
           </div>
         </div>
         <div class="address-actions">
-          <button class="edit-btn" onclick="editAddress('${address._id}')">Edit</button>
+          <button class="edit-btn" onclick="editAddress('${
+            address._id
+          }')">Edit</button>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join("");
   }
 
   async function fetchCartItems() {
     try {
-      const response = await fetch('/cart');
+      const response = await fetch("/cart");
       const data = await response.json();
       if (response.ok) {
         renderCartItems(data.cartItems);
       } else {
-        console.error('Failed to load cart items:', data.message);
-        showNotification('Failed to load cart items', 'error');
+        console.error("Failed to load cart items:", data.message);
+        showNotification("Failed to load cart items", "error");
       }
     } catch (error) {
-      console.error('Error fetching cart items:', error);
-      showNotification('Failed to load cart items', 'error');
+      console.error("Error fetching cart items:", error);
+      showNotification("Failed to load cart items", "error");
     }
   }
 
   function renderCartItems(cartItems) {
-    const cartItemsContainer = document.getElementById('cartItems');
+    const cartItemsContainer = document.getElementById("cartItems");
     if (!cartItems.length) {
       cartItemsContainer.innerHTML = `<tr><td colspan="3">No items in cart</td></tr>`;
       return;
     }
-    const subtotal = cartItems.reduce((total, item) => total + item.subtotal, 0);
+    const subtotal = cartItems.reduce(
+      (total, item) => total + item.subtotal,
+      0
+    );
     const shipping = 49;
     const total = subtotal + shipping - discount;
 
-    cartItemsContainer.innerHTML = cartItems.map(item => `
+    cartItemsContainer.innerHTML = cartItems
+      .map(
+        (item) => `
       <tr>
-        <td><img src="/admin-assets/imgs/brands/${item.product.productImage[0]}" alt="Product Image" class="order__img" /></td>
+        <td><img src="/admin-assets/imgs/brands/${
+          item.product.productImage[0]
+        }" alt="Product Image" class="order__img" /></td>
         <td>
           <h3 class="table__title">${item.product.productName}</h3>
           <p class="table__quantity">x ${item.quantity}</p>
         </td>
-        <td><span class="table__price">₹${item.subtotal.toFixed(2)}</span></td>
+        <td><span  id="subtotal" class="table__price">${item.subtotal.toFixed(
+          2
+        )}</span></td>
       </tr>
-    `).join('');
+    `
+      )
+      .join("");
     cartItemsContainer.innerHTML += `
       <tr>
         <td><span class="order__subtitle">Subtotal</span></td>
-        <td colspan="2"><span class="table__price">₹${subtotal.toFixed(2)}</span></td>
+        <td colspan="2"><span id="subtotal" class="table__price">${subtotal.toFixed(
+          2
+        )}</span></td>
       </tr>
       <tr>
         <td><span class="order__subtitle">Shipping</span></td>
-        <td colspan="2"><span class="table__price">₹${shipping.toFixed(2)}</span></td>
+        <td colspan="2"><span class="table__price">₹${shipping.toFixed(
+          2
+        )}</span></td>
       </tr>
       <tr>
         <td><span class="order__subtitle">Discount</span></td>
-        <td colspan="2"><span class="table__price">-₹${discount.toFixed(2)}</span></td>
+        <td colspan="2"><span class="table__price">-₹${discount.toFixed(
+          2
+        )}</span></td>
       </tr>
       <tr>
         <td><span class="order__subtitle">Total</span></td>
-        <td colspan="2"><span class="order__grand-total">₹${total.toFixed(2)}</span></td>
+        <td colspan="2"><span class="order__grand-total">₹${total.toFixed(
+          2
+        )}</span></td>
       </tr>
     `;
   }
@@ -283,126 +443,293 @@
   async function placeOrder() {
     const selectedAddressId = document.querySelector('input[name="addressId"]:checked')?.value;
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    const couponCode = document.getElementById("couponCode").value.trim() || null;
+    const subtotal = parseFloat(document.getElementById("subtotal").value);
+    const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
+    const totalPrice = subtotal + 49 - discount; // 49 is the shipping charge
 
     if (!selectedAddressId) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Please select an address'
-      });
-      return;
+        Swal.fire({ icon: "error", title: "Error", text: "Please select an address" });
+        return;
     }
     if (!paymentMethod) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Please select a payment method'
-      });
-      return;
+        Swal.fire({ icon: "error", title: "Error", text: "Please select a payment method" });
+        return;
+    }else if(paymentMethod == "cod"){
+      try {
+        const response = await fetch("/place-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                addressId: selectedAddressId,
+                cartId: "<%= cart._id %>", 
+                paymentMethod: paymentMethod,
+                couponCode: couponCode,
+                subtotal: subtotal,
+                discount: discount,
+                totalAmount: totalPrice
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            Swal.fire({
+                icon: "success",
+                title: "Order placed successfully!",
+                showConfirmButton: false,
+                timer: 2000,
+                willClose: () => {
+                    window.location.href = `/order-details/${data.orderId}`;
+                },
+            });
+        } else {
+            Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to place order" });
+        }
+    } catch (error) {
+        console.error("Error placing order:", error);
+        Swal.fire({ icon: "error", title: "Error", text: "Failed to place order" });
     }
+}else if (paymentMethod === "online") {
+    const currentTotal = subtotal - discount;
 
     try {
-      const response = await fetch('/place-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ addressId: selectedAddressId, paymentMethod })
-      });
+        // Create Razorpay order on the server
+        const response = await fetch("/placeOrderRazorPay", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                addressId: selectedAddressId,
+                cartId: "<%= cart._id %>", 
+                paymentMethod: paymentMethod,
+                couponCode: couponCode,
+                subtotal: subtotal,
+                discount: discount,
+                totalAmount: totalPrice
+            }),
+        });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Order placed successfully!',
-          showConfirmButton: false,
-          timer: 2000,
-          willClose: () => {
-            window.location.href = `/order-details/${data.orderId}`;
-          }
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: data.message || 'Failed to place order'
-        });
-      }
+        const data = await response.json();
+        console.log("Order Creation Response:", data);
+
+        if (data.success) {
+            const { orderId, amount, currency, key } = data;
+
+            if (!key) {
+                console.error("Razorpay key is missing!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Payment Error",
+                    text: "Razorpay key is not set. Please contact support.",
+                });
+                return;
+            }
+
+            const options = {
+                key: key,
+                amount: amount,
+                currency: currency,
+                name: "Time Edge",
+                description: "Order Payment",
+                order_id: orderId,
+                handler: async function (response) {
+                    console.log("Razorpay Payment Response:", response);
+
+                    const paymentId = response.razorpay_payment_id;
+                    const razorpaySignature = response.razorpay_signature;
+                    const orderId = response.razorpay_order_id;
+
+                    if (!paymentId || !razorpaySignature || !orderId) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Payment Failed",
+                            text: "Invalid payment response. Please try again.",
+                        });
+                        return;
+                    }
+
+                    // Verify the payment
+                    const verifyResponse = await fetch("/verifyRazorPayOrder", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            addressId: selectedAddressId,
+                            paymentMethod,
+                            couponId: couponCode,
+                            orderId,
+                            paymentId,
+                            cartId: "<%= cart._id %>", 
+                            razorpaySignature
+                        }),
+                    });
+
+                    const verifyData = await verifyResponse.json();
+                    console.log("Payment Verification Response:", verifyData);
+
+                    if (verifyData.success) {
+                        Swal.fire({
+                            title: "Payment Success",
+                            text: `Order Placed Successfully. Your OrderId is: ${verifyData.orderId}`,
+                            icon: "success",
+                            confirmButtonText: "OK"
+                        }).then(() => window.location.href = `/order-details/${verifyData.orderId}`);
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Payment Failed",
+                            text: "Payment verification failed. Please try again.",
+                        });
+                    }
+                },
+                modal: {
+                    ondismiss: async function () {
+                        console.log("User closed Razorpay modal.");
+
+                        // Mark the payment as failed
+                        const cancelResponse = await fetch("/verifyRazorPayOrder", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                addressId: selectedAddressId,
+                                paymentMethod,
+                                couponId: couponCode,
+                                orderId,
+                                paymentId: null,
+                                razorpaySignature: null,
+                                paymentStatus: "Failed"
+                            })
+                        });
+
+                        const cancelData = await cancelResponse.json();
+                        console.log("Payment Cancel Response:", cancelData);
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Payment Failed",
+                            text: "Your payment was unsuccessful. Order has been placed with status 'Payment Failed'.",
+                            confirmButtonText: "OK"
+                        }).then(() => window.location.href = "/cart");
+                    }
+                },
+                theme: { color: "#3399cc" },
+            };
+
+            console.log("Razorpay Options:", options);
+            
+            // Ensure Razorpay script is loaded before opening modal
+            if (typeof Razorpay === "undefined") {
+                console.error("Razorpay script is not loaded!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Payment Error",
+                    text: "Razorpay script failed to load. Please refresh and try again.",
+                });
+                return;
+            }
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message || "Failed to initiate payment. Please try again.",
+                confirmButtonText: "OK",
+            });
+        }
     } catch (error) {
-      console.error('Error placing order:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to place order'
-      });
+        console.error("Error processing payment:", error);
+        Swal.fire({
+            title: "Error",
+            text: "An error occurred while processing the payment.",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
     }
+}
   }
 
+
+        
+    
+
+   
+
+
   function showAddressForm() {
-    document.getElementById('addressFormTitle').textContent = 'Add New Address';
-    document.getElementById('addressFormModal').classList.add('active');
-    document.getElementById('addressForm').onsubmit = saveAddress;
+    document.getElementById("addressFormTitle").textContent = "Add New Address";
+    document.getElementById("addressFormModal").classList.add("active");
+    document.getElementById("addressForm").onsubmit = saveAddress;
   }
 
   function closeAddressForm() {
-    document.getElementById('addressFormModal').classList.remove('active');
-    document.getElementById('addressForm').reset();
+    document.getElementById("addressFormModal").classList.remove("active");
+    document.getElementById("addressForm").reset();
     clearValidationMessages();
     editingAddressId = null;
   }
 
   async function saveAddress(event) {
     event.preventDefault();
-    console.log('Save Address triggered'); 
+    console.log("Save Address triggered");
     const { isValid, errors, formData } = validateForm();
-    console.log('Validation Result:', { isValid, errors, formData });
+    console.log("Validation Result:", { isValid, errors, formData });
     if (!isValid) {
-      console.log('Validation failed with errors:', errors);
+      console.log("Validation failed with errors:", errors);
       clearValidationMessages();
       displayErrorMessages(errors);
       return;
     }
 
     try {
-      const url = editingAddressId ? `/addresses/${editingAddressId}` : '/addAddress';
-      const method = editingAddressId ? 'PUT' : 'POST';
-      console.log('Sending request:', { url, method, formData });
+      const url = editingAddressId
+        ? `/addresses/${editingAddressId}`
+        : "/addAddress";
+      const method = editingAddressId ? "PUT" : "POST";
+      console.log("Sending request:", { url, method, formData });
       const response = await fetch(url, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
       const data = await response.json();
-      console.log('Server Response:', { status: response.status, data }); 
+      console.log("Server Response:", { status: response.status, data });
       if (response.ok) {
         if (editingAddressId) {
-          addresses = addresses.map(addr => addr._id === editingAddressId ? data.address : addr);
-          Swal.fire('Success', 'Address updated successfully!', 'success');
+          addresses = addresses.map((addr) =>
+            addr._id === editingAddressId ? data.address : addr
+          );
+          Swal.fire("Success", "Address updated successfully!", "success");
         } else {
           addresses.push(data.address);
-          Swal.fire('Success', 'Address added successfully!', 'success');
+          Swal.fire("Success", "Address added successfully!", "success");
         }
         renderAddresses();
         closeAddressForm();
       } else {
-        console.error('Save address failed:', data);
-        showNotification(data.message || 'Failed to save address', 'error');
+        console.error("Save address failed:", data);
+        showNotification(data.message || "Failed to save address", "error");
       }
     } catch (error) {
-      console.error('Error saving address:', error);
-      showNotification('Failed to save address', 'error');
+      console.error("Error saving address:", error);
+      showNotification("Failed to save address", "error");
     }
   }
 
   function validateForm() {
     const formData = {
-      addressType: document.getElementById('addressType').value,
-      name: document.getElementById('name').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      altPhone: document.getElementById('altPhone').value.trim(),
-      city: document.getElementById('city').value.trim(),
-      landMark: document.getElementById('landmark').value.trim(),
-      state: document.getElementById('state').value.trim(),
-      pincode: document.getElementById('pincode').value.trim()
+      addressType: document.getElementById("addressType").value,
+      name: document.getElementById("name").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      altPhone: document.getElementById("altPhone").value.trim(),
+      city: document.getElementById("city").value.trim(),
+      landMark: document.getElementById("landmark").value.trim(),
+      state: document.getElementById("state").value.trim(),
+      pincode: document.getElementById("pincode").value.trim(),
     };
 
     const errors = {};
@@ -412,60 +739,65 @@
     const consecutiveZerosRegex = /0{7,}/;
 
     if (!formData.addressType) {
-      errors.addressType = 'Address type is required';
+      errors.addressType = "Address type is required";
     }
     if (!formData.name) {
-      errors.name = 'Name is required';
+      errors.name = "Name is required";
     } else if (formData.name.length < 3) {
-      errors.name = 'Name must be at least 3 characters';
+      errors.name = "Name must be at least 3 characters";
     } else if (!alphaRegex.test(formData.name)) {
-      errors.name = 'Name must contain only letters and spaces';
+      errors.name = "Name must contain only letters and spaces";
     }
     if (!formData.phone) {
-      errors.phone = 'Phone number is required';
+      errors.phone = "Phone number is required";
     } else if (!phoneRegex.test(formData.phone)) {
-      errors.phone = 'Phone number must be exactly 10 digits';
+      errors.phone = "Phone number must be exactly 10 digits";
     } else if (consecutiveZerosRegex.test(formData.phone)) {
-      errors.phone = 'Phone number is invalid';
+      errors.phone = "Phone number is invalid";
     }
     if (!formData.altPhone) {
-      errors.altPhone = 'Alternative phone number is required';
+      errors.altPhone = "Alternative phone number is required";
     } else if (!phoneRegex.test(formData.altPhone)) {
-      errors.altPhone = 'Alternative phone number must be exactly 10 digits';
+      errors.altPhone = "Alternative phone number must be exactly 10 digits";
     } else if (consecutiveZerosRegex.test(formData.altPhone)) {
-      errors.altPhone = 'Alternative phone number is invalid';
+      errors.altPhone = "Alternative phone number is invalid";
     } else if (formData.phone === formData.altPhone) {
-      errors.altPhone = 'Phone number and alternative phone number cannot be the same';
+      errors.altPhone =
+        "Phone number and alternative phone number cannot be the same";
     }
     if (!formData.city) {
-      errors.city = 'City is required';
+      errors.city = "City is required";
     } else if (!alphaRegex.test(formData.city)) {
-      errors.city = 'City must contain only letters and spaces';
+      errors.city = "City must contain only letters and spaces";
     }
     if (!formData.state) {
-      errors.state = 'State is required';
+      errors.state = "State is required";
     } else if (!alphaRegex.test(formData.state)) {
-      errors.state = 'State must contain only letters and spaces';
+      errors.state = "State must contain only letters and spaces";
     }
     if (!formData.pincode) {
-      errors.pincode = 'Pincode is required';
+      errors.pincode = "Pincode is required";
     } else if (!pincodeRegex.test(formData.pincode)) {
-      errors.pincode = 'Pincode must be a valid 6-digit number';
+      errors.pincode = "Pincode must be a valid 6-digit number";
     }
     if (!formData.landMark) {
-      errors.landMark = 'Landmark is required';
+      errors.landMark = "Landmark is required";
     }
 
     return {
       isValid: Object.keys(errors).length === 0,
       errors,
-      formData
+      formData,
     };
   }
 
   function clearValidationMessages() {
-    document.querySelectorAll('.validation-message').forEach(div => div.textContent = '');
-    document.querySelectorAll('.form-input').forEach(input => input.classList.remove('error'));
+    document
+      .querySelectorAll(".validation-message")
+      .forEach((div) => (div.textContent = ""));
+    document
+      .querySelectorAll(".form-input")
+      .forEach((input) => input.classList.remove("error"));
   }
 
   function displayErrorMessages(errors) {
@@ -473,39 +805,35 @@
       const field = document.getElementById(fieldName);
       if (field) {
         const validationDiv = field.nextElementSibling;
-        field.classList.add('error');
+        field.classList.add("error");
         validationDiv.textContent = message;
       }
     });
   }
 
-
   function editAddress(addressId) {
-  editingAddressId = addressId;
-  const address = addresses.find(addr => addr._id === addressId);
+    editingAddressId = addressId;
+    const address = addresses.find((addr) => addr._id === addressId);
 
-  document.getElementById('addressFormTitle').textContent = 'Edit Address';
-  document.getElementById('addressFormModal').classList.add('active');
+    document.getElementById("addressFormTitle").textContent = "Edit Address";
+    document.getElementById("addressFormModal").classList.add("active");
 
-  // Populate the form fields with the existing address data
-  document.getElementById('addressType').value = address.addressType;
-  document.getElementById('name').value = address.name;
-  document.getElementById('phone').value = address.phone;
-  document.getElementById('altPhone').value = address.altPhone;
-  document.getElementById('city').value = address.city;
-  document.getElementById('landmark').value = address.landMark;
-  document.getElementById('state').value = address.state;
-  document.getElementById('pincode').value = address.pincode;
+    // Populate the form fields with the existing address data
+    document.getElementById("addressType").value = address.addressType;
+    document.getElementById("name").value = address.name;
+    document.getElementById("phone").value = address.phone;
+    document.getElementById("altPhone").value = address.altPhone;
+    document.getElementById("city").value = address.city;
+    document.getElementById("landmark").value = address.landMark;
+    document.getElementById("state").value = address.state;
+    document.getElementById("pincode").value = address.pincode;
 
-  // Bind the saveAddress function to the form's onsubmit event
-  document.getElementById('addressForm').onsubmit = saveAddress;
-}
+    // Bind the saveAddress function to the form's onsubmit event
+    document.getElementById("addressForm").onsubmit = saveAddress;
+  }
 
-
-
-  
-  function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
+  function showNotification(message, type = "success") {
+    const notification = document.createElement("div");
     notification.className = `notification ${type}`;
     notification.textContent = message;
     document.body.appendChild(notification);
@@ -514,25 +842,14 @@
     }, 3000);
   }
 
-  function applyCoupon() {
-    const couponCode = document.getElementById('couponCode').value.trim();
-    if (couponCode === 'DISCOUNT10') {
-      discount = 10;
-      showNotification('Coupon applied successfully!', 'success');
-      fetchCartItems();
-    } else {
-      showNotification('Invalid coupon code', 'error');
-    }
-  }
-
   function updateQuantity(productId, action) {
     const quantityInput = document.getElementById(`quantity-${productId}`);
     let quantity = parseInt(quantityInput.value);
     const maxQuantity = 10; // Set your max quantity here
 
-    if (action === 'increase' && quantity < maxQuantity) {
+    if (action === "increase" && quantity < maxQuantity) {
       quantity++;
-    } else if (action === 'decrease' && quantity > 1) {
+    } else if (action === "decrease" && quantity > 1) {
       quantity--;
     }
 
@@ -541,25 +858,140 @@
   }
 
   function checkMaxQuantity(productId, quantity, maxQuantity) {
-    const maxQuantityMessage = document.getElementById(`max-quantity-message-${productId}`);
+    const maxQuantityMessage = document.getElementById(
+      `max-quantity-message-${productId}`
+    );
     const increaseBtn = document.getElementById(`increase-btn-${productId}`);
 
     if (quantity >= maxQuantity) {
-      maxQuantityMessage.style.display = 'block';
+      maxQuantityMessage.style.display = "block";
       increaseBtn.disabled = true;
     } else {
-      maxQuantityMessage.style.display = 'none';
+      maxQuantityMessage.style.display = "none";
       increaseBtn.disabled = false;
     }
   }
 
   function selectAddress(addressId) {
     selectedAddressId = addressId;
-    document.querySelectorAll('.address-card').forEach(card => {
-      card.classList.remove('selected');
+    document.querySelectorAll(".address-card").forEach((card) => {
+      card.classList.remove("selected");
     });
-    document.getElementById(`address-${addressId}`).closest('.address-card').classList.add('selected');
+    document
+      .getElementById(`address-${addressId}`)
+      .closest(".address-card")
+      .classList.add("selected");
   }
+
+  async function fetchAvailableCoupons() {
+    try {
+      const response = await fetch("/available-coupons");
+      const data = await response.json();
+
+      const couponListContainer = document.getElementById(
+        "availableCouponsList"
+      );
+      couponListContainer.innerHTML = "";
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch coupons");
+      }
+
+      data.coupons.forEach((coupon) => {
+        const listItem = document.createElement("li");
+        listItem.classList.add("coupon-item");
+        listItem.innerHTML = `
+                <div class="coupon-details">
+                    <strong>${coupon.name}</strong> - Save ₹${
+          coupon.offerPrice
+        } (Min Order ₹${coupon.minimumPrice})
+                    <p>Expires on: ${new Date(
+                      coupon.expireOn
+                    ).toLocaleDateString()}</p>
+                </div>
+                <button class="apply-coupon-btn" onclick="applySelectedCoupon('${
+                  coupon.name
+                }')">Apply</button>
+            `;
+        couponListContainer.appendChild(listItem);
+      });
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      document.getElementById(
+        "availableCouponsList"
+      ).innerHTML = `<li>No available coupons</li>`;
+    }
+  }
+
+  function openCouponsModal() {
+    fetchAvailableCoupons();
+    document.getElementById("couponsModal").classList.add("active");
+  }
+
+  function closeCouponsModal() {
+    document.getElementById("couponsModal").classList.remove("active");
+  }
+
+  function applySelectedCoupon(code) {
+    document.getElementById("couponCode").value = code; // Set input field
+    showNotification(`Coupon ${code} applied successfully!`, "success");
+    closeCouponsModal();
+  }
+
+  function showNotification(message, type = "success") {
+    alert(message);
+  }
+
+  async function applyCouponCode() {
+    const couponCode = document.getElementById("couponCode").value.trim();
+
+    if (!couponCode) {
+        Swal.fire("Error", "Please enter a coupon code", "error");
+        return;
+    }
+
+    try {
+        const subtotal = parseFloat(document.getElementById("subtotal").value);
+        const shipping = 49;
+        const totalPrice = subtotal + shipping;
+
+        const response = await fetch("/apply-coupon", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ couponCode, totalPrice }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            const discount = data.discount || 0;
+            const finalAmount = data.finalAmount || (totalPrice - discount);
+
+            // ✅ **Update the Discount Field**
+            document.querySelector(".order__discount").textContent = `₹${discount.toFixed(2)}`;
+
+            // ✅ **Update the Total Amount**
+            updateTotalAmount(finalAmount);
+
+            Swal.fire("Success", `Coupon applied! ₹${discount} discount`, "success");
+        } else {
+            Swal.fire("Error", data.message || "Invalid coupon code", "error");
+        }
+    } catch (error) {
+        console.error("Error applying coupon:", error);
+        Swal.fire("Error", "Something went wrong", "error");
+    }
+}
+
+function updateTotalAmount(finalAmount) {
+    document.querySelector(".order__grand-total").textContent = `₹${finalAmount.toFixed(2)}`;
+}
+
+
+
+
+   
+
 </script>
 
 <style>
@@ -615,124 +1047,124 @@
     }
   }
   .form-group {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-.validation-message {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  min-height: 1.25rem;
-}
-
-.form-input.error {
-  border-color: #dc2626;
-}
-
-.form-input.error:focus {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-.address-list {
-  margin-top: 1rem;
-}
-
-.address-card {
-  display: flex;
-  align-items: center;
-  border: 1px solid #E5E7EB;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.address-select {
-  margin-right: 1rem;
-}
-
-.address-details {
-  flex: 1;
-}
-
-.address-card:hover {
-  border-color: var(--pink);
-  background-color: #FDF2F8;
-}
-
-.address-type {
-  display: inline-block;
-  background-color: #FDF2F8;
-  color: var(--pink);
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.address-content {
-  color: #374151;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.address-actions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.address-action-btn {
-  background: none;
-  border: none;
-  padding: 0.25rem;
-  cursor: pointer;
-  color: #6B7280;
-  transition: color 0.2s ease;
-}
-
-.address-action-btn:hover {
-  color: var(--pink);
-}
-
-.add-address-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #F3F4F6;
-  border: 2px dashed #D1D5DB;
-  border-radius: 0.5rem;
-  color: #374151;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.add-address-btn:hover {
-  background-color: #FDF2F8;
-  border-color: var(--pink);
-  color: var(--pink);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-@media (max-width: 640px) {
-  .form-row {
-      grid-template-columns: 1fr;
+    position: relative;
+    margin-bottom: 1.5rem;
   }
-}
-.modal {
+
+  .validation-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    min-height: 1.25rem;
+  }
+
+  .form-input.error {
+    border-color: #dc2626;
+  }
+
+  .form-input.error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+  .address-list {
+    margin-top: 1rem;
+  }
+
+  .address-card {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .address-select {
+    margin-right: 1rem;
+  }
+
+  .address-details {
+    flex: 1;
+  }
+
+  .address-card:hover {
+    border-color: var(--pink);
+    background-color: #fdf2f8;
+  }
+
+  .address-type {
+    display: inline-block;
+    background-color: #fdf2f8;
+    color: var(--pink);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .address-content {
+    color: #374151;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .address-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .address-action-btn {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s ease;
+  }
+
+  .address-action-btn:hover {
+    color: var(--pink);
+  }
+
+  .add-address-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    border-radius: 0.5rem;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .add-address-btn:hover {
+    background-color: #fdf2f8;
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  .modal {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -744,46 +1176,46 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     z-index: 2000;
     overflow: hidden;
-}
+  }
 
-.modal-content {
+  .modal-content {
     display: flex;
     flex-direction: column;
     max-height: 80vh;
-}
+  }
 
-.modal-header {
+  .modal-header {
     padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ddd;
     background-color: #f8f9fa;
-}
+  }
 
-.modal-body {
+  .modal-body {
     padding: 16px;
     flex: 1;
     overflow-y: auto;
-}
+  }
 
-.modal-footer {
+  .modal-footer {
     padding: 16px;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     border-top: 1px solid #ddd;
     background-color: #f8f9fa;
-}
+  }
 
-.close-btn {
+  .close-btn {
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-}
+  }
 
-.action-btn {
+  .action-btn {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -791,28 +1223,28 @@
     background-color: #007bff;
     color: white;
     font-size: 1rem;
-}
+  }
 
-.action-btn.secondary {
+  .action-btn.secondary {
     background-color: #6c757d;
-}
+  }
 
-.action-btn:hover {
+  .action-btn:hover {
     opacity: 0.9;
-}
+  }
 
-.form-group {
+  .form-group {
     position: relative;
     margin-bottom: 1.5rem;
-}
+  }
 
-.form-group label {
+  .form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
   }
 
-.form-input {
+  .form-input {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ccc;
@@ -820,39 +1252,143 @@
     font-size: 1rem;
   }
 
-.form-input:focus {
+  .form-input:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
     outline: none;
   }
 
-.validation-message {
+  .validation-message {
     color: #dc2626;
     font-size: 0.875rem;
     margin-top: 0.25rem;
     min-height: 1.25rem;
-}
+  }
 
-.form-input.error {
+  .form-input.error {
     border-color: #dc2626;
-}
+  }
 
-.form-input.error:focus {
+  .form-input.error:focus {
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
+  }
 
-.form-row {
+  .form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-}
+  }
 
-@media (max-width: 640px) {
+  /* Coupons Modal Styles */
+  .coupons-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    overflow: hidden;
+  }
+
+  .coupons-modal.active {
+    display: block;
+  }
+
+  .coupons-modal-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .coupons-modal-header {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f9fa;
+  }
+
+  .coupons-modal-body {
+    padding: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .coupons-modal-footer {
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #f8f9fa;
+  }
+
+  .coupons-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .coupons-action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .coupons-action-btn.secondary {
+    background-color: #6c757d;
+  }
+
+  .coupon-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+  }
+
+  .apply-coupon-btn {
+    padding: 5px 10px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9rem;
+  }
+
+  .apply-coupon-btn:hover {
+    background-color: #218838;
+  }
+
+  /* Style for the "View Available Coupons" link */
+  .available-coupons-link {
+    display: inline-block;
+    color: #007bff;
+    text-decoration: none;
+    margin-bottom: 10px;
+  }
+
+  .available-coupons-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 640px) {
     .form-row {
-        grid-template-columns: 1fr;
+      grid-template-columns: 1fr;
     }
-}
+  }
 </style>
 
 <%- include("../../views/partials/user/footer") %>

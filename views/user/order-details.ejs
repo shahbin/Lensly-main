@@ -1,4 +1,4 @@
-<%- include("../../views/partials/user/header", { user: user }) %>
+<%- include("../../views/partials/user/header" , { user: user }) %>
     <!--=============== MAIN ===============-->
     <main class="main">
       <!--=============== BREADCRUMB ===============-->
@@ -48,8 +48,8 @@
             </div>
             <div class="order-tracker">
               <h2 class="order-tracker__title">Payment Method</h2>
-              <p>Cash On Delivery</p>
-              <p>Status: Pending</p>
+              <p><%= order.paymentMethod %></p>  
+              <p>Status : <%= order.paymentStatus %></p>   
             </div>
             <br>
             <div class="order-tracker">

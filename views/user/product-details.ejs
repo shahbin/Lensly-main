@@ -1,5 +1,8 @@
 <%- include("../../views/partials/user/header") %>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
 <main class="main">
   <!-- Breadcrumb -->
   <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
@@ -44,15 +47,33 @@
         <p class="details__brand">Brand: <span><%= product.brand %></span></p>
         
         <div class="details__price flex">
-          <span class="new__price">₹<%= product.salePrice %></span>
-          <% if (product.regularPrice > product.salePrice) { %>
-            <span class="old__price">₹<%= product.regularPrice %></span>
-            <span class="save__price">
-              10% Off
-            </span>
+          <% 
+              // Get offers
+              const productOffer = product.productOffer || 0;
+              const categoryOffer = product.category?.categoryOffer || 0;
+              
+              // Get the best offer
+              const bestOffer = Math.max(productOffer, categoryOffer);
+              
+              // Calculate final price
+              const regularPrice = product.regularPrice;
+              const finalPrice = bestOffer > 0 
+                  ? Math.floor(regularPrice - (regularPrice * bestOffer / 100)) 
+                  : product.salePrice;
+          %>
+      
+          <!-- Display final price -->
+          <span class="new__price">₹<%= finalPrice %></span>
+      
+          <!-- Show original price and discount ONLY if there's an offer -->
+          <% if (bestOffer > 0 && finalPrice < regularPrice) { %>
+              <span class="old__price">₹<%= regularPrice %></span>
+              <span class="save__price">
+                  <%= bestOffer %>% Off
+              </span>
           <% } %>
-        </div>
-
+      </div>
+      
         <p class="short__description"><%= product.description %></p>
 
         <ul class="products__list">
@@ -80,9 +101,11 @@
             Add To Cart
           </a>
           
-          <a href="/add-to-wishlist/<%= product._id %>" class="details__action-btn">
-            <i class="fi fi-rs-heart"></i>
-          </a>
+          <a href="/add/<%= product._id %>" class="details__action-btn">
+            <i class="fa-heart <%= isInWishlist ? 'fa-solid' : 'fa-regular' %>"></i>
+        </a>
+        
+        
         </div>
 
         <ul class="details__meta">
@@ -279,7 +302,7 @@
 .old__price {
   text-decoration: line-through;
   color: #666;
-  margin-left: -23rem;
+  margin-left: -20rem;
   margin-bottom: -0.75rem;
 }
 
@@ -290,30 +313,41 @@
   border-radius: 4px;
   margin-left: 1rem;
 }
+
+/* .fa-heart.active {
+    color: #ff0000; 
+    font-weight: bold;
+} */
+
+.in-wishlist {
+    color: #ff0000; /* Red */
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  // Cart management functions
+  
 const cartAPI = {
-  async addToCart(productId, quantity = 1) {
+  async addToCart  (productId, quantity = 1) {
     try {
-      const response = await fetch('/cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ productId, quantity })
-      });
-      
-      if (!response.ok) throw new Error('Failed to add to cart');
-      window.location.href = '/cart';
-      
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to add product to cart');
-    }
-  },
+    const response = await fetch('/cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId, quantity }),
+    });
+
+    const data = await response.json()
+    console.log("Response from server:", data)
+    return data
+ 
+  } catch (error) {
+    console.error('Error adding item to cart:', error);
+    return { success: false, status: 'error', message: 'Something went wrong. Please try again later.' }; 
+  }
+},
 
   async updateQuantity(productId, quantity) {
     try {
@@ -350,10 +384,73 @@ const cartAPI = {
   }
 };
 
-function handleAddToCart(productId) {
-  const quantity = document.getElementById('quantity')?.value || 1;
-  cartAPI.addToCart(productId, parseInt(quantity));
-}
+async function handleAddToCart(productId) {
+  const quantity = parseInt(document.getElementById("quantity").value, 10);
+  const availableStock = parseInt("<%= product.quantity %>", 10); 
+
+  if (availableStock === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Out of Stock!',
+      text: 'Sorry, this product is currently unavailable.',
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'Continue Shopping'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/shop";  
+      }
+    });
+    return
+  } 
+
+  const response = await cartAPI.addToCart(productId, quantity); 
+
+  if (!response.success) {
+    if (response.status === 'out_of_stock'){
+        Swal.fire({
+        icon: 'warning',
+        title: 'Out of Stock!',
+        text: response.message,
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Continue Shopping'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/shop"; 
+        }
+      })
+    } else {
+        Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: response.message,
+        confirmButtonColor: '#d33'
+      })
+
+    }
+    return
+   
+  }
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Added to Cart!',
+    text: 'Your item has been successfully added to the cart.',
+    confirmButtonColor: '#3085d6',
+    showCancelButton: true,
+    confirmButtonText: 'Go to Cart',
+    cancelButtonText: 'Continue Shopping',
+    cancelButtonColor: '#6c757d'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/cart";
+    } else {
+      window.location.href = "/shop";
+    }
+  });
+};
+
+
+
 
 function handleQuantityUpdate(input, productId) {
   const quantity = parseInt(input.value);
@@ -389,26 +486,148 @@ function toggleIncreaseButton(quantity, maxQuantity, availableStock) {
   const increaseBtn = document.getElementById('increase-btn');
   const outOfStockMessage = document.getElementById('out-of-stock-message');
 
-  if (quantity >= maxQuantity) {
-    increaseBtn.disabled = true;
-    Swal.fire({
-      icon: 'warning',
-      title: 'Maximum quantity reached',
-      text: 'You cannot add more than the allowed limit.',
-      timer: 2000,
-      showConfirmButton: false
-    });
-  } else if (quantity >= availableStock) {
-    increaseBtn.disabled = true;
-    outOfStockMessage.style.display = 'block';
-  } else {
-    increaseBtn.disabled = false;
-    outOfStockMessage.style.display = 'none';
-  }
+  
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   const quantityInput = document.getElementById('quantity');
   toggleIncreaseButton(parseInt(quantityInput.value), parseInt(quantityInput.max), parseInt('<%= product.quantity %>'));
 });
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const wishlistBtn = document.querySelector('.details__action-btn');
+
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            const heartIcon = this.querySelector('.fa-heart');
+            const productId = this.getAttribute('href').split('/').pop();  // Extract productId
+
+            try {
+                // Check if the product is in the wishlist
+                const checkResponse = await fetch(`/check-wishlist/${productId}`);
+                
+                if (!checkResponse.ok) {
+                    // Log the response body if the status is not OK
+                    const errorText = await checkResponse.text();
+                    console.error('Error response:', errorText);
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Failed to check wishlist',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    return;
+                }
+
+                const checkData = await checkResponse.json();
+                const isInWishlist = checkData.inWishlist;  // true or false
+
+                // Decide whether to add or remove
+                const url = isInWishlist ? `/remove/${productId}` : `/add/${productId}`;
+                const method = "POST";
+
+                const response = await fetch(url, { method });
+                const data = await response.json();
+
+                console.log('Wishlist update response:', data);  // Log the response for debugging
+
+                if (data.success) {
+                    // Toggle heart icon styles
+                    if (isInWishlist) {
+                        heartIcon.classList.remove('fa-solid', 'in-wishlist');
+                        heartIcon.classList.add('fa-regular');  // Change to outline heart
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: 'Removed from Wishlist!',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                    } else {
+                        heartIcon.classList.remove('fa-regular');
+                        heartIcon.classList.add('fa-solid', 'in-wishlist');  // Change to filled heart
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Added to Wishlist!',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: data.message || 'Something went wrong!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Failed to update wishlist',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        });
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const wishlistBtn = document.querySelector('.details__action-btn');
+
+    if (wishlistBtn) {
+        const heartIcon = wishlistBtn.querySelector('.fa-heart');
+        const productId = wishlistBtn.getAttribute('href').split('/').pop();  // Extract productId
+
+        fetch(`/check-wishlist/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.inWishlist) {
+                    heartIcon.classList.add('in-wishlist');
+                }
+            });
+    }
+});
+
+
+
+
+
 </script>
+
+
+
+
+<!-- if (quantity >= maxQuantity) {
+  increaseBtn.disabled = true;
+  Swal.fire({
+    icon: 'warning',
+    title: 'Maximum quantity reached',
+    text: 'You cannot add more than the allowed limit.',
+    timer: 2000,
+    showConfirmButton: false
+  });
+} else if (quantity >= availableStock) {
+  increaseBtn.disabled = true;
+  outOfStockMessage.style.display = 'block';
+} else {
+  increaseBtn.disabled = false;
+  outOfStockMessage.style.display = 'none';
+} -->
