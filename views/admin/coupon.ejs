@@ -1,53 +1,235 @@
 <%- include("../../views/partials/admin/header") %>
 <style>
- .col-md-3 {
-   padding: 20px;
-   border: 1px solid #ddd;
-   border-radius: 10px;
-   margin: 10px;
- }
+/* Modern Admin Dashboard Styles */
+:root {
+  --primary-color: #4361ee;
+  --danger-color: #ef476f;
+  --success-color: #06d6a0;
+  --background-color: #f8f9fa;
+  --text-color: #2d3748;
+  --border-color: #e2e8f0;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
 
+/* Layout & Container Styles */
+.content-main {
+  padding: 2rem;
+  background-color: var(--background-color);
+  min-height: 100vh;
+}
 
- .error-message {
-   color: red;
-   margin-top: 5px;
- }
+.content-title {
+  color: var(--text-color);
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
 
+.card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  border: none;
+  margin-bottom: 2rem;
+}
 
- .form-label {
-   margin-bottom: 8px;
- }
+.card-body {
+  padding: 2rem;
+}
 
+/* Form Styles */
+.col-md-3 {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+}
 
- .form-control {
-   width: 100%;
-   padding: 8px;
-   margin-bottom: 10px;
-   border: 1px solid #ccc;
-   border-radius: 5px;
-   box-sizing: border-box;
- }
+.form-label {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
 
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
 
- .d-grid {
-   margin-top: 20px;
- }
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+  outline: none;
+}
 
+.form-control::placeholder {
+  color: #a0aec0;
+}
 
- .btn-primary {
-   background-color: #007bff;
-   color: #fff;
-   border: 1px solid #007bff;
-   border-radius: 5px;
-   padding: 10px 20px;
-   cursor: pointer;
- }
+/* Button Styles */
+.btn {
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
 
+.btn-primary {
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+}
 
- .btn-primary:hover {
-   background-color: #0056b3;
-   border-color: #0056b3;
- }
+.btn-primary:hover {
+  background-color: #3651d1;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #dc3545;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+/* Table Styles */
+.table-responsive {
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  background: white;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background: #f8fafc;
+  padding: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--border-color);
+  font-size: 0.875rem;
+}
+
+.table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+}
+
+/* Error Message Styles */
+.error-message {
+  color: var(--danger-color);
+  font-size: 0.75rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+}
+
+/* Layout Improvements */
+.col-md-7.ml-105 {
+  margin-left: 2rem;
+}
+
+/* Action Buttons in Table */
+.table .btn {
+  margin: 0.25rem;
+  min-width: 80px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .content-main {
+    padding: 1rem;
+  }
+  
+  .col-md-7.ml-105 {
+    margin-left: 0;
+    margin-top: 1.5rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .table-responsive {
+    margin-top: 1rem;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 0.75rem;
+  }
+}
+
+/* Status Badge Styles */
+.badge {
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 600;
+  border-radius: 0.25rem;
+}
+
+.badge-success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.badge-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Form Grid Layout */
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Animation for Hover States */
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Custom Scrollbar */
+.table-responsive::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
  </style>
 <section class="content-main">
  <div class="content-header">
@@ -179,6 +361,8 @@
  </div>
 </section>
 
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
  function validateForm() {

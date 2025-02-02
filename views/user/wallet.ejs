@@ -1,157 +1,229 @@
 <%- include("../../views/partials/user/header") %>
 
 <style>
+   /* Enhanced Wallet Styles */
+.wallet-container {
+    background: linear-gradient(135deg, #f6f9fc 0%, #f1f4f8 100%);
+    min-height: calc(100vh - 100px);
+    padding: 4rem;
+    padding-top: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.wallet-card {
+    width: 100%;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.wallet-card:hover {
+    transform: translateY(-5px);
+}
+
+.wallet-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(237, 242, 247, 0.7);
+    background: linear-gradient(to right, #ffffff, #f8fafc);
+    border-radius: 20px 20px 0 0;
+}
+
+.wallet-header h2 {
+    color: #1a1a1a;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wallet-header i {
+    color: #00897b;
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.wallet-header:hover i {
+    transform: scale(1.1);
+}
+
+.wallet-balance {
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+    padding: 2rem;
+    border-bottom: 1px solid rgba(237, 242, 247, 0.7);
+    transition: all 0.3s ease;
+}
+
+.wallet-balance:hover {
+    background: linear-gradient(135deg, #eef2f7 0%, #f8fafc 100%);
+}
+
+.balance-info h3 {
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 0.5rem 0;
+}
+
+.balance-amount {
+    color: #00897b;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 137, 123, 0.1);
+}
+
+.wallet-body {
+    padding: 2rem;
+}
+
+.transaction-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+}
+
+.transaction-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 2px solid #edf2f7;
+}
+
+.transaction-table td {
+    padding: 1.25rem 1.5rem;
+    color: #1a1a1a;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #edf2f7;
+    transition: all 0.2s ease;
+}
+
+.transaction-table tr {
+    transition: all 0.2s ease;
+}
+
+.transaction-table tr:hover {
+    background: rgba(248, 250, 252, 0.8);
+    cursor: pointer;
+}
+
+.transaction-table tr:hover td {
+    transform: translateX(5px);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.status-credit {
+    background: rgba(22, 101, 52, 0.1);
+    color: #166534;
+}
+
+.status-credit:hover {
+    background: rgba(22, 101, 52, 0.2);
+}
+
+.status-debit {
+    background: rgba(153, 27, 27, 0.1);
+    color: #991b1b;
+}
+
+.status-debit:hover {
+    background: rgba(153, 27, 27, 0.2);
+}
+
+.amount-credit {
+    color: #166534;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.amount-debit {
+    color: #991b1b;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.transaction-table tr:hover .amount-credit,
+.transaction-table tr:hover .amount-debit {
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
     .wallet-container {
-        background: #f8f9fa;
-        min-height: calc(100vh - 100px);
-        padding-right: 40px;
-        padding-top: 30px;
+        padding: 1rem;
     }
 
-    .wallet-card {
-        width: 100%;
-        margin: 0 auto;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .wallet-header {
-        padding: 20px 30px;
-        border-bottom: 1px solid #edf2f7;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .wallet-header h2 {
-        color: #2d3748;
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .wallet-header i {
-        color: #1a1a1a;
-        font-size: 1.25rem;
-    }
-
+    .wallet-header, 
     .wallet-balance {
-        background: #f8fafc;
-        padding: 20px 30px;
-        border-bottom: 1px solid #edf2f7;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .balance-info h3 {
-        color: #64748b;
-        font-size: 0.875rem;
-        font-weight: 500;
-        margin: 0 0 4px 0;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        padding: 1.5rem;
     }
 
     .balance-amount {
-        color: #1a1a1a;
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
+        font-size: 2rem;
     }
 
     .wallet-body {
-        padding: 30px;
+        padding: 1rem;
     }
 
-    .transaction-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
+    .table-container {
+        overflow-x: auto;
+        margin: 0 -1rem;
+        padding: 0 1rem;
     }
 
-    .transaction-table th {
-        background: #f8fafc;
-        color: #64748b;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.75rem;
-        padding: 12px 20px;
-        text-align: left;
-        border-bottom: 1px solid #edf2f7;
-    }
-
+    .transaction-table th, 
     .transaction-table td {
-        padding: 16px 20px;
-        color: #1a1a1a;
-        font-size: 0.9rem;
-        border-bottom: 1px solid #edf2f7;
-    }
-
-    .transaction-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .transaction-table tr:hover {
-        background: #f8fafc;
+        padding: 1rem;
     }
 
     .status-badge {
-        padding: 6px 12px;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 500;
+        padding: 0.35rem 0.75rem;
     }
+}
 
-    .status-credit {
-        background: #dcfce7;
-        color: #166534;
-    }
+/* Animation for empty state */
+@keyframes pulseIcon {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
 
-    .status-debit {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .amount-credit {
-        color: #166534;
-        font-weight: 500;
-    }
-
-    .amount-debit {
-        color: #991b1b;
-        font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-        .wallet-container {
-            padding: 20px 10px;
-        }
-
-        .wallet-header, .wallet-balance {
-            padding: 15px 20px;
-        }
-
-        .wallet-body {
-            padding: 15px;
-        }
-
-        .transaction-table th, 
-        .transaction-table td {
-            padding: 12px 15px;
-        }
-
-        /* Make table scrollable on mobile */
-        .table-container {
-            overflow-x: auto;
-        }
-    }
+.empty-state-icon {
+    animation: pulseIcon 2s infinite ease-in-out;
+    color: #64748b;
+}
 </style>
+
+<section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;">
+    <ul class="breadcrumb__list container" style="margin-left: -25px;">
+      <li><a href="/" class="breadcrumb__link" style="font-size: 12px;">Home</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a href="/userProfile" class="breadcrumb__link" style="font-size: 12px;">Profile</a></li>
+      <li><span class="breadcrumb__link">></span></li>
+      <li><a  class="breadcrumb__link" style="font-size: 12px;">Wallet</a></li>
+    </ul>
+  </section>
 
 <div class="dashboard-container" style="width: 100%;">
 <div class="wallet-container" style="width: 100%;">

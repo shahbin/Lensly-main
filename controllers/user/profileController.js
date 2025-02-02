@@ -214,7 +214,6 @@ const addAddress = async (req, res) => {
         };
 
         const userId = req.session.user;
-        console.log("usersId",userId)
         let userAddress = await Address.findOne({ userId });
 
         const MAX_ADDRESSES = 5; 

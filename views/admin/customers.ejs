@@ -1,4 +1,55 @@
 <%- include("../../views/partials/admin/header") %>
+
+<style>
+    /* Modern Pagination Styles */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 1rem 0;
+}
+
+.pagination .page-item {
+  list-style: none;
+}
+
+.pagination .page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  background-color: #fff;
+  border: 1px solid #e4e4e4;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-item:hover .page-link {
+  background-color: #f5f5f5;
+  border-color: #e4e4e4;
+  color: #666;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #00897b;
+  color: white;
+  border-color: #00897b;
+}
+
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+  padding: 0 12px;
+  font-size: 14px;
+}
+</style>
+
 <div class="content-header row">
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="content-title card-title">Customers</h2>
