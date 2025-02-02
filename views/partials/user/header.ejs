@@ -73,7 +73,9 @@
         <div class="header__user-actions">
           <a href="/wishlist" class="header__action-btn" title="Wishlist">
             <img src="/assets/img/icon-heart.svg" alt="" />
-            <!-- <span class="count"></span> -->
+            <% if (user) { %>
+            <span class="count"><%= typeof wishlistItems !== 'undefined' ? wishlistItems.length : 0 %></span>
+            <% } %>
           </a>
           <a href="/cart" class="header__action-btn" title="Cart">
             <img src="/assets/img/icon-cart.svg" alt="" />

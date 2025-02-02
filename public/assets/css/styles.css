@@ -648,7 +648,7 @@ table {
   -o-transition: all 0.2s var(--transition);
 } */
 
-/* .action__btn {
+.action__btn {
   position: relative;
   width: 40px;
   height: 40px;
@@ -663,9 +663,9 @@ table {
   -moz-border-radius: 50%;
   -ms-border-radius: 50%;
   -o-border-radius: 50%;
-} */
+}
 
-  /* .action__btn::before,
+  .action__btn::before,
   .action__btn::after {
     position: absolute;
     left: 50%;
@@ -674,9 +674,9 @@ table {
     -moz-transform: translateX(-50%);
     -ms-transform: translateX(-50%);
     -o-transform: translateX(-50%);
-  } */
+  }
 
-/* .action__btn {
+.action__btn {
   position: relative;
   background-color: #eaf6ea;
   border-radius: 50%;
@@ -686,13 +686,13 @@ table {
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease-in-out;
-} */
+}
 
 
 
 
 
- /* .action__btn::after {
+  .action__btn::after {
   content: attr(aria-label);  
   position: absolute;
   bottom: 100%;
@@ -705,11 +705,11 @@ table {
   border-radius: 0.25rem;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
-}  
+}   
 
 .action__btn:hover::after {
    opacity: 1; 
-} */
+} 
 
 
  .product__badge {
@@ -785,26 +785,26 @@ table {
 }
 
 
-/* .product__img.hover,
+.product__img.hover,
 .product__actions,
 .action__btn::before,
 .action__btn::after,
 .product__item:hover .product__img.default {
   opacity: 1;
-} */
+}
 
 .product__item:hover {
   box-shadow: 0 0 10px hsl(0, 0%, 0%, 0.1);
 }
 
-/* .product__item:hover .product__img.hover,
+.product__item:hover .product__img.hover,
 .product__item:hover .product__actions,
 .action__btn:hover::before,
 .action__btn:hover::after {
   opacity: 1;
-} */
+}
 
-/* .action__btn:hover::before,
+.action__btn:hover::before,
 .action__btn:hover::after {
   transform: translateX(-50%) translateY(-0.5rem);
   transition: all 0.3s cubic-bezier(0.71, 1.7, 0.77, 1.24);
@@ -816,13 +816,13 @@ table {
   -moz-transform: translateX(-50%) translateY(-0.5rem);
   -ms-transform: translateX(-50%) translateY(-0.5rem);
   -o-transform: translateX(-50%) translateY(-0.5rem);
-} */
-/* 
+}
+
 .action__btn:hover {
   background-color: var(--first-color);
   border-color: var(--first-color);
   color: var(--body-color);
-} */
+}
 
 /*=============== DEALS ===============*/
 

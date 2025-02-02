@@ -1,12 +1,17 @@
 const Product = require("../../models/productSchema")
 const Category = require("../../models/categorySchema")
 const User = require("../../models/userSchema")
+const Cart = require("../../models/cartSchema")
 const Wishlist = require("../../models/wishlistSchema")
 
 const productDetails = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId);  // Fetching user data
+        const cart = await Cart.findOne({ userId });
+        res.locals.cartItems = cart ? cart.items : [];
+        res.locals.cartCount = cart ? cart.items.length : 0;
+        const wishlistItems = await Wishlist.findOne({userId:userId})
         const productId = req.query.id;
         const product = await Product.findById(productId).populate('category'); // Fetch product data with category populated
         const findCategory = product.category;
@@ -34,7 +39,9 @@ const productDetails = async (req, res) => {
             product: product,
             quantity: product.quantity,
             relatedProduct: relatedProduct,
-            isInWishlist: isInWishlist
+            isInWishlist: isInWishlist,
+            cartItems: res.locals.cartItems,
+            wishlistItems: wishlistItems.products
         });
 
     } catch (error) {

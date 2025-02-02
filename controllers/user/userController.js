@@ -1,6 +1,8 @@
 const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
+const Wishlist = require("../../models/wishlistSchema")
+const Cart = require("../../models/cartSchema")
 const env = require("dotenv").config();
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
@@ -10,14 +12,18 @@ const loadHomePage = async (req,res)=>{
         const user = req.session.user
         const categories = await Category.find({isListed:true})
         const product = await Product.find({isBlocked:false, category:{$in : categories.map(cat => cat._id)}}).populate('category')
-
+        
         product.sort((a,b)=> new Date(b.createdOn)-new Date(a.createdOn))
         
         
         if(user){
-            const userData = await User.findById({_id:user})
+          const userData = await User.findById({_id:user})
+          const wishlistItems = await Wishlist.findOne({userId:user})
+          const cart = await Cart.findOne({ userId:user });
+          res.locals.cartItems = cart ? cart.items : [];
+          res.locals.cartCount = cart ? cart.items.length : 0;
             
-            return res.render("home",{user:userData, products:product})
+            return res.render("home",{user:userData, products:product, cartItems: res.locals.cartItems, wishlistItems:wishlistItems.products})
         }else{
             return res.render('home',{user: null, products:product})
         }
@@ -90,7 +96,8 @@ const loadShopPage = async (req, res) => {
           minPrice,
           maxPrice,
           categoryQuantities: await getCategoryQuantities(),
-          totalProducts: featuredProducts.length
+          totalProducts: featuredProducts.length,
+          cartItems:cartItems.items
         });
       } else if (selectedSort === 'newArrivals') {
         sort.createdOn = -1;
@@ -137,6 +144,11 @@ const loadShopPage = async (req, res) => {
 
     if (userId) {
       const userData = await User.findById({ _id: userId });
+      const wishlistItems = await Wishlist.findOne({userId:userId})
+
+      const cart = await Cart.findOne({ userId });
+      res.locals.cartItems = cart ? cart.items : [];
+      res.locals.cartCount = cart ? cart.items.length : 0;
 
       return res.render("shop", {
         user: userData,
@@ -147,7 +159,9 @@ const loadShopPage = async (req, res) => {
         minPrice,
         maxPrice,
         categoryQuantities: categoryQuantitiesMap,
-        totalProducts
+        totalProducts,
+        cartItems: res.locals.cartItems,
+        wishlistItems: wishlistItems.products
       });
     } else {
       return res.render('shop', {
@@ -158,7 +172,8 @@ const loadShopPage = async (req, res) => {
         minPrice,
         maxPrice,
         categoryQuantities: categoryQuantitiesMap,
-        totalProducts
+        totalProducts,
+
       });
     }
   } catch (error) {

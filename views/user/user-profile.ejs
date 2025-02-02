@@ -669,7 +669,7 @@ body {
               <p>Track your orders</p>
           </div>
           
-          <div class="dashboard-item" data-type="wallet">
+          <div class="dashboard-item" data-type="wallet" onclick="window.location.href='/wallet' ">
               <div class="icon-wrapper orange">
                   <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -811,25 +811,26 @@ body {
 </div>
 
 
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 
 
-// Script to handle modal functionality
 function showEditDetailsModal() {
     const modal = document.getElementById('editDetailsModal');
     if (modal) {
-        modal.classList.add('active'); // Show the modal
+        modal.classList.add('active'); 
     }
 }
 
 function closeModals() {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
-        modal.classList.remove('active'); // Hide all modals
+        modal.classList.remove('active'); 
     });
 }
 
-// Optional: Close modal when clicking outside the modal content
 window.addEventListener('click', (event) => {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
@@ -884,7 +885,6 @@ window.addEventListener('click', (event) => {
         updateDateTime();
         setInterval(updateDateTime, 60000);
 
-        // Edit Profile Form Submission
         const editProfileForm = document.getElementById('editProfileForm');
         if (editProfileForm) {
             editProfileForm.addEventListener('submit', async function(e) {
@@ -896,7 +896,6 @@ window.addEventListener('click', (event) => {
 
                 let isValid = true;
 
-                // Name validation
                 if (!data.name.trim()) {
                     showValidationError('editName', 'Name is required');
                     isValid = false;
@@ -905,9 +904,8 @@ window.addEventListener('click', (event) => {
                     isValid = false;
                 }
 
-                // Phone validation
                 const phoneRegex = /^\d{10}$/;
-                const invalidPhonePattern = /0{7,}/; // Pattern to check for 7 or more consecutive zeros
+                const invalidPhonePattern = /0{7,}/; 
                 if (!phoneRegex.test(data.phone.replace(/\s+/g, ''))) {
                     showValidationError('editPhone', 'Please enter a valid 10-digit phone number');
                     isValid = false;
@@ -953,15 +951,13 @@ window.addEventListener('click', (event) => {
             })
             const message = sessionStorage.getItem('profileUpdateMessage');
       if (message) {
-          showMessage(message, 'success'); // Show success message
+          showMessage(message, 'success'); 
 
-          // Clear the message from sessionStorage to prevent repeated alerts
           sessionStorage.removeItem('profileUpdateMessage');
       }
           
         }
 
-        // Change Password Form Submission
         const changePasswordForm = document.getElementById('changePasswordForm');
         if (changePasswordForm) {
             const newPasswordInput = document.getElementById('newPassword');
@@ -1035,8 +1031,6 @@ window.addEventListener('click', (event) => {
                 }
             });
         }
-
-        // Helper Functions
         function showValidationError(fieldId, message) {
             const input = document.getElementById(fieldId);
             const validationDiv = input.nextElementSibling;
@@ -1104,11 +1098,9 @@ window.addEventListener('click', (event) => {
         }
     });
 
-    // State management
     let addresses = [];
     let editingAddressId = null;
 
-    // Constants
     const VALIDATION_RULES = {
         phone: {
             pattern: /^\d{10}$/,
@@ -1143,12 +1135,10 @@ window.addEventListener('click', (event) => {
         const formData = getFormData();
         const errors = {};
 
-        // Address Type validation
         if (!formData.type || !VALIDATION_RULES.addressTypes.includes(formData.type.toLowerCase())) {
             errors.type = 'Please select a valid address type';
         }
 
-        // Name validation
         if (!formData.name) {
             errors.name = 'Name is required';
         } else if (formData.name.length < 3) {
@@ -1157,14 +1147,12 @@ window.addEventListener('click', (event) => {
             errors.name = 'Name must contain only letters';
         }
 
-        // Phone validation
         if (!formData.phone) {
             errors.phone = 'Phone number is required';
         } else if (!VALIDATION_RULES.phone.pattern.test(formData.phone)) {
             errors.phone = VALIDATION_RULES.phone.message;
         }
 
-        // Alt Phone validation
         if (!formData.altPhone) {
             errors.altPhone = 'Alternative phone number is required';
         } else if (!VALIDATION_RULES.phone.pattern.test(formData.altPhone)) {
@@ -1173,28 +1161,24 @@ window.addEventListener('click', (event) => {
             errors.altPhone = 'Phone number and alternative phone number cannot be the same';
         }
 
-        // City validation
         if (!formData.city) {
             errors.city = 'City is required';
         } else if (!VALIDATION_RULES.text.pattern.test(formData.city)) {
             errors.city = 'City must contain only letters';
         }
 
-        // State validation
         if (!formData.state) {
             errors.state = 'State is required';
         } else if (!VALIDATION_RULES.text.pattern.test(formData.state)) {
             errors.state = 'State must contain only letters';
         }
 
-        // Pincode validation
         if (!formData.pincode) {
             errors.pincode = 'Pincode is required';
         } else if (!VALIDATION_RULES.pincode.pattern.test(formData.pincode)) {
             errors.pincode = VALIDATION_RULES.pincode.message;
         }
 
-        // Landmark validation
         if (!formData.landmark) {
             errors.landmark = 'Landmark is required';
         } else if (formData.landmark.length > 100) {
@@ -1208,7 +1192,6 @@ window.addEventListener('click', (event) => {
         };
     }
 
-    // UI handling functions
     function clearErrorMessages() {
         document.querySelectorAll('.error-message').forEach(el => el.remove());
     }
@@ -1242,7 +1225,6 @@ window.addEventListener('click', (event) => {
         editingAddressId = null;
     }
 
-    // Modal functions
     function showAddressModal() {
         document.getElementById('addressModal').classList.add('active');
         renderAddresses();
@@ -1264,7 +1246,6 @@ window.addEventListener('click', (event) => {
         resetForm();
     }
 
-    // API functions
     async function saveAddress() {
         const { isValid, errors, formData } = validateForm();
         
@@ -1319,30 +1300,57 @@ window.addEventListener('click', (event) => {
         }
     }
 
-    async function deleteAddress(id) {
-        if (!confirm('Are you sure you want to delete this address?')) {
-            return;
-        }
+   async function deleteAddress(id) {
+    // Show confirmation dialog using SweetAlert
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to delete this address?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    });
 
-        try {
-            const response = await fetch(`/addresses/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete address');
-            }
-
-            addresses = addresses.filter(addr => addr._id !== id);
-            renderAddresses();
-            showNotification('Address deleted successfully!');
-        } catch (error) {
-            console.error('Error deleting address:', error);
-            showNotification('Failed to delete address', 'error');
-        }
+    // If user didn't confirm, exit the function
+    if (!result.isConfirmed) {
+        return;
     }
 
-    // Render functions
+    try {
+        const response = await fetch(`/addresses/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete address');
+        }
+
+        addresses = addresses.filter(addr => addr._id !== id);
+        renderAddresses();
+        
+        // Show success message
+        await Swal.fire({
+            title: 'Deleted!',
+            text: 'Address has been deleted successfully',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        
+        // Show error message
+        await Swal.fire({
+            title: 'Error!',
+            text: 'Failed to delete address',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
     function renderAddresses() {
         const addressList = document.querySelector('.address-list');
         
@@ -1376,7 +1384,6 @@ window.addEventListener('click', (event) => {
         `).join('');
     }
 
-    // Edit address function
     function editAddress(addressId) {
         const address = addresses.find(addr => addr._id === addressId);
         if (!address) return;
@@ -1395,9 +1402,7 @@ window.addEventListener('click', (event) => {
         showAddressForm(true);
     }
 
-    // Event listeners for address functionality
     document.addEventListener('DOMContentLoaded', function() {
-        // Form submission
         const addressForm = document.getElementById('addressForm');
         if (addressForm) {
             addressForm.addEventListener('submit', function(e) {
@@ -1405,7 +1410,6 @@ window.addEventListener('click', (event) => {
                 saveAddress();
             });
 
-            // Real-time validation
             addressForm.querySelectorAll('input, select').forEach(input => {
                 input.addEventListener('input', function() {
                     const errorMessage = this.parentNode.querySelector('.error-message');
@@ -1416,11 +1420,9 @@ window.addEventListener('click', (event) => {
             });
         }
 
-        // Initial load of addresses
         fetchAddresses();
     });
 
-    // Fetch addresses on load
     async function fetchAddresses() {
         try {
             const response = await fetch('/addresses');

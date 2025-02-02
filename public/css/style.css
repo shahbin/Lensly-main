@@ -676,12 +676,12 @@ table {
   -o-transform: translateX(-50%);
 }
 
-/* .action__btn::before {
+.action__btn::before {
   content: "";
   top: -2px;
   border: 0.5rem solid transparent;
   border-top-color: var(--first-color);
-} */
+}
 
 .action__btn::after {
   content: attr(aria-label);

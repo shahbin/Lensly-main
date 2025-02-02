@@ -85,7 +85,7 @@
                   </td>
                   <td>
                     <% if (item.product.quantity > 0) { %>
-                      <a href="/cart/add/<%= item.product._id %>" class="btn btn--sm">Add to Cart</a>
+                      <a href="#" class="btn btn--sm" onclick="handleAddToCart('<%= item.product._id %>', '<%= item.product.quantity %>')">Add to Cart</a>
                     <% } else { %>
                       <button class="btn btn--sm" disabled>Add to Cart</button>
                     <% } %>
@@ -196,6 +196,171 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+
+
+const cartAPI = {
+  async addToCart(productId, quantity = 1) {
+    try {
+      const response = await fetch('/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+      const data = await response.json();
+      console.log("Response from server:", data);
+      return data;
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+      return { 
+        success: false, 
+        status: 'error', 
+        message: 'Something went wrong. Please try again later.' 
+      }; 
+    }
+  },
+
+  // Keep other methods the same
+  async updateQuantity(productId, quantity) {
+    try {
+      const response = await fetch('/update-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId, quantity })
+      });
+
+      if (!response.ok) throw new Error('Update failed');
+      location.reload();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to update quantity');
+    }
+  },
+
+  async removeItem(productId) {
+    try {
+      const response = await fetch(`/removeFrom-cart/${productId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Remove failed');
+      location.reload();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to remove item');
+    }
+  }
+};
+
+// Updated handleAddToCart for shop/home page
+async function handleAddToCart(productId, availableStock) {
+  try {
+    console.log("Adding to cart - Product ID:", productId, "Stock:", availableStock);
+    
+    // Parse stock to number and validate
+    availableStock = parseInt(availableStock, 10);
+    
+    if (isNaN(availableStock) || availableStock <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Out of Stock!',
+        text: 'Sorry, this product is currently unavailable.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Continue Shopping'
+      });
+      return;
+    }
+
+    // Show loading state
+    Swal.fire({
+      title: 'Adding to cart...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const response = await cartAPI.addToCart(productId, 1); // Default quantity 1 for shop/home page
+    
+    // Close loading dialog
+    Swal.close();
+
+    if (!response.success) {
+      if (response.status === 'out_of_stock') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Out of Stock!',
+          text: response.message || 'Sorry, this product is currently unavailable.',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Continue Shopping'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/shop";
+          }
+        });
+        return;
+      }
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: response.message || 'Failed to add item to cart',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Success case
+    Swal.fire({
+      icon: 'success',
+      title: 'Added to Cart!',
+      text: 'Your item has been successfully added to the cart.',
+      confirmButtonColor: '#3085d6',
+      showCancelButton: true,
+      confirmButtonText: 'Go to Cart',
+      cancelButtonText: 'Continue Shopping',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/cart";
+      } else {
+        window.location.href = "/shop";
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in handleAddToCart:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'Something went wrong. Please try again later.',
+      confirmButtonColor: '#d33'
+    });
+  }
+}
+
+// Product details page specific quantity handling
+function updateQuantity(action) {
+  const quantityInput = document.getElementById('quantity');
+  if (!quantityInput) return; // Only run on product details page
+  
+  let quantity = parseInt(quantityInput.value);
+  const maxQuantity = parseInt(quantityInput.max);
+  const availableStock = parseInt(quantityInput.dataset.stock);
+
+  if (action === 'increase' && quantity < maxQuantity) {
+    quantity++;
+  } else if (action === 'decrease' && quantity > 1) {
+    quantity--;
+  }
+
+  quantityInput.value = quantity;
+  toggleIncreaseButton(quantity, maxQuantity, availableStock);
+}
 
 
 

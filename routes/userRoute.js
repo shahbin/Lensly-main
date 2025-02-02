@@ -63,7 +63,10 @@ router.get('/order-details/:orderId', userAuth, orderController.getOrderDetails)
 
 router.get('/search', userController.searchProducts);
 router.get('/orders-list',userAuth,orderController.getOrdersList);
-router.patch('/cancel-order-item/:orderId/:itemId', userAuth, orderController.cancelOrderItem);
+
+router.post('/cancel-order-item/:orderId/:itemId', orderController.cancelOrderItem);
+router.post('/returnOrder/:orderId/:itemId', orderController.returnOrder);
+
 
 router.get('/wishlist',userAuth,wishlistController.getWishlist)
 router.post('/add/:productId', userAuth, wishlistController.addToWishlist);
@@ -72,5 +75,9 @@ router.get('/check-wishlist/:productId', userAuth, wishlistController.checkWishl
 
 router.get("/available-coupons",userAuth,orderController.getAvailableCoupons);
 router.post('/apply-coupon',userAuth,orderController.applyCoupon);
+
+router.get('/wallet',userAuth,profileController.getWalletPage)
+router.post('/walletPayment',userAuth,orderController.walletPayment)
+
 
 module.exports = router;

@@ -1,5 +1,8 @@
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema")
+const Wallet = require("../../models/walletSchema")
+const Wishlist = require("../../models/wishlistSchema")
+const Cart = require("../../models/cartSchema")
 const nodemailer = require("nodemailer")
 const bcrypt = require("bcrypt")
 
@@ -11,6 +14,10 @@ const userProfile = async (req, res) => {
     }
 
     const user = await User.findById(userId);
+    const cart = await Cart.findOne({ userId });
+    res.locals.cartItems = cart ? cart.items : [];
+    res.locals.cartCount = cart ? cart.items.length : 0;
+    const wishlistItems = await Wishlist.findOne({ userId });
     if (!user) {
       return res.redirect("/login");
     }
@@ -26,7 +33,9 @@ const userProfile = async (req, res) => {
 
     res.render("user-profile", {
       user,
-      userData, 
+      userData,
+      cartItems: res.locals.cartItems,
+      wishlistItems: wishlistItems.products 
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -692,6 +701,46 @@ const securePassword = async(newPassword)=>{
     }
 }
 
+
+const getWalletPage = async(req, res) => {
+    try {
+        const userId = req.session.user;
+        const user = await User.findById(userId);
+        const wallet = await Wallet.findOne({ userId });
+        const cart = await Cart.findOne({ userId });
+        res.locals.cartItems = cart ? cart.items : [];
+        res.locals.cartCount = cart ? cart.items.length : 0;
+        const wishlistItems = await Wishlist.findOne({ userId:userId });
+
+        if (!wallet) {
+            wallet = { balance: 0, transactions: [] };
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const totalTransactions = wallet.transactions.length;
+        const totalPage = Math.ceil(totalTransactions / limit);
+
+        wallet.transactions = wallet.transactions
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice((page - 1) * limit, page * limit);
+
+        res.render('wallet', {
+            user,
+            wallet,
+            currentPage: page,
+            totalPage,
+            wishlistItems: wishlistItems.products,
+            cartItems: res.locals.cartItems
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "server error" });
+    }
+};
+
+
 module.exports = {
   userProfile,
   editProfile,
@@ -706,5 +755,6 @@ module.exports = {
   verifyEmailOtp,
   resendEmailOtp,
   createPassword,
-  saveNewPassword
+  saveNewPassword,
+  getWalletPage
 };

@@ -280,11 +280,8 @@
   </div>
 </div>
 
-<!-- Add SweetAlert2 CSS and JS -->
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
-/>
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -298,7 +295,6 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     fetchAddresses();
-    // fetchCartItems();
   });
 
   async function fetchAddresses() {
@@ -441,217 +437,229 @@
   }
 
   async function placeOrder() {
-    const selectedAddressId = document.querySelector('input[name="addressId"]:checked')?.value;
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-    const couponCode = document.getElementById("couponCode").value.trim() || null;
-    const subtotal = parseFloat(document.getElementById("subtotal").value);
-    const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
-    const totalPrice = subtotal + 49 - discount; // 49 is the shipping charge
+    console.log("Place Order function triggered");
 
+    // Get selected address
+    const selectedAddressId = document.querySelector('input[name="addressId"]:checked')?.value;
     if (!selectedAddressId) {
         Swal.fire({ icon: "error", title: "Error", text: "Please select an address" });
         return;
     }
+
+
+    // Get selected payment method
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    console.log("Selected Payment Method:", paymentMethod);
     if (!paymentMethod) {
         Swal.fire({ icon: "error", title: "Error", text: "Please select a payment method" });
         return;
-    }else if(paymentMethod == "cod"){
-      try {
-        const response = await fetch("/place-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                addressId: selectedAddressId,
-                cartId: "<%= cart._id %>", 
-                paymentMethod: paymentMethod,
-                couponCode: couponCode,
-                subtotal: subtotal,
-                discount: discount,
-                totalAmount: totalPrice
-            }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            Swal.fire({
-                icon: "success",
-                title: "Order placed successfully!",
-                showConfirmButton: false,
-                timer: 2000,
-                willClose: () => {
-                    window.location.href = `/order-details/${data.orderId}`;
-                },
-            });
-        } else {
-            Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to place order" });
-        }
-    } catch (error) {
-        console.error("Error placing order:", error);
-        Swal.fire({ icon: "error", title: "Error", text: "Failed to place order" });
     }
-}else if (paymentMethod === "online") {
-    const currentTotal = subtotal - discount;
 
-    try {
-        // Create Razorpay order on the server
-        const response = await fetch("/placeOrderRazorPay", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                addressId: selectedAddressId,
-                cartId: "<%= cart._id %>", 
-                paymentMethod: paymentMethod,
-                couponCode: couponCode,
-                subtotal: subtotal,
-                discount: discount,
-                totalAmount: totalPrice
-            }),
-        });
+    // Get other order details
+    const couponCode = document.getElementById("couponCode").value.trim() || null;
+    const subtotal = parseFloat(document.getElementById("subtotal").value);
+    const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
+    const totalPrice = subtotal + 49 - discount; // Assuming ₹49 is a fixed shipping charge
 
-        const data = await response.json();
-        console.log("Order Creation Response:", data);
 
-        if (data.success) {
-            const { orderId, amount, currency, key } = data;
+    // COD Payment
+    if (paymentMethod === "cod") {
+        try {
+            const response = await fetch("/place-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    addressId: selectedAddressId,
+                    cartId: "<%= cart._id %>", 
+                    paymentMethod,
+                    couponCode,
+                    subtotal,
+                    discount,
+                    totalAmount: totalPrice
+                }),
+            });
 
-            if (!key) {
-                console.error("Razorpay key is missing!");
+            const data = await response.json();
+            if (response.ok) {
                 Swal.fire({
-                    icon: "error",
-                    title: "Payment Error",
-                    text: "Razorpay key is not set. Please contact support.",
+                    icon: "success",
+                    title: "Order placed successfully!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    willClose: () => {
+                        window.location.href = `/order-details/${data.orderId}`;
+                    },
                 });
-                return;
+            } else {
+                Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to place order" });
             }
+        } catch (error) {
+            console.error("Error placing order:", error);
+            Swal.fire({ icon: "error", title: "Error", text: "Failed to place order" });
+        }
+    }
 
-            const options = {
-                key: key,
-                amount: amount,
-                currency: currency,
-                name: "Time Edge",
-                description: "Order Payment",
-                order_id: orderId,
-                handler: async function (response) {
-                    console.log("Razorpay Payment Response:", response);
+    // Online Payment (Razorpay)
+    else if (paymentMethod === "online") {
+        try {
+            const response = await fetch("/placeOrderRazorPay", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    addressId: selectedAddressId,
+                    cartId: "<%= cart._id %>",  
+                    paymentMethod,
+                    couponCode,
+                    subtotal,
+                    discount,
+                    totalAmount: totalPrice
+                }),
+            });
 
-                    const paymentId = response.razorpay_payment_id;
-                    const razorpaySignature = response.razorpay_signature;
-                    const orderId = response.razorpay_order_id;
+            const data = await response.json();
+            if (data.success) {
+                const { orderId, amount, currency, key } = data;
 
-                    if (!paymentId || !razorpaySignature || !orderId) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Payment Failed",
-                            text: "Invalid payment response. Please try again.",
-                        });
-                        return;
-                    }
-
-                    // Verify the payment
-                    const verifyResponse = await fetch("/verifyRazorPayOrder", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            addressId: selectedAddressId,
-                            paymentMethod,
-                            couponId: couponCode,
-                            orderId,
-                            paymentId,
-                            cartId: "<%= cart._id %>", 
-                            razorpaySignature
-                        }),
+                if (!key) {
+                    console.error("Razorpay key is missing!");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Payment Error",
+                        text: "Razorpay key is not set. Please contact support.",
                     });
+                    return;
+                }
 
-                    const verifyData = await verifyResponse.json();
-                    console.log("Payment Verification Response:", verifyData);
+                const options = {
+                    key: key,
+                    amount: amount,
+                    currency: currency,
+                    name: "Lensly",
+                    description: "Order Payment",
+                    order_id: orderId,
+                    handler: async function (response) {
+                        const { razorpay_payment_id, razorpay_signature, razorpay_order_id } = response;
 
-                    if (verifyData.success) {
-                        Swal.fire({
-                            title: "Payment Success",
-                            text: `Order Placed Successfully. Your OrderId is: ${verifyData.orderId}`,
-                            icon: "success",
-                            confirmButtonText: "OK"
-                        }).then(() => window.location.href = `/order-details/${verifyData.orderId}`);
-                    } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Payment Failed",
-                            text: "Payment verification failed. Please try again.",
-                        });
-                    }
-                },
-                modal: {
-                    ondismiss: async function () {
-                        console.log("User closed Razorpay modal.");
+                        if (!razorpay_payment_id || !razorpay_signature || !razorpay_order_id) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Payment Failed",
+                                text: "Invalid payment response. Please try again.",
+                            });
+                            return;
+                        }
 
-                        // Mark the payment as failed
-                        const cancelResponse = await fetch("/verifyRazorPayOrder", {
+                        // Verify the payment
+                        const verifyResponse = await fetch("/verifyRazorPayOrder", {
                             method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
+                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
                                 addressId: selectedAddressId,
                                 paymentMethod,
                                 couponId: couponCode,
-                                orderId,
-                                paymentId: null,
-                                razorpaySignature: null,
-                                paymentStatus: "Failed"
-                            })
+                                orderId: razorpay_order_id,
+                                paymentId: razorpay_payment_id,
+                                cartId: "<%= cart._id %>", 
+                                razorpaySignature: razorpay_signature
+                            }),
                         });
 
-                        const cancelData = await cancelResponse.json();
-                        console.log("Payment Cancel Response:", cancelData);
+                        const verifyData = await verifyResponse.json();
+                        console.log("Payment Verification Response:", verifyData);
 
-                        Swal.fire({
-                            icon: "error",
-                            title: "Payment Failed",
-                            text: "Your payment was unsuccessful. Order has been placed with status 'Payment Failed'.",
-                            confirmButtonText: "OK"
-                        }).then(() => window.location.href = "/cart");
-                    }
-                },
-                theme: { color: "#3399cc" },
+                        if (verifyData.success) {
+                            Swal.fire({
+                                title: "Payment Success",
+                                text: `Order Placed Successfully. Your OrderId is: ${verifyData.orderId}`,
+                                icon: "success",
+                                confirmButtonText: "OK"
+                            }).then(() => window.location.href = `/order-details/${verifyData.orderId}`);
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Payment Failed",
+                                text: "Payment verification failed. Please try again.",
+                            });
+                        }
+                    },
+                    theme: { color: "#3399cc" },
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to initiate payment. Please try again." });
+            }
+        } catch (error) {
+            console.error("Error processing payment:", error);
+            Swal.fire({ title: "Error", text: "An error occurred while processing the payment.", icon: "error" });
+        }
+    } else if (paymentMethod === "wallet") {
+        console.log("Wallet payment method selected.");
+
+        try {
+            const requestData = {
+                addressId: selectedAddressId,
+                cartId: "<%= cart._id %>",  
+                paymentMethod,
+                couponCode,
+                subtotal,
+                couponDiscount: discount,
+                finalAmount: totalPrice
             };
 
-            console.log("Razorpay Options:", options);
-            
-            // Ensure Razorpay script is loaded before opening modal
-            if (typeof Razorpay === "undefined") {
-                console.error("Razorpay script is not loaded!");
+            console.log("Request Data:", requestData);
+
+            const walletResponse = await fetch("/walletPayment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestData),
+            });
+
+            console.log("Wallet Response Status:", walletResponse.status, walletResponse.statusText);
+
+            if (!walletResponse.ok) {
+                console.error("Failed response:", walletResponse.status, walletResponse.statusText);
                 Swal.fire({
                     icon: "error",
-                    title: "Payment Error",
-                    text: "Razorpay script failed to load. Please refresh and try again.",
+                    title: "Error",
+                    text: `Request failed with status: ${walletResponse.status}`,
                 });
                 return;
             }
 
-            const rzp = new Razorpay(options);
-            rzp.open();
-        } else {
+            const walletData = await walletResponse.json();
+            console.log("Wallet Payment Response:", walletData);
+
+            if (walletData.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Order Placed Successfully!",
+                    text: "Your order has been placed using wallet balance.",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    willClose: () => {
+                        window.location.href = `/order-details/${walletData.orderId}`;
+                    },
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: walletData.message || "Failed to place order using wallet.",
+                });
+            }
+        } catch (error) {
+            console.error("Wallet transaction error:", error);
             Swal.fire({
                 icon: "error",
-                title: "Error",
-                text: data.message || "Failed to initiate payment. Please try again.",
-                confirmButtonText: "OK",
+                title: "Transaction Failed",
+                text: "An error occurred while processing your wallet payment.",
             });
         }
-    } catch (error) {
-        console.error("Error processing payment:", error);
-        Swal.fire({
-            title: "Error",
-            text: "An error occurred while processing the payment.",
-            icon: "error",
-            confirmButtonText: "OK"
-        });
     }
 }
-  }
+
 
 
         
@@ -818,7 +826,6 @@
     document.getElementById("addressFormTitle").textContent = "Edit Address";
     document.getElementById("addressFormModal").classList.add("active");
 
-    // Populate the form fields with the existing address data
     document.getElementById("addressType").value = address.addressType;
     document.getElementById("name").value = address.name;
     document.getElementById("phone").value = address.phone;
@@ -828,7 +835,6 @@
     document.getElementById("state").value = address.state;
     document.getElementById("pincode").value = address.pincode;
 
-    // Bind the saveAddress function to the form's onsubmit event
     document.getElementById("addressForm").onsubmit = saveAddress;
   }
 
@@ -845,7 +851,7 @@
   function updateQuantity(productId, action) {
     const quantityInput = document.getElementById(`quantity-${productId}`);
     let quantity = parseInt(quantityInput.value);
-    const maxQuantity = 10; // Set your max quantity here
+    const maxQuantity = 10; 
 
     if (action === "increase" && quantity < maxQuantity) {
       quantity++;
@@ -885,64 +891,55 @@
 
   async function fetchAvailableCoupons() {
     try {
-      const response = await fetch("/available-coupons");
-      const data = await response.json();
+        const response = await fetch("/available-coupons");
+        const data = await response.json();
 
-      const couponListContainer = document.getElementById(
-        "availableCouponsList"
-      );
-      couponListContainer.innerHTML = "";
+        const couponListContainer = document.getElementById("availableCouponsList");
+        couponListContainer.innerHTML = "";
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch coupons");
-      }
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch coupons");
+        }
 
-      data.coupons.forEach((coupon) => {
-        const listItem = document.createElement("li");
-        listItem.classList.add("coupon-item");
-        listItem.innerHTML = `
+        data.coupons.forEach((coupon) => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("coupon-item");
+            listItem.innerHTML = `
                 <div class="coupon-details">
-                    <strong>${coupon.name}</strong> - Save ₹${
-          coupon.offerPrice
-        } (Min Order ₹${coupon.minimumPrice})
-                    <p>Expires on: ${new Date(
-                      coupon.expireOn
-                    ).toLocaleDateString()}</p>
+                    <strong>${coupon.name}</strong> - Save ₹${coupon.offerPrice} (Min Order ₹${coupon.minimumPrice})
+                    <p>Expires on: ${new Date(coupon.expireOn).toLocaleDateString()}</p>
                 </div>
-                <button class="apply-coupon-btn" onclick="applySelectedCoupon('${
-                  coupon.name
-                }')">Apply</button>
+                <button class="apply-coupon-btn" onclick="applySelectedCoupon('${coupon.name}')">Select</button>
             `;
-        couponListContainer.appendChild(listItem);
-      });
+            couponListContainer.appendChild(listItem);
+        });
     } catch (error) {
-      console.error("Error fetching coupons:", error);
-      document.getElementById(
-        "availableCouponsList"
-      ).innerHTML = `<li>No available coupons</li>`;
+        console.error("Error fetching coupons:", error);
+        document.getElementById("availableCouponsList").innerHTML = `<li>No available coupons</li>`;
     }
-  }
+}
 
-  function openCouponsModal() {
+function openCouponsModal() {
     fetchAvailableCoupons();
     document.getElementById("couponsModal").classList.add("active");
-  }
+}
 
-  function closeCouponsModal() {
+function closeCouponsModal() {
     document.getElementById("couponsModal").classList.remove("active");
-  }
+}
 
-  function applySelectedCoupon(code) {
-    document.getElementById("couponCode").value = code; // Set input field
-    showNotification(`Coupon ${code} applied successfully!`, "success");
+function applySelectedCoupon(code) {
+    document.getElementById("couponCode").value = code;
+    Swal.fire({
+        title: 'Coupon Selected!',
+        text: 'Click the "Apply Coupon" button below to activate your discount',
+        icon: 'info',
+        confirmButtonText: 'Got it'
+    });
     closeCouponsModal();
-  }
+}
 
-  function showNotification(message, type = "success") {
-    alert(message);
-  }
-
-  async function applyCouponCode() {
+async function applyCouponCode() {
     const couponCode = document.getElementById("couponCode").value.trim();
 
     if (!couponCode) {
@@ -967,10 +964,8 @@
             const discount = data.discount || 0;
             const finalAmount = data.finalAmount || (totalPrice - discount);
 
-            // ✅ **Update the Discount Field**
             document.querySelector(".order__discount").textContent = `₹${discount.toFixed(2)}`;
 
-            // ✅ **Update the Total Amount**
             updateTotalAmount(finalAmount);
 
             Swal.fire("Success", `Coupon applied! ₹${discount} discount`, "success");
@@ -982,7 +977,6 @@
         Swal.fire("Error", "Something went wrong", "error");
     }
 }
-
 function updateTotalAmount(finalAmount) {
     document.querySelector(".order__grand-total").textContent = `₹${finalAmount.toFixed(2)}`;
 }

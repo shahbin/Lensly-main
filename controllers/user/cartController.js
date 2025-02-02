@@ -2,6 +2,7 @@ const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
+const Wishlist = require("../../models/wishlistSchema");
 const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
 const { v4: uuidv4 } = require('uuid');
@@ -13,6 +14,7 @@ const getCart = async (req, res) => {
 
     const user = await User.findById(userId);
     const cart = await Cart.findOne({ userId }).populate({ path: 'items.productId', select: 'productImage productName salePrice regularPrice' });
+    const wishlistItems = await Wishlist.findOne({userId:userId})
 
     if (!cart) return res.render('cart', { user, cartItems: [] });
 
@@ -26,7 +28,7 @@ const getCart = async (req, res) => {
 
     if (!res.locals.cartItems) {
       res.locals.cartItems = cartItems;
-      res.render('cart', { user, cartItems });
+      res.render('cart', { user, cartItems,wishlistItems: wishlistItems.products });
     }
 
   } catch (error) {
@@ -168,6 +170,7 @@ const getCheckout = async (req, res) => {
 
     const user = await User.findById(userId);
     const cart = await Cart.findOne({ userId }).populate({ path: 'items.productId', select: 'productName salePrice regularPrice productImage' });
+    const wishlistItems = await Wishlist.findOne({userId:userId})
 
     if (!cart || cart.items.length === 0) {
       return res.redirect('/cart');
@@ -181,7 +184,7 @@ const getCheckout = async (req, res) => {
       productName: item.productId.productName
     }));
 
-    res.render('checkout', { user, cart: { items: cartItems }, discount: 0, cartItems });
+    res.render('checkout', { user, cart: { items: cartItems }, discount: 0, cartItems, wishlistItems: wishlistItems.products });
 
   } catch (error) {
     console.error('Error getting checkout:', error);
@@ -192,11 +195,8 @@ const getCheckout = async (req, res) => {
 const placeOrder = async (req, res) => {
   try {
     const { addressId, paymentMethod, cartId, couponCode, subtotal, discount, totalAmount } = req.body;
-    console.log("placeOrder",addressId,paymentMethod,cartId,couponCode,subtotal,discount,totalAmount)
     const userId = req.session.user;
-    console.log("ooo",userId);
     
- 
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     
     if (!cart || cart.items.length === 0) {
@@ -210,9 +210,6 @@ const placeOrder = async (req, res) => {
       dateAdded: new Date() 
       
     }));
-    console.log("orderItems",orderItems)
-
-
  
     const order = new Order({
       userId,
@@ -235,10 +232,7 @@ const placeOrder = async (req, res) => {
     );
     await Promise.all(productUpdates);
  
-    await Cart.deleteOne({ userId });
-
-    console.log('Order placed successfully:', order);
- 
+    await Cart.deleteOne({ userId }); 
     res.status(200).json({ success: true, orderId: order._id });
  
   } catch (error) {

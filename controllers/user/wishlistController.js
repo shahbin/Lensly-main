@@ -1,18 +1,27 @@
 const Wishlist = require("../../models/wishlistSchema")
 const User = require("../../models/userSchema")
+const Cart = require("../../models/cartSchema")
+const mongoose = require('mongoose'); 
 
 const getWishlist = async (req, res) => {
     try {
-        const userId = req.session.user
-        
-        // Fetch wishlist with populated product details
+        const userId = req.session.user;
+        if (!userId) {
+            res.locals.wishlistItems = [];  // Set this for consistency with header
+            return res.render('wishlist', { 
+                user: null, 
+                wishlist: [], 
+                cartItems: [] 
+            });
+        }
+
         const wishlist = await Wishlist.findOne({ userId })
             .populate({
                 path: 'products.productId',
                 select: 'productName productImage regularPrice salePrice quantity status' 
             });
 
-        // Format the data for the frontend
+        // Format wishlist items
         const wishlistItems = wishlist ? wishlist.products.map(item => ({
             product: {
                 productName: item.productId.productName,
@@ -25,43 +34,46 @@ const getWishlist = async (req, res) => {
             addedOn: item.addedOn
         })) : [];
 
-        const user = await User.findById(userId);
+        // Set wishlistItems in res.locals to match what header is expecting
+        res.locals.wishlistItems = wishlistItems;
+
+        const cart = await Cart.findOne({ userId });
+        res.locals.cartItems = cart ? cart.items : [];
+        res.locals.cartCount = cart ? cart.items.length : 0;
         
         res.render('wishlist', {
-            user,
-            wishlist: wishlistItems
+            user: await User.findById(userId),
+            wishlist: wishlistItems,
+            cartItems: res.locals.cartItems
         });
 
     } catch (error) {
         console.error('Wishlist error:', error);
         res.status(500).render('error', { message: 'Failed to fetch wishlist' });
     }
-}
+};
 
 
 const addToWishlist = async (req, res) => {
     try {
+        console.log("Request received!");
         const userId = req.session.user;
         const productId = req.params.productId;
 
-        // Check if wishlist exists for user
         let wishlist = await Wishlist.findOne({ userId });
 
         if (!wishlist) {
-            // If no wishlist exists, create new one
             wishlist = new Wishlist({
                 userId,
                 products: [{ productId }]
             });
             await wishlist.save();
         } else {
-            // Check if product already exists in wishlist
             const productExists = wishlist.products.some(item => 
                 item.productId.toString() === productId
             );
 
             if (!productExists) {
-                // Add product to existing wishlist
                 wishlist.products.push({ productId });
                 await wishlist.save();
             }
@@ -81,7 +93,6 @@ const addToWishlist = async (req, res) => {
     }
 };
 
-const mongoose = require('mongoose'); // Import mongoose for ObjectId
 
 const removeFromWishlist = async (req, res) => {
     try {
@@ -91,7 +102,6 @@ const removeFromWishlist = async (req, res) => {
         const userId = req.session.user;
         let productId = req.params.productId || req.body.productId;
 
-        // Convert productId to ObjectId if needed
         if (mongoose.Types.ObjectId.isValid(productId)) {
             productId = new mongoose.Types.ObjectId(productId);
         }
@@ -116,18 +126,15 @@ const removeFromWishlist = async (req, res) => {
 
 
 const checkWishlist = async (req, res) => {
-    try {
-        const userId = req.session.user;  // Assuming the user ID is in the session
-        const productId = req.params.productId;  // Get the product ID from the URL params
 
-        // Check if the product is in the wishlist for the user
+    try {
+        const userId = req.session.user;  
+        const productId = req.params.productId;  
         const wishlist = await Wishlist.findOne({
             userId,
-            'products.productId': productId  // Look for the product in the wishlist
+            'products.productId': productId  
         });
-
-        // Respond with whether the product is in the wishlist
-        res.json({ inWishlist: !!wishlist });  // True if product is found, otherwise false
+        res.json({ inWishlist: !!wishlist }); 
     } catch (error) {
         console.error('Error checking wishlist:', error);
         res.status(500).json({ inWishlist: false, message: 'Server error' });

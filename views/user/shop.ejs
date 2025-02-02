@@ -303,20 +303,6 @@ input[type="range"]::-moz-range-thumb:active {
 }
 
 /* Ensure the button background (circle) remains unchanged */
-.action__btn {
-    background-color: rgba(255, 255, 255, 0.8) !important; /* Keeps the circle light */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    transition: background-color 0.2s ease;
-}
-
-/* Smooth transition effect */
-.action__btn i {
-    transition: color 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
-}
 
 
 
@@ -420,78 +406,78 @@ input[type="range"]::-moz-range-thumb:active {
         <% } %>
         <div class="products__container grid">
           <% products.forEach(product => { %>
-          <div class="product__item">
-            <div class="product__banner">
-              <a href="/productDetails?id=<%= product._id %>" class="product__images">
-                <img
-                  src="/admin-assets/imgs/brands/<%= product.productImage[0] %>"
-                  alt="<%= product.productName %>"
-                  class="product__img default"
-                />
-                <img
-                  src="/admin-assets/imgs/brands/<%= product.productImage[1] %>"
-                  alt=""
-                  class="product__img hover"
-                />
-              </a>
-              <div class="product__actions">
-                <a href="#" class="action__btn" >
-                  <i class="fi fi-rs-eye"></i>
+            <div class="product__item">
+              <div class="product__banner">
+                <a href="/productDetails?id=<%= product._id %>" class="product__images">
+                  <img
+                    src="/admin-assets/imgs/brands/<%= product.productImage[0] %>"
+                    alt="<%= product.productName %>"
+                    class="product__img default"
+                  />
+                  <img
+                    src="/admin-assets/imgs/brands/<%= product.productImage[1] %>"
+                    alt=""
+                    class="product__img hover"
+                  />
                 </a>
-                <a href="/add/<%= product._id %>" class="action__btn">
-                  <i class="fi fi-rs-heart"></i> 
-              </a>
-              
-              
-              
+                <div class="product__actions">
+                  <a href="#" class="action__btn" >
+                    <i class="fi fi-rs-eye"></i>
+                  </a>
+                  <a href="/add/<%= product._id %>" class="action__btn">
+                    <i class="fi fi-rs-heart"></i>
+                  </a>
+                </div>
+                <div class="product__badge light-pink">Now Available</div>
               </div>
-              <div class="product__badge light-pink">Now Available</div>
-            </div>
-            <div class="product__content">
-              <span class="product__category"><%= product.category.name %></span>
-              <a href="/productDetails?id=<%= product._id %>">
-                <h3 class="product__title"><%= product.productName %></h3>
-              </a>
-              <div class="product__rating">
-                <i class="fi fi-rs-star"></i>
-                <i class="fi fi-rs-star"></i>
-                <i class="fi fi-rs-star"></i>
-                <i class="fi fi-rs-star"></i>
-                <i class="fi fi-rs-star"></i>
-              </div>
-              <div class="product__price">
-                <% 
-                  const productOffer = product.productOffer || 0;
-                  const categoryOffer = product.category?.categoryOffer || 0;
-                  const bestOffer = Math.max(productOffer, categoryOffer);
+              <div class="product__content">
+                <span class="product__category"><%= product.category.name %></span>
+                <a href="/productDetails?id=<%= product._id %>">
+                  <h3 class="product__title"><%= product.productName %></h3>
+                </a>
+                <div class="product__rating">
+                  <i class="fi fi-rs-star"></i>
+                  <i class="fi fi-rs-star"></i>
+                  <i class="fi fi-rs-star"></i>
+                  <i class="fi fi-rs-star"></i>
+                  <i class="fi fi-rs-star"></i>
+                </div>
+                <div class="product__price">
+                  <% 
+                    const productOffer = product.productOffer || 0;
+                    const categoryOffer = product.category?.categoryOffer || 0;
+                    const bestOffer = Math.max(productOffer, categoryOffer);
+                    
+                    const regularPrice = product.regularPrice;
+                    const finalPrice = bestOffer > 0 
+                      ? Math.floor(regularPrice - (regularPrice * bestOffer / 100)) 
+                      : product.salePrice;
+                  %>
                   
-                  const regularPrice = product.regularPrice;
-                  const finalPrice = bestOffer > 0 
-                    ? Math.floor(regularPrice - (regularPrice * bestOffer / 100)) 
-                    : product.salePrice;
-                %>
+                  <span class="new__price">₹<%= finalPrice %></span>
+                  <br>
+                  
+                  <% if(bestOffer > 0 && finalPrice < regularPrice) { %>  
+                      <span class="old__price">₹<%= regularPrice %></span>
+                      <span class="save__price">
+                        <%= bestOffer %>% Off
+                      </span>
+                  <% } %>
+                </div>
                 
-                <span class="new__price">₹<%= finalPrice %></span>
-                <br>
-            
-                <% if(bestOffer > 0 && finalPrice < regularPrice) { %>  
-                    <span class="old__price">₹<%= regularPrice %></span>
-                    <span class="save__price">
-                      <%= bestOffer %>% Off
-                    </span>
-                <% } %>
-            </div>
-            
-              <a
-                href="/addToCart?id=<%= product._id %>"
-                class="action__btn cart__btn"
-                aria-label="Add To Cart"
-              >
+                <a href="#" class="action__btn cart__btn" 
+                aria-label="Add To Cart" 
+                onclick="handleAddToCart('<%= product._id %>', '<%= product.quantity %>')">
                 <i class="fi fi-rs-shopping-bag-add"></i>
-              </a>
+             </a>
+             
+
+              
+              </div>
             </div>
-          </div>
           <% }) %>
+          
+          
         </div>
         <ul class="pagination">
           <% if(pagination.hasPrevPage){ %>
@@ -698,71 +684,257 @@ input[type="range"]::-moz-range-thumb:active {
   });
 
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const wishlistBtns = document.querySelectorAll('.action__btn');
+  const wishlistAPI = {
+  async checkWishlistStatus(productId) {
+    try {
+      const response = await fetch(`/check-wishlist/${productId}`);
+      if (!response.ok) throw new Error('Failed to check wishlist status');
+      const data = await response.json();
+      return data.inWishlist;
+    } catch (error) {
+      console.error('Error checking wishlist status:', error);
+      return false;
+    }
+  },
 
-    wishlistBtns.forEach(button => {
-        button.addEventListener('click', async function (e) {
-            e.preventDefault(); // Prevent default navigation
+  async toggleWishlistItem(productId, isInWishlist) {
+    try {
+      const url = isInWishlist ? `/remove/${productId}` : `/add/${productId}`;
+      const response = await fetch(url, { method: "POST" });
+      if (!response.ok) throw new Error('Failed to update wishlist');
+      return true;
+    } catch (error) {
+      console.error('Error updating wishlist:', error);
+      return false;
+    }
+  }
+};
 
-            const heartIcon = this.querySelector('i');
-            if (!heartIcon) return;
+function initializeWishlist() {
+  const wishlistBtns = document.querySelectorAll('.action__btn');
 
-            const productId = this.getAttribute('href').split('/').pop(); // Get product ID
+  wishlistBtns.forEach(button => {
+    button.addEventListener('click', handleWishlistClick);
+    initializeWishlistState(button);
+  });
+}
 
-            try {
-                // Check if product is in the wishlist
-                const checkResponse = await fetch(`/check-wishlist/${productId}`);
-                if (!checkResponse.ok) return console.error('Error checking wishlist');
+async function handleWishlistClick(e) {
+  e.preventDefault();
 
-                const checkData = await checkResponse.json();
-                const isInWishlist = checkData.inWishlist;
+  const button = e.currentTarget;
+  const heartIcon = button.querySelector('.fi-rs-heart');
+  if (!heartIcon) return;
 
-                // Toggle heart icon visibility
-                if (isInWishlist) {
-                    heartIcon.style.fill = 'none'; // Remove fill color
-                } else {
-                    heartIcon.style.fill = 'red'; // Fill with red color
-                }
+  const productId = button.href.split('/').pop();
+  if (!productId) return;
 
-                // Send request to add/remove from wishlist
-                const url = isInWishlist ? `/remove/${productId}` : `/add/${productId}`;
-                await fetch(url, { method: "POST" });
+  try {
+    const isInWishlist = await wishlistAPI.checkWishlistStatus(productId);
+    const success = await wishlistAPI.toggleWishlistItem(productId, isInWishlist);
 
-                // Show confirmation message
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: isInWishlist ? 'info' : 'success',
-                    title: isInWishlist ? 'Removed from Wishlist!' : 'Added to Wishlist!',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
+    if (success) {
+      heartIcon.style.fill = isInWishlist ? 'none' : 'red';
 
-            } catch (error) {
-                console.error('Error:', error);
-            }
+      button.href = isInWishlist ? `/add/${productId}` : `/remove/${productId}`;
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: isInWishlist ? 'info' : 'success',
+        title: isInWishlist ? 'Removed from Wishlist!' : 'Added to Wishlist!',
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+  } catch (error) {
+    console.error('Error handling wishlist click:', error);
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: 'Failed to update wishlist',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  }
+}
+
+async function initializeWishlistState(button) {
+  const heartIcon = button.querySelector('.fi-rs-heart');
+  if (!heartIcon) return;
+
+  const productId = button.href.split('/').pop();
+  if (!productId) return;
+
+  try {
+    const isInWishlist = await wishlistAPI.checkWishlistStatus(productId);
+    heartIcon.style.fill = isInWishlist ? 'red' : 'none';
+    button.href = isInWishlist ? `/remove/${productId}` : `/add/${productId}`;
+  } catch (error) {
+    console.error('Error initializing wishlist state:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initializeWishlist);
+const cartAPI = {
+  async addToCart(productId, quantity = 1) {
+    try {
+      const response = await fetch('/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+      const data = await response.json();
+      console.log("Response from server:", data);
+      return data;
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+      return { 
+        success: false, 
+        status: 'error', 
+        message: 'Something went wrong. Please try again later.' 
+      }; 
+    }
+  },
+
+  async updateQuantity(productId, quantity) {
+    try {
+      const response = await fetch('/update-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId, quantity })
+      });
+
+      if (!response.ok) throw new Error('Update failed');
+      location.reload();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to update quantity');
+    }
+  },
+
+  async removeItem(productId) {
+    try {
+      const response = await fetch(`/removeFrom-cart/${productId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Remove failed');
+      location.reload();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to remove item');
+    }
+  }
+};
+
+async function handleAddToCart(productId, availableStock) {
+  try {
+    console.log("Adding to cart - Product ID:", productId, "Stock:", availableStock);
+    
+    availableStock = parseInt(availableStock, 10);
+    
+    if (isNaN(availableStock) || availableStock <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Out of Stock!',
+        text: 'Sorry, this product is currently unavailable.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Continue Shopping'
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Adding to cart...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const response = await cartAPI.addToCart(productId, 1); 
+    
+    Swal.close();
+
+    if (!response.success) {
+      if (response.status === 'out_of_stock') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Out of Stock!',
+          text: response.message || 'Sorry, this product is currently unavailable.',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Continue Shopping'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/shop";
+          }
         });
+        return;
+      }
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: response.message || 'Failed to add item to cart',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Added to Cart!',
+      text: 'Your item has been successfully added to the cart.',
+      confirmButtonColor: '#3085d6',
+      showCancelButton: true,
+      confirmButtonText: 'Go to Cart',
+      cancelButtonText: 'Continue Shopping',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/cart";
+      } else {
+        window.location.href = "/shop";
+      }
     });
 
-    // Ensure correct icon state on page load
-    wishlistBtns.forEach(button => {
-        const heartIcon = button.querySelector('i');
-        if (!heartIcon) return;
-
-        const productId = button.getAttribute('href').split('/').pop();
-
-        fetch(`/check-wishlist/${productId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.inWishlist) {
-                    heartIcon.style.fill = 'red';
-                } else {
-                    heartIcon.style.fill = 'none';
-                }
-            });
+  } catch (error) {
+    console.error('Error in handleAddToCart:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'Something went wrong. Please try again later.',
+      confirmButtonColor: '#d33'
     });
-});
+  }
+}
+
+function updateQuantity(action) {
+  const quantityInput = document.getElementById('quantity');
+  if (!quantityInput) return; 
+  
+  let quantity = parseInt(quantityInput.value);
+  const maxQuantity = parseInt(quantityInput.max);
+  const availableStock = parseInt(quantityInput.dataset.stock);
+
+  if (action === 'increase' && quantity < maxQuantity) {
+    quantity++;
+  } else if (action === 'decrease' && quantity > 1) {
+    quantity--;
+  }
+
+  quantityInput.value = quantity;
+  toggleIncreaseButton(quantity, maxQuantity, availableStock);
+}
+
+
   </script>
 
 <!--=============== FOOTER ===============-->

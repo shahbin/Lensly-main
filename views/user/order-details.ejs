@@ -1,192 +1,59 @@
 <%- include("../../views/partials/user/header" , { user: user }) %>
-    <!--=============== MAIN ===============-->
-    <main class="main">
-      <!--=============== BREADCRUMB ===============-->
-      <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;" >
-        <ul class="breadcrumb__list  container" style=" margin-left: -25px;">
-          <li><a href="/" class="breadcrumb__link" style="font-size: 12px ;">Home</a></li>
-          <li><span class="breadcrumb__link">></span></li>
-          <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px ;">Shop</a></li>
-          <li><span class="breadcrumb__link">></span></li>
-          <li><a href="/cart" class="breadcrumb__link" style="font-size: 12px ;">Cart</a></li>
-          <li><span class="breadcrumb__link">></span></li>
-          <li><a href="/checkout" class="breadcrumb__link" style="font-size: 12px ;">Checkout</a></li>
-          <li><span class="breadcrumb__link">></span></li>
-          <li><a  class="breadcrumb__link" style="font-size: 12px ;">Order details</a></li>
-        </ul>
-      </section>
-
-      <section class="order-details section--lg">
-        <div class="order-details__container container">
-          <h1 class="order-summary__title" style="margin-bottom: 100px; margin-top: -70px; color: rgb(17, 3, 34);">Order Details</h1>
-          <% if (order) { %>
-            <div class="order-user">
-              <h3 class="order-user__name"><%= user.name %></h3>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-            <div class="order-address">
-              <h2>Shipping Address</h2>
-              <% if (order.shippingAddress) { %>
-                <div class="address-details">
-                  <p class="address-name"><%= order.shippingAddress.name %></p>
-                  <% if (order.shippingAddress.landMark) { %>
-                    <p class="address-landmark"><%= order.shippingAddress.landMark %></p>
-                  <% } %>
-                  <p class="address-location">
-                    <%= order.shippingAddress.city %>, 
-                    <%= order.shippingAddress.state %> - 
-                    <%= order.shippingAddress.pincode %>
-                  </p>
-                  <p class="address-phone">Phone: <%= order.shippingAddress.phone %></p>
-                  <% if (order.shippingAddress.altPhone) { %>
-                    <p class="address-alt-phone">Alt Phone: <%= order.shippingAddress.altPhone %></p>
-                  <% } %>
-                </div>
-              <% } else { %>
-                <p class="no-address">Address not available</p>
-              <% } %>
-            </div>
-            <div class="order-tracker">
-              <h2 class="order-tracker__title">Payment Method</h2>
-              <p><%= order.paymentMethod %></p>  
-              <p>Status : <%= order.paymentStatus %></p>   
-            </div>
-            <br>
-            <div class="order-tracker">
-              <h2 class="order-tracker__title">Order Tracker</h2>
-              <p>Status: <%= order.status %></p>
-            </div>
-          </div>
-            <div class="order-summary">
-              <h3 class="order-summary__title">Order Summary</h3>
-              <table class="order-summary__table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Details</th>
-                    <!-- <th>Total</th> -->
-                  </tr>
-                </thead>
-                <tbody>
-                  <% order.orderedItems.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded)); %>
-                  <% order.orderedItems.forEach(item => { %>
-                    <tr>
-                      <td><img src="/admin-assets/imgs/brands/<%= item.product.productImage[0] %>" alt="Product Image" class="order__img" /></td>
-                      <td>
-                        <h3 class="table__title"><%= item.product.productName %></h3>
-                        <p class="table__quantity">x <%= item.quantity %></p>
-                        <p class="status  <%= item.status?.toLowerCase() %>" style="color: #d33; font-size: larger; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;"><%= item.status || 'Pending' %></p>
-                        <% if (!item.status || item.status.toLowerCase() !== 'cancelled') { %>
-                        <button class="cancel-btn" onclick="cancelOrderItem('<%= order._id %>', '<%= item._id %>')">Cancel</button>
-                        <% } %>
-                      </td>
-                      <!-- <td><span class="table__price">₹<%= item.price.toFixed(2) %></span></td> -->
-                    </tr>
-                  <% }) %>
-                  <tr>
-                    <td><span class="order__subtitle">Subtotal</span></td>
-                    <td colspan="2"><span class="table__price">₹<%= order.totalPrice.toFixed(2) %></span></td>
-                  </tr>
-                  <tr>
-                    <td><span class="order__subtitle">Shipping</span></td>
-                    <td colspan="2"><span class="table__price">₹49.00</span></td>
-                  </tr>
-                  <tr>
-                    <td><span class="order__subtitle">Discount</span></td>
-                    <td colspan="2"><span class="table__price">₹<%= order.discount.toFixed(2) %></span></td>
-                  </tr>
-                  <tr>
-                    <td><span class="order__subtitle">Total</span></td>
-                    <td colspan="2"><span class="order__grand-total">₹<%= order.finalAmount.toFixed(2) %></span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          <% } else { %>
-            <p class="error-message"><%= error %></p>
-          <% } %>
-          <div class="order-actions">
-            <a href="/shop" class="btn btn--md">Continue Shopping</a>
-          </div>
-        </div>
-      </section>
-    </main>
-
-
-<!-- Add this in your EJS template -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-  function cancelOrderItem(orderId, itemId) {
-    // Initial confirmation dialog
-    Swal.fire({
-      title: 'Cancel Order Item',
-      text: 'Are you sure you want to cancel this item?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, cancel it!',
-      cancelButtonText: 'No, keep it'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Show loading state
-        Swal.fire({
-          title: 'Processing...',
-          text: 'Cancelling your order item',
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          allowEnterKey: false,
-          showConfirmButton: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
-        // Make the cancellation request
-        fetch(`/cancel-order-item/${orderId}/${itemId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Success dialog
-            Swal.fire({
-              title: 'Cancelled Successfully!',
-              text: 'Your order item has been cancelled.',
-              icon: 'success',
-              confirmButtonColor: '#3085d6',
-              confirmButtonText: 'OK'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                location.reload();
-              }
-            });
-          } else {
-            throw new Error(data.message || 'Cancellation failed');
-          }
-        })
-        .catch(error => {
-          // Error dialog
-          Swal.fire({
-            title: 'Cancellation Failed',
-            text: 'There was an error cancelling your order item. Please try again.',
-            icon: 'error',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
-          });
-        });
-      }
-    });
-  }
-</script>
-
-<!-- Add this CSS for better button styling -->
+<!--=============== MAIN ===============-->
 <style>
-  .cancel-btn {
+.modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 99999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: auto !important;
+}
+
+/* Force display flex when show class is present */
+.modal.show {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure modal content is visible and properly positioned */
+.modal-content {
+    background-color: #fff !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    position: relative !important;
+    margin: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: 100000 !important;
+}
+
+/* Override any potential conflicting styles */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+/* Ensure buttons and form elements are clickable */
+.modal-buttons {
+    position: relative !important;
+    z-index: 100001 !important;
+}
+
+.modal textarea {
+    width: 100% !important;
+    min-height: 100px !important;
+    margin-bottom: 15px !important;
+    padding: 10px !important;
+}
+.cancel-btn {
     background-color: #d33;
     color: white;
     border: 1px solid #d33;
@@ -194,16 +61,421 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s ease;
-  }
+}
 
-  .cancel-btn:hover {
+.cancel-btn:hover {
     background-color: white;
     color: #d33;
-  }
+}
 
-  .swal2-popup {
+.return-btn {
+    background-color: #4b5563;
+    color: white;
+    border: 1px solid #4b5563;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.return-btn:hover {
+    background-color: white;
+    color: #4b5563;
+}
+
+.modal-content h3 {
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.modal-content textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    min-height: 100px;
+    font-size: 0.95rem;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.modal-buttons button {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+}
+
+.confirm-btn {
+    background-color: #2563eb;
+    color: white;
+}
+
+.close-btn {
+    background-color: #e5e7eb;
+    color: #4b5563;
+    width: 60px;
+    height: 40px
+}
+
+.swal2-popup {
     font-size: 0.9rem !important;
-  }
+}
 </style>
 
+<main class="main">
+    <!--=============== BREADCRUMB ===============-->
+    <section class="breadcrumb" style="width: 100%; height: 80px; display: flex; margin-top: -40px; justify-content: center; align-items: center; background-color: #ffff;">
+        <ul class="breadcrumb__list container" style="margin-left: -25px">
+            <li><a href="/" class="breadcrumb__link" style="font-size: 12px">Home</a></li>
+            <li><span class="breadcrumb__link">></span></li>
+            <li><a href="/shop" class="breadcrumb__link" style="font-size: 12px">Shop</a></li>
+            <li><span class="breadcrumb__link">></span></li>
+            <li><a href="/cart" class="breadcrumb__link" style="font-size: 12px">Cart</a></li>
+            <li><span class="breadcrumb__link">></span></li>
+            <li><a href="/checkout" class="breadcrumb__link" style="font-size: 12px">Checkout</a></li>
+            <li><span class="breadcrumb__link">></span></li>
+            <li><a class="breadcrumb__link" style="font-size: 12px">Order details</a></li>
+        </ul>
+    </section>
+
+    <section class="order-details section--lg">
+        <div class="order-details__container container">
+            <h1 class="order-summary__title" style="margin-bottom: 100px; margin-top: -70px; color: rgb(17, 3, 34)">
+                Order Details
+            </h1>
+            <% if (order) { %>
+                <div class="order-user">
+                    <h3 class="order-user__name"><%= user.name %></h3>
+                </div>
+                <div style="display: flex; justify-content: space-between">
+                    <div class="order-address">
+                        <h2>Shipping Address</h2>
+                        <% if (order.shippingAddress) { %>
+                            <div class="address-details">
+                                <p class="address-name"><%= order.shippingAddress.name %></p>
+                                <% if (order.shippingAddress.landMark) { %>
+                                    <p class="address-landmark"><%= order.shippingAddress.landMark %></p>
+                                <% } %>
+                                <p class="address-location">
+                                    <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.pincode %>
+                                </p>
+                                <p class="address-phone">Phone: <%= order.shippingAddress.phone %></p>
+                                <% if (order.shippingAddress.altPhone) { %>
+                                    <p class="address-alt-phone">Alt Phone: <%= order.shippingAddress.altPhone %></p>
+                                <% } %>
+                            </div>
+                        <% } else { %>
+                            <p class="no-address">Address not available</p>
+                        <% } %>
+                    </div>
+                    <div class="order-tracker">
+                        <h2 class="order-tracker__title">Payment Method</h2>
+                        <p><%= order.paymentMethod %></p>
+                        <p>Status : <%= order.paymentStatus %></p>
+                    </div>
+                    <div class="order-tracker">
+                        <h2 class="order-tracker__title">Order Tracker</h2>
+                        <p>Status: <%= order.status %></p>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <h3 class="order-summary__title">Order Summary</h3>
+                    <table class="order-summary__table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.orderedItems.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded)); %>
+                            <% order.orderedItems.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <img src="/admin-assets/imgs/brands/<%= item.product.productImage[0] %>" alt="Product Image" class="order__img" />
+                                    </td>
+                                    <td>
+                                        <h3 class="table__title"><%= item.product.productName %></h3>
+                                        <p class="table__quantity">x <%= item.quantity %></p>
+                                        <p class="status <%= item.status?.toLowerCase() %>" style="color: #d33; font-size: larger; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">
+                                            <%= item.status || 'Pending' %>
+                                        </p>
+                                        <% if (item.status && item.status.toLowerCase() !== 'cancelled' && item.status.toLowerCase() !== 'returned') { %>
+                                            <% if (item.status.toLowerCase() === 'delivered') { %>
+                                                <button class="return-btn" onclick="showReturnModal('<%= order._id %>', '<%= item._id %>')">Return</button>
+                                            <% } else if(item.status.toLowerCase() !== 'returned') { %>
+                                                <button class="cancel-btn" onclick="showCancelModal('<%= order._id %>', '<%= item._id %>')">Cancel</button>
+                                            <% } %>
+                                        <% } %>
+                                        
+                                    </td>
+                                </tr>
+                            <% }) %>
+                            <tr>
+                                <td><span class="order__subtitle">Subtotal</span></td>
+                                <td colspan="2"><span class="table__price">₹<%= order.totalPrice.toFixed(2) %></span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="order__subtitle">Shipping</span></td>
+                                <td colspan="2"><span class="table__price">₹49.00</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="order__subtitle">Discount</span></td>
+                                <td colspan="2"><span class="table__price">₹<%= order.discount.toFixed(2) %></span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="order__subtitle">Total</span></td>
+                                <td colspan="2"><span class="order__grand-total">₹<%= order.finalAmount.toFixed(2) %></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p class="error-message"><%= error %></p>
+            <% } %>
+            <div class="order-actions">
+                <a href="/shop" class="btn btn--md">Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="cancelModal" class="modal">
+          <div class="modal-content">
+              <h3>Cancellation Reason</h3>
+              <textarea id="cancelReason" placeholder="Please provide a reason for cancellation"></textarea>
+              <div class="modal-buttons">
+                  <button id="confirmCancel" class="confirm-btn">Confirm</button>
+                  <button type="button" onclick="closeModal('cancelModal')" class="close-btn">Close</button>
+              </div>
+          </div>
+      </div>
+      
+      <div id="returnModal" class="modal">
+          <div class="modal-content">
+              <h3>Return Reason</h3>
+              <textarea id="returnReason" placeholder="Please provide a reason for returning"></textarea>
+              <div class="modal-buttons">
+                  <button id="confirmReturn" class="confirm-btn">Confirm</button>
+                  <button type="button" onclick="closeModal('returnModal')" class="close-btn">Close</button>
+              </div>
+          </div>
+      </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+       // Add debug logging
+let currentOrderId = null;
+let currentItemId = null;
+function showCancelModal(orderId, itemId) {
+    currentOrderId = orderId;
+    currentItemId = itemId;
+    const modal = document.getElementById("cancelModal");
+    
+if (modal) {
+        modal.style.display = 'flex';
+        void modal.offsetHeight; 
+        modal.classList.add("show");
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+    }
+  }
+function showReturnModal(orderId, itemId) {
+    currentOrderId = orderId;
+    currentItemId = itemId;
+    const modal = document.getElementById("returnModal");
+    if (modal) {
+        modal.style.display = 'flex';
+        void modal.offsetHeight; 
+        modal.classList.add("show");
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove("show");
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = "auto";
+    }
+}
+
+
+        function initializeOrderActions() {
+            // Initialize SweetAlert if not already loaded
+            if (typeof Swal === "undefined") {
+                console.error("SweetAlert2 is not loaded");
+                return;
+            }
+
+            // Set up cancel confirmation
+            const confirmCancelBtn = document.getElementById("confirmCancel");
+            if (confirmCancelBtn) {
+                confirmCancelBtn.addEventListener("click", function() {
+                    const reason = document.getElementById("cancelReason")?.value;
+
+                    if (!reason?.trim()) {
+                        closeModal("cancelModal"); // Hide modal before showing SweetAlert
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Missing Reason",
+                            text: "Please provide a reason for cancellation.",
+                        }).then(() => {
+                            showCancelModal(currentOrderId, currentItemId); // Reopen modal after alert
+                        });
+                        return;
+                    }
+
+
+                    Swal.fire({
+                        title: "Processing...",
+                        text: "Cancelling your order item",
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+
+                    fetch(`/cancel-order-item/${currentOrderId}/${currentItemId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ reason: reason }),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        closeModal("cancelModal");
+                        if (data.success) {
+                            Swal.fire({
+                                title: "Cancelled Successfully!",
+                                text: "Your order item has been cancelled.",
+                                icon: "success",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message || "Cancellation failed");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            title: "Cancellation Failed",
+                            text: error.message || "There was an error cancelling your order item.",
+                            icon: "error",
+                        });
+                    });
+                });
+            }
+
+            // Set up return confirmation
+            const confirmReturnBtn = document.getElementById("confirmReturn");
+            if (confirmReturnBtn) {
+                confirmReturnBtn.addEventListener("click", function() {
+                    const reason = document.getElementById("returnReason")?.value;
+
+                    if (!reason?.trim()) {
+                        closeModal("returnModal"); // Hide modal before showing SweetAlert
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Missing Reason",
+                            text: "Please provide a reason for returning.",
+                        }).then(() => {
+                            showReturnModal(currentOrderId, currentItemId); // Reopen modal after alert
+                        });
+                        return;
+                    }
+
+                    console.log("Submitting return request:", {
+        orderId: currentOrderId,
+        itemId: currentItemId,
+        reason
+    });
+
+
+
+                    Swal.fire({
+                        title: "Processing...",
+                        text: "Processing your return request",
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+
+                    fetch(`/returnOrder/${currentOrderId}/${currentItemId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ reason: reason }),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        closeModal("returnModal");
+                        if (data.success) {
+                            Swal.fire({
+                                title: "Return Requested Successfully!",
+                                text: "Your return request has been submitted.",
+                                icon: "success",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            throw new Error(data.message || "Return request failed");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            title: "Return Request Failed",
+                            text: error.message || "There was an error processing your return request.",
+                            icon: "error",
+                        });
+                    });
+                });
+            }
+
+            // Set up modal close buttons
+            document.querySelectorAll(".close-btn").forEach((btn) => {
+                btn.addEventListener("click", function() {
+                    const modalId = this.closest(".modal").id;
+                    closeModal(modalId);
+                });
+            });
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target.classList.contains("modal")) {
+                    closeModal(event.target.id);
+                }
+            };
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener("DOMContentLoaded", initializeOrderActions);
+
+        // Make sure modal functions are available globally
+        window.showCancelModal = showCancelModal;
+        window.showReturnModal = showReturnModal;
+        window.closeModal = closeModal;
+    </script>
+
     <%- include("../../views/partials/user/footer") %>
+</main>
