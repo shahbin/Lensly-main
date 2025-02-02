@@ -1,0 +1,432 @@
+<%- include("../../views/partials/admin/header") %>
+  <style>
+    /* Variables */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #333;
+  --border-color: #dee2e6;
+  --white: #fff;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --border-radius: 4px;
+  --transition: all 0.3s ease;
+}
+
+/* Layout */
+.content-main {
+  position: relative;
+  max-width: 1200px;
+  margin: var(--spacing-lg) auto;
+  padding: var(--spacing-lg);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Truncate Text */
+.truncate {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tooltip */
+.truncate-tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+.truncate-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  background: var(--secondary-color);
+  color: var(--white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  width: max-content;
+  max-width: 200px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  z-index: 100;
+  transition: var(--transition);
+}
+
+.truncate-tooltip:hover::after {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Pagination */
+.pagination-container {
+  margin-top: var(--spacing-lg);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-sm);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 var(--spacing-sm);
+  color: var(--primary-color);
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.page-link:hover {
+  background-color: #f8f9fa;
+  border-color: var(--primary-color);
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: var(--white);
+  border-color: var(--border-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content-main {
+    padding: var(--spacing-md);
+  }
+  
+  .truncate {
+    max-width: 120px;
+  }
+  
+  .page-link {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-main {
+    padding: var(--spacing-sm);
+  }
+  
+  .truncate {
+    max-width: 100px;
+  }
+  
+  .pagination {
+    gap: 2px;
+  }
+}
+  </style>
+  <section class="content-main">
+    <div class="content-header">
+      <div>
+        <h2 class="content-title card-title">Sales Report</h2>
+      </div>
+      <div class="download-buttons">
+        <button class="btn btn-primary" id="downloadPdf">Download PDF</button>
+        <button class="btn btn-primary" id="downloadExcel">Download Excel</button>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <div class="row mb-4">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Sales Report Filters</h5>
+              <div class="row">
+                <div class="col-md-3">
+                  <label for="report-type" class="form-label">Report Type</label>
+                  <select id="filter-order" class="form-select" onchange="filterOrder()">
+                    <option value="custom">Default</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="start-date" class="form-label">Start Date</label>
+                  <input type="date" id="start-date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label for="end-date" class="form-label">End Date</label>
+                  <input type="date" id="end-date" class="form-control">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                  <button class="btn btn-primary w-100" onClick="filterByDate()">Filter</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Cards -->
+     <!-- Replace your current metrics cards section with this -->
+<div class="row">
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Total Orders</h5>
+          <h3 class="text-primary" style="font-size: 1.3rem;">
+            <%= metrics.orderCount %>
+          </h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Total Revenue</h5>
+          <h3 class="text-success" style="font-size: 1.3rem;">₹ <%= metrics.totalSales.toFixed(2) %>
+          </h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Total Discounts</h5>
+          <h3 class="text-warning" style="font-size: 1.3rem;">₹ <%= metrics.totalDiscount.toFixed(2) %>
+          </h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Net Amount</h5>
+          <h3 class="text-info" style="font-size: 1.3rem;">₹ <%= metrics.totalFinalAmount.toFixed(2) %>
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+      <!-- Sales Report Table -->
+      <div class="row mt-4">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title">Sales Report</h5>
+            </div>
+            <div class="card-body">
+              <table id="salesTable" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (order.length> 0) { %>
+                    <% order.forEach(order=> { %>
+                      <% order.orderedItems.forEach(item=> { %>
+                        <tr>
+                          <td>
+                            <%= new Date(order.createdOn).toLocaleDateString() %>
+                          </td>
+                          <td class="truncate truncate-tooltip"
+                            data-tooltip="<%= order.userId ? order.userId.name : 'N/A' %>">
+                            <%= order.userId ? order.userId.name : 'N/A' %>
+                          </td>
+                          <td class="truncate truncate-tooltip" data-tooltip="<%= item.product.productName %>">
+                            <%= item.product.productName %>
+                          </td>
+                          <td>
+                            <%= item.quantity %>
+                          </td>
+                          <td>₹ <%= item.price %>
+                          </td>
+                          <td>₹ <%= order.discount || 0 %>
+                          </td>
+                          <td>₹ <%= item.price * item.quantity - (order.discount || 0) %>
+                          </td>
+                          <td>
+                            <%= order.status || "Pending" %>
+                          </td>
+                          <td>
+                            <%= order.paymentMethod %>
+                          </td>
+                        </tr>
+                        <% }); %>
+                          <% }); %>
+                            <% } else { %>
+                              <tr>
+                                <td colspan="7" class="text-center">No orders found.
+                                </td>
+                              </tr>
+                              <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pagination-container">
+      <% if (totalPage> 1) { %>
+        <ul class="pagination">
+          <% if (page> 1) { %>
+            <li class="page-item">
+              <a class="page-link" href="?page=<%= page - 1 %>">&laquo; Previous</a>
+            </li>
+            <% } %>
+              <% for (let i=1; i <=totalPage; i++) { %>
+                <li class="page-item <%= i === page ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>">
+                    <%= i %>
+                  </a>
+                </li>
+                <% } %>
+                  <% if (page < totalPage) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= page + 1 %>">Next &raquo;</a>
+                    </li>
+                    <% } %>
+        </ul>
+        <% } %>
+    </div>
+  </section>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+function filterOrder() {
+    const reportType = document.getElementById('filter-order').value;
+    const currentUrl = new URL(window.location.href);
+    
+    // Clear existing date parameters
+    currentUrl.searchParams.delete('startDate');
+    currentUrl.searchParams.delete('endDate');
+    currentUrl.searchParams.set('type', reportType);
+    
+    window.location.href = currentUrl.toString();
+}
+
+function filterByDate() {
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    
+    if (!startDate || !endDate) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Dates',
+            text: 'Please select both start and end dates'
+        });
+        return;
+    }
+    
+    if (new Date(endDate) < new Date(startDate)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date Range',
+            text: 'End date must be after start date'
+        });
+        return;
+    }
+    
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('type', 'custom');
+    currentUrl.searchParams.set('startDate', startDate);
+    currentUrl.searchParams.set('endDate', endDate);
+    
+    window.location.href = currentUrl.toString();
+}
+
+document.getElementById('downloadPdf').addEventListener('click', async () => {
+    try {
+        const currentUrl = new URL(window.location.href);
+        const params = currentUrl.searchParams;
+        
+        const downloadUrl = new URL('/admin/sales-report/download-pdf', window.location.origin);
+        if (params.has('startDate')) downloadUrl.searchParams.set('startDate', params.get('startDate'));
+        if (params.has('endDate')) downloadUrl.searchParams.set('endDate', params.get('endDate'));
+        if (params.has('type')) downloadUrl.searchParams.set('type', params.get('type'));
+        
+        window.location.href = downloadUrl.toString();
+    } catch (error) {
+        console.error('Error downloading PDF:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Download Failed',
+            text: 'Failed to download PDF'
+        });
+    }
+});
+
+document.getElementById('downloadExcel').addEventListener('click', async () => {
+    try {
+        const currentUrl = new URL(window.location.href);
+        const params = currentUrl.searchParams;
+        
+        const downloadUrl = new URL('/admin/sales-report/download-excel', window.location.origin);
+        if (params.has('startDate')) downloadUrl.searchParams.set('startDate', params.get('startDate'));
+        if (params.has('endDate')) downloadUrl.searchParams.set('endDate', params.get('endDate'));
+        if (params.has('type')) downloadUrl.searchParams.set('type', params.get('type'));
+        
+        window.location.href = downloadUrl.toString();
+    } catch (error) {
+        console.error('Error downloading Excel:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Download Failed',
+            text: 'Failed to download Excel'
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('startDate')) {
+        document.getElementById('start-date').value = urlParams.get('startDate');
+    }
+    if (urlParams.has('endDate')) {
+        document.getElementById('end-date').value = urlParams.get('endDate');
+    }
+    if (urlParams.has('type')) {
+        document.getElementById('filter-order').value = urlParams.get('type');
+    }
+});
+</script>
+
+
+  <%- include("../../views/partials/admin/footer") %>
