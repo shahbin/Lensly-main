@@ -7,7 +7,7 @@ const getWishlist = async (req, res) => {
     try {
         const userId = req.session.user;
         if (!userId) {
-            res.locals.wishlistItems = [];  // Set this for consistency with header
+            res.locals.wishlistItems = [];  
             return res.render('wishlist', { 
                 user: null, 
                 wishlist: [], 
@@ -21,7 +21,6 @@ const getWishlist = async (req, res) => {
                 select: 'productName productImage regularPrice salePrice quantity status' 
             });
 
-        // Format wishlist items
         const wishlistItems = wishlist ? wishlist.products.map(item => ({
             product: {
                 productName: item.productId.productName,
@@ -34,7 +33,6 @@ const getWishlist = async (req, res) => {
             addedOn: item.addedOn
         })) : [];
 
-        // Set wishlistItems in res.locals to match what header is expecting
         res.locals.wishlistItems = wishlistItems;
 
         const cart = await Cart.findOne({ userId });

@@ -265,15 +265,14 @@
 
     
 <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
-<script>
-//    
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
 
 let cropper;
 const croppedImages = [];
 const maxImages = 5;
 
-// Initialize elements
 document.addEventListener('DOMContentLoaded', function() {
     const modalBackdrop = document.getElementById('modalBackdrop');
     const cropperContainer = document.getElementById('cropperContainer');
@@ -350,7 +349,7 @@ function saveCrop() {
             preview: canvas.toDataURL('image/jpeg')
         });
         updatePreview();
-        closeCropper();  // Make sure to call closeCropper here
+        closeCropper();  
     }, 'image/jpeg', 0.9);
 }
 
@@ -368,7 +367,6 @@ function closeCropper() {
     modal.style.display = 'none';
     backdrop.style.display = 'none';
     
-    // Reset the file input
     document.getElementById('imageInput').value = '';
 }
 
@@ -378,10 +376,9 @@ function cancelCrop() {
 
 
 function removeImage(index) {
-    croppedImages.splice(index, 1); // Remove the image at the specified index
-    updatePreview(); // Update the preview container
+    croppedImages.splice(index, 1);
+    updatePreview(); 
     
-    // Re-enable the file input if we're below max images
     if (croppedImages.length < maxImages) {
         document.getElementById('imageInput').disabled = false;
     }
@@ -419,12 +416,10 @@ function validateAndSubmit() {
 
     const formData = new FormData(document.getElementById('productForm'));
     
-    // Remove any existing image fields
     for (let i = 0; i < maxImages; i++) {
         formData.delete(`image${i}`);
     }
 
-    // Add the cropped image files
     croppedImages.forEach((image, index) => {
         formData.append('images', image.file);
     });
@@ -436,85 +431,97 @@ function validateAndSubmit() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Product added successfully!');
-            window.location.href = '/admin/addProducts';
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Product added successfully!',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = '/admin/addProducts';
+            });
         } else {
-            alert(data.error || 'Error adding product');
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data.error || 'Error adding product'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error adding product. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error adding product. Please try again.'
+        });
     });
 }
 
 function validateForm() {
     let isValid = true;
 
-    // Clear previous error messages
     document.querySelectorAll('.error-message').forEach(function (el) {
         el.textContent = '';
     });
 
-    // Validate Product Name
     const productName = document.getElementById('product_name').value.trim();
     if (!productName) {
         document.getElementById('productName-error').textContent = 'Product Name is required';
         isValid = false;
     }
 
-    // Validate Brand
     const brand = document.querySelector('[name="brand"]').value.trim();
     if (!brand) {
         document.getElementById('brand-error').textContent = 'Brand is required';
         isValid = false;
     }
 
-    // Validate Description
     const description = document.getElementById('descriptionid').value.trim();
     if (!description) {
         document.getElementById('description-error').textContent = 'Description is required';
         isValid = false;
     }
 
-    // Validate Regular Price
     const regularPrice = document.querySelector('[name="regularPrice"]').value.trim();
     if (!regularPrice || isNaN(regularPrice)) {
         document.getElementById('regularPrice-error').textContent = 'Valid Regular Price is required';
         isValid = false;
     }
 
-    // Validate Sale Price
     const salePrice = document.querySelector('[name="salePrice"]').value.trim();
     if (salePrice && isNaN(salePrice)) {
         document.getElementById('salePrice-error').textContent = 'Valid Sale Price is required';
         isValid = false;
     }
 
-    // Validate Quantity
     const quantity = document.querySelector('[name="quantity"]').value.trim();
     if (!quantity || isNaN(quantity)) {
         document.getElementById('quantity-error').textContent = 'Valid Quantity is required';
         isValid = false;
     }
 
-    // Validate Category
     const category = document.querySelector('[name="category"]').value.trim();
     if (!category) {
         document.getElementById('category-error').textContent = 'Category is required';
         isValid = false;
     }
 
-    // Validate at least one image
     if (croppedImages.length === 0) {
         document.getElementById('images-error').textContent = 'At least one image is required';
         isValid = false;
     }
 
+    if (!isValid) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Validation Error',
+            text: 'Please fill in all required fields correctly'
+        });
+    }
+
     return isValid;
 }
-
-
     </script>
     
 

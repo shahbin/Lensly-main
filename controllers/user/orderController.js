@@ -209,10 +209,8 @@ const orderRazorpay = async (req, res) => {
 const verifyRazorPayOrder = async (req, res) => {
   try {
     
-      const { addressId, paymentMethod, couponId, orderId, paymentId, razorpaySignature, cartId } = req.body;
+      const { addressId, paymentMethod,couponCode, couponId, discount, orderId, paymentId, razorpaySignature, cartId } = req.body;
       const userId = req.session.user;
-      console.log("start",userId);
-      console.log("cart id",req.body)
       
       const cart = await Cart.findOne({ userId }).populate('items.productId');
     
@@ -251,12 +249,6 @@ const verifyRazorPayOrder = async (req, res) => {
               totalPrice += product.salePrice * quantity;
           }
 
-          let discount = 0;
-          if (coupon) {
-              discount = coupon.offerPrice;
-              totalPrice = totalPrice - discount;
-          }
-
           const finalAmount = totalPrice;
           const newOrder = new Order({
               orderedItems: cart.items.map(item => ({
@@ -272,7 +264,9 @@ const verifyRazorPayOrder = async (req, res) => {
               status: "Pending",  
               paymentMethod,
               discount,
-              paymentStatus:"Paid"
+              paymentStatus:"Paid",
+              couponDiscount,
+              couponId: couponCode ? couponCode._id : null,
           });
 
           await newOrder.save();
@@ -467,7 +461,7 @@ console.log("Reason:", req.body.reason);
   const walletPayment = async (req, res) => {
     try {
 
-        const { addressId, cartId, paymentMethod, couponCode, subtotal, couponDiscount, finalAmount } = req.body;
+        const { addressId, cartId, paymentMethod, couponCode, subtotal, couponDiscount, finalAmount, discount } = req.body;
         console.log("Received wallet payment request:", req.body);
 
         // Proceed with your logic
@@ -508,7 +502,6 @@ console.log("Reason:", req.body.reason);
             await product.save();
         }
 
-        // Create a new order
         const newOrder = new Order({
             orderedItems: cart.items.map(item => ({
                 product: item.productId,
@@ -521,28 +514,22 @@ console.log("Reason:", req.body.reason);
             invoiceDate: new Date(),
             status: "Pending",
             paymentMethod,
-            couponDiscount,
-            couponId: couponCode ? couponCode._id : null,
+            discount,
             userId,
             paymentStatus:"Paid"
         });
 
-        // Log the new order details before saving
         console.log("New Order Data:", newOrder);
 
-        // Save the order
         const orderSaving = await newOrder.save();
         console.log("Order saved:", orderSaving);
 
-        // Deduct the wallet balance
         const transactionType = 'debit';
         await walletHelper.updateWalletBalance(userId, finalAmount, transactionType);
 
-        // Clear the cart after order is placed
         cart.items = [];
         await cart.save();
 
-        // Respond with success message
         res.status(200).json({ success: true, orderId: newOrder._id, finalAmount });
     } catch (error) {
         console.error("Error during wallet payment:", error);

@@ -188,9 +188,7 @@
           </div>
         </div>
       </div>
-
-      <!-- Metrics Cards -->
-     <!-- Replace your current metrics cards section with this -->
+    
 <div class="row">
     <div class="col-md-3">
       <div class="card">
@@ -214,8 +212,8 @@
     <div class="col-md-3">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Total Discounts</h5>
-          <h3 class="text-warning" style="font-size: 1.3rem;">₹ <%= metrics.totalDiscount.toFixed(2) %>
+          <h5 class="card-title">Coupon Discounts</h5>
+          <h3 class="text-warning" style="font-size: 1.3rem;">₹ <%= metrics.totalCoupon.toFixed(2) %>
           </h3>
         </div>
       </div>
@@ -223,15 +221,14 @@
     <div class="col-md-3">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Net Amount</h5>
-          <h3 class="text-info" style="font-size: 1.3rem;">₹ <%= metrics.totalFinalAmount.toFixed(2) %>
+          <h5 class="card-title">Total Discounts</h5>
+          <h3 class="text-info" style="font-size: 1.3rem;">₹ <%= metrics.totalDiscounts.toFixed(2) %>
           </h3>
         </div>
       </div>
     </div>
   </div>
 
-      <!-- Sales Report Table -->
       <div class="row mt-4">
         <div class="col-lg-12">
           <div class="card">
@@ -248,8 +245,8 @@
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Discount</th>
+                    <th>Coupon</th>
                     <th>Total</th>
-                    <th>Status</th>
                     <th>Payment Method</th>
                   </tr>
                 </thead>
@@ -271,14 +268,14 @@
                           <td>
                             <%= item.quantity %>
                           </td>
-                          <td>₹ <%= item.price %>
+                          <td>₹ <%= item.product.regularPrice %>
                           </td>
-                          <td>₹ <%= order.discount || 0 %>
+                          <td>₹ <%= item.product.offerAmount || 0 %>
+                            <td>
+                              <%= order.discount || 0 %>
+                            </td>
                           </td>
                           <td>₹ <%= item.price * item.quantity - (order.discount || 0) %>
-                          </td>
-                          <td>
-                            <%= order.status || "Pending" %>
                           </td>
                           <td>
                             <%= order.paymentMethod %>
@@ -334,7 +331,6 @@ function filterOrder() {
     const reportType = document.getElementById('filter-order').value;
     const currentUrl = new URL(window.location.href);
     
-    // Clear existing date parameters
     currentUrl.searchParams.delete('startDate');
     currentUrl.searchParams.delete('endDate');
     currentUrl.searchParams.set('type', reportType);
@@ -382,7 +378,7 @@ document.getElementById('downloadPdf').addEventListener('click', async () => {
         if (params.has('endDate')) downloadUrl.searchParams.set('endDate', params.get('endDate'));
         if (params.has('type')) downloadUrl.searchParams.set('type', params.get('type'));
         
-        window.location.href = downloadUrl.toString();
+        window.location.href = downloadUrl.toString();window.location.origin
     } catch (error) {
         console.error('Error downloading PDF:', error);
         Swal.fire({

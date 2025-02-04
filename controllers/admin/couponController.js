@@ -87,7 +87,7 @@ const getEditCoupon = async (req,res)=>{
 
   const deleteCoupon = async (req, res) => {
     try {
-      const id = req.body.id; // Changed from query to body since we're using POST
+      const id = req.body.id;
       
       if (!id) {
         return res.status(400).json({

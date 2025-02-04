@@ -2,10 +2,11 @@ const Order = require("../../models/orderSchema");
 const PDFDocument = require('pdfkit');
 const xlsx = require('xlsx');
 
+let getDiscounts = 0;
 const loadSalesReport = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 5;
         const skip = (page - 1) * limit;
         
         const reportType = req.query.type || 'custom';
@@ -61,7 +62,7 @@ const loadSalesReport = async (req, res) => {
                 $group: {
                     _id: null,
                     totalSales: { $sum: '$totalPrice' },
-                    totalDiscount: { $sum: '$discount' },
+                    totalCoupon: { $sum: '$discount' },
                     totalFinalAmount: { $sum: '$finalAmount' },
                     orderCount: { $sum: 1 }
                 }
@@ -70,16 +71,36 @@ const loadSalesReport = async (req, res) => {
 
         const metrics = aggregateResult[0] || {
             totalSales: 0,
-            totalDiscount: 0,
+            totalCoupon: 0,
             totalFinalAmount: 0,
+            totalDiscounts: 0,
             orderCount: 0
         };
 
+        let totalDiscounts = 0;
+        for(let order of orders) {
+            console.log(order)
+            for(let item of order.orderedItems) {
+                totalDiscounts += item.product.offerAmount
+            }
+        }
+
+        getDiscounts = totalDiscounts;
+
+        const newMetrics = {
+            totalSales: metrics.totalSales,
+            totalCoupon: metrics.totalCoupon,
+            totalFinalAmount: metrics.totalFinalAmount,
+            totalDiscounts: totalDiscounts,
+            orderCount: metrics.orderCount
+        }
+        
         res.render('salesReport', {
             order: orders,
+            totalDiscounts,
             page,
             totalPage: totalPages,
-            metrics,
+            metrics: newMetrics,
             reportType,
             startDate,
             endDate
@@ -93,13 +114,13 @@ const loadSalesReport = async (req, res) => {
 
 
 const generatePDF = async (orders, metrics) => {
+    console.log(metrics, "rtyuikuytrfgthjkl")
     const doc = new PDFDocument({
         margin: 50,
         size: 'A4'
     });
 
-    // Helper functions
-    const formatCurrency = (amount) => `₹${Number(amount).toLocaleString('en-IN', {
+    const formatCurrency = (amount) => `${Number(amount).toLocaleString('en-IN', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     })}`;
@@ -116,7 +137,6 @@ const generatePDF = async (orders, metrics) => {
         return id.substring(0, 12) + '...';
     };
 
-    // Header
     doc.fontSize(24)
         .font('Helvetica-Bold')
         .text('SALES REPORT', { align: 'center' });
@@ -131,22 +151,19 @@ const generatePDF = async (orders, metrics) => {
     
     doc.moveDown(2);
 
-    // Summary section
     doc.rect(50, doc.y, 495, 120).stroke();
     
     const startY = doc.y + 10;
     
-    // Summary title
     doc.font('Helvetica-Bold')
         .fontSize(16)
         .text('Summary', 70, startY);
     
-    // Summary data
     const summaryData = [
         { label: 'Total Orders:', value: metrics.orderCount },
         { label: 'Total Sales:', value: formatCurrency(metrics.totalSales) },
-        { label: 'Total Discount:', value: formatCurrency(metrics.totalDiscount) },
-        { label: 'Net Amount:', value: formatCurrency(metrics.totalFinalAmount) }
+        { label: 'Coupon Discount:', value: formatCurrency(metrics.totalCoupon) },
+        { label: 'Total Discount:', value: formatCurrency(metrics.totalDiscounts) }
     ];
 
     let currentY = startY + 30;
@@ -161,14 +178,12 @@ const generatePDF = async (orders, metrics) => {
 
     doc.moveDown(4);
 
-    // Order Details section
     doc.font('Helvetica-Bold')
         .fontSize(16)
         .text('Order Details', 50, doc.y);
     
     doc.moveDown();
 
-    // Define fixed column widths
     const columns = [
         { header: 'Order ID', width: 140 },
         { header: 'Date', width: 100 },
@@ -179,11 +194,9 @@ const generatePDF = async (orders, metrics) => {
 
     const tableTop = doc.y;
     
-    // Draw table header background
     doc.rect(50, tableTop, 495, 20)
        .fill('#f0f0f0');
 
-    // Draw header text
     let xPos = 60;
     doc.font('Helvetica-Bold')
        .fontSize(11)
@@ -197,11 +210,9 @@ const generatePDF = async (orders, metrics) => {
         xPos += column.width;
     });
 
-    // Table rows
     let rowTop = tableTop + 25;
 
     orders.forEach((order, index) => {
-        // Alternate row background
         if (index % 2 === 0) {
             doc.rect(50, rowTop - 5, 495, 20)
                .fill('#f9f9f9');
@@ -212,31 +223,26 @@ const generatePDF = async (orders, metrics) => {
            .fontSize(10)
            .fillColor('#000000');
 
-        // Order ID (truncated)
         doc.text(truncateId(order.orderId), xPos, rowTop, {
             width: columns[0].width - 10
         });
         xPos += columns[0].width;
 
-        // Date (formatted)
         doc.text(formatDate(order.createdOn), xPos, rowTop, {
             width: columns[1].width - 10
         });
         xPos += columns[1].width;
 
-        // Customer
         doc.text(order.userId.name, xPos, rowTop, {
             width: columns[2].width - 10
         });
         xPos += columns[2].width;
 
-        // Status
         doc.text(order.status, xPos, rowTop, {
             width: columns[3].width - 10
         });
         xPos += columns[3].width;
 
-        // Amount
         doc.text(formatCurrency(order.finalAmount), xPos, rowTop, {
             width: columns[4].width - 10
         });
@@ -244,7 +250,6 @@ const generatePDF = async (orders, metrics) => {
         rowTop += 20;
     });
 
-    // Draw table border
     doc.rect(50, tableTop, 495, rowTop - tableTop)
        .stroke();
 
@@ -261,6 +266,7 @@ const downloadPdf = async (req, res) => {
             .populate('orderedItems.product');
 
         const metrics = await calculateMetrics(query);
+
 
         const doc = await generatePDF(orders, metrics);
 
@@ -332,17 +338,27 @@ const calculateMetrics = async (query) => {
             $group: {
                 _id: null,
                 totalSales: { $sum: '$totalPrice' },
-                totalDiscount: { $sum: '$discount' },
+                totalCoupon: { $sum: '$discount' },
                 totalFinalAmount: { $sum: '$finalAmount' },
                 orderCount: { $sum: 1 }
             }
         }
     ]);
-    return aggregateResult[0] || {
+
+    let newResult = [{
+        totalSales: aggregateResult[0].totalSales,
+        totalCoupon: aggregateResult[0].totalCoupon,
+        totalFinalAmount: aggregateResult[0].totalFinalAmount,
+        orderCount: aggregateResult[0].orderCount,
+        totalDiscounts: getDiscounts
+    }]
+
+    return newResult[0] || {
         totalSales: 0,
-        totalDiscount: 0,
+        totalCoupon: 0,
         totalFinalAmount: 0,
-        orderCount: 0
+        orderCount: 0,
+        totalDiscounts: 0,
     };
 };
 

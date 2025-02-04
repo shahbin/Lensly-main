@@ -222,7 +222,6 @@ const cartAPI = {
     }
   },
 
-  // Keep other methods the same
   async updateQuantity(productId, quantity) {
     try {
       const response = await fetch('/update-cart', {
@@ -256,12 +255,10 @@ const cartAPI = {
   }
 };
 
-// Updated handleAddToCart for shop/home page
 async function handleAddToCart(productId, availableStock) {
   try {
     console.log("Adding to cart - Product ID:", productId, "Stock:", availableStock);
     
-    // Parse stock to number and validate
     availableStock = parseInt(availableStock, 10);
     
     if (isNaN(availableStock) || availableStock <= 0) {
@@ -275,7 +272,6 @@ async function handleAddToCart(productId, availableStock) {
       return;
     }
 
-    // Show loading state
     Swal.fire({
       title: 'Adding to cart...',
       allowOutsideClick: false,
@@ -284,9 +280,8 @@ async function handleAddToCart(productId, availableStock) {
       }
     });
 
-    const response = await cartAPI.addToCart(productId, 1); // Default quantity 1 for shop/home page
+    const response = await cartAPI.addToCart(productId, 1); 
     
-    // Close loading dialog
     Swal.close();
 
     if (!response.success) {
@@ -314,7 +309,6 @@ async function handleAddToCart(productId, availableStock) {
       return;
     }
 
-    // Success case
     Swal.fire({
       icon: 'success',
       title: 'Added to Cart!',
@@ -343,10 +337,9 @@ async function handleAddToCart(productId, availableStock) {
   }
 }
 
-// Product details page specific quantity handling
 function updateQuantity(action) {
   const quantityInput = document.getElementById('quantity');
-  if (!quantityInput) return; // Only run on product details page
+  if (!quantityInput) return; 
   
   let quantity = parseInt(quantityInput.value);
   const maxQuantity = parseInt(quantityInput.max);

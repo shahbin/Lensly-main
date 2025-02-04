@@ -10,20 +10,16 @@ const categoryInfo = async (req, res) => {
         const skip = (page - 1) * limit;
         const searchQuery = req.query.search?.trim();
 
-        // Build the filter object
         let filter = {};
         if (searchQuery) {
-            // Case-insensitive search using regex
             filter.name = { $regex: new RegExp(searchQuery, 'i') };
         }
 
-        // Get filtered categories with pagination
         const categoryData = await Category.find(filter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        // Get total count for pagination
         const totalCategories = await Category.countDocuments(filter);
         const totalPages = Math.ceil(totalCategories / limit);
 
@@ -32,7 +28,7 @@ const categoryInfo = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             totalCategories: totalCategories,
-            searchQuery: searchQuery || '' // Pass search query back to view
+            searchQuery: searchQuery || '' 
         });
 
     } catch (error) {
@@ -142,7 +138,6 @@ const addCategoryOffer = async (req, res) => {
         const percentage = parseInt(req.body.percentage);
         const categoryId = req.body.categoryId;
 
-        // Find category with proper findById syntax
         const category = await Category.findById(categoryId);
         
         if (!category) {
@@ -152,10 +147,8 @@ const addCategoryOffer = async (req, res) => {
             });
         }
 
-        // Find all products in the category
         const products = await Product.find({ category: category._id });
 
-        // Check if any product has higher offer (fixed .so to .some)
         const hasHigherProductOffer = products.some(
             (product) => product.productOffer > percentage
         );
@@ -167,16 +160,13 @@ const addCategoryOffer = async (req, res) => {
             });
         }
 
-        // Update category offer
         await Category.updateOne(
             { _id: categoryId },
             { $set: { categoryOffer: percentage } }
         );
 
-        // Update all products in the category
         for (const product of products) {
             product.productOffer = 0;
-            // Calculate new sale price with category offer
             const discountAmount = (product.regularPrice * percentage) / 100;
             product.salePrice = product.regularPrice - discountAmount;
             product.offerAmount = discountAmount;
@@ -202,7 +192,6 @@ const removeCategoryOffer = async (req, res) => {
     try {
         const categoryId = req.body.categoryId;
         
-        // First find the category properly
         const category = await Category.findById(categoryId);
 
         if (!category) {
@@ -214,13 +203,10 @@ const removeCategoryOffer = async (req, res) => {
 
         const percentage = category.categoryOffer;
         
-        // Find products in the category
         const products = await Product.find({ category: categoryId });
 
-        // Update products if any exist
         if (products.length > 0) {
             for (const product of products) {
-                // Reset sale price to regular price since offer is being removed
                 product.salePrice = product.regularPrice;
                 product.productOffer = 0;
                 product.offerAmount = 0;
@@ -228,7 +214,6 @@ const removeCategoryOffer = async (req, res) => {
             }
         }
 
-        // Remove the category offer
         category.categoryOffer = 0;
         await category.save();
 

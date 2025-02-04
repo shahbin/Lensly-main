@@ -439,7 +439,6 @@
   async function placeOrder() {
     console.log("Place Order function triggered");
 
-    // Get selected address
     const selectedAddressId = document.querySelector('input[name="addressId"]:checked')?.value;
     if (!selectedAddressId) {
         Swal.fire({ icon: "error", title: "Error", text: "Please select an address" });
@@ -447,7 +446,6 @@
     }
 
 
-    // Get selected payment method
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
     console.log("Selected Payment Method:", paymentMethod);
     if (!paymentMethod) {
@@ -455,14 +453,12 @@
         return;
     }
 
-    // Get other order details
     const couponCode = document.getElementById("couponCode").value.trim() || null;
     const subtotal = parseFloat(document.getElementById("subtotal").value);
     const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
-    const totalPrice = subtotal + 49 - discount; // Assuming ₹49 is a fixed shipping charge
+    const totalPrice = subtotal + 49 - discount; 
 
 
-    // COD Payment
     if (paymentMethod === "cod") {
         try {
             const response = await fetch("/place-order", {
@@ -549,7 +545,6 @@
                             return;
                         }
 
-                        // Verify the payment
                         const verifyResponse = await fetch("/verifyRazorPayOrder", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -604,7 +599,7 @@
                 paymentMethod,
                 couponCode,
                 subtotal,
-                couponDiscount: discount,
+                discount,
                 finalAmount: totalPrice
             };
 
