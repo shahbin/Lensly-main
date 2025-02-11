@@ -58,7 +58,7 @@
                     <button class="quantity-btn increment" data-product-id="<%= item.product._id %>">+</button>
                   </div>
                   <div class="max-quantity-message" style="display: none; color: rgb(125, 71, 71); font-size: 12px;">Maximum quantity reached</div>
-                  <div class="out-of-stock-message" style="display: none; color: rgb(125, 71, 71); font-size: 12px;">Maximum quantity reached <p>"Out of stock"</p></div>
+                  <div class="out-of-stock-message" style="display: none; color: rgb(125, 71, 71); font-size: 12px;"><p>"Out of stock"</p></div>
                 </td>
                 <td><span class="subtotal"><%= item.subtotal.toFixed(2) %></span></td>
                 <td><i class="fi fi-rs-trash table__trash" onclick="removeItem('<%= item.product._id %>')" ></i></td>

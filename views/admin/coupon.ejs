@@ -230,6 +230,30 @@
 .table-responsive::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
 }
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.page-link {
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.page-link.active {
+    background-color: #088178;
+    color: #fff;
+}
+
+.page-link:hover {
+    background-color: #f0f0f0;
+}
  </style>
 <section class="content-main">
  <div class="content-header">
@@ -359,139 +383,171 @@
      </div>
    </div>
  </div>
-</section>
+
+ <div class="pagination">
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>" class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+  <% } %>
+  <a href="?page=<%= currentPage + 1 %>" class="page-link">Next</a>
+</div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
- function validateForm() {
-   document.querySelectorAll(".error-message").forEach((element) => (element.innerHTML = ""));
-   const sDate = document.getElementsByName("startDate")[0].value;
-   const eDate = document.getElementsByName("endDate")[0].value;
-   const sDateObj = new Date(sDate);
-   const eDateObj = new Date(eDate);
-   const todayDateObj = new Date();
-   todayDateObj.setHours(0, 0, 0, 0);
+function validateForm() {
+    $.ajax({
+        url: "/admin/createCoupon",
+        method: "POST",
+        data: {
+            couponName: $("input[name='couponName']").val(),
+            startDate: $("input[name='startDate']").val(),
+            endDate: $("input[name='endDate']").val(),
+            offerPrice: $("input[name='offerPrice']").val(),
+            minimumPrice: $("input[name='minimumPrice']").val()
+        },
+        success: function(response) {
+            if (response.success) {
+                window.location.href = "/admin/coupon";
+            }
+        },
+        error: function(xhr) {
+            // Clear previous error messages
+            $(".error-message").text("");
 
+            // Check if validation errors exist
+            if (xhr.responseJSON && xhr.responseJSON.errors) {
+                const errors = xhr.responseJSON.errors;
 
-   if (sDateObj > eDateObj) {
-     document.getElementById("error-end-date").innerHTML ="End date should be after the start date";
-     return false;
-   }
+                // Map backend errors to frontend error elements
+                if (errors.couponName) 
+                    $("#error-coupon-name").text(errors.couponName);
+                
+                if (errors.startDate) 
+                    $("#error-start-date").text(errors.startDate);
+                
+                if (errors.endDate) 
+                    $("#error-end-date").text(errors.endDate);
+                
+                if (errors.offerPrice) 
+                    $("#error-offer-price").text(errors.offerPrice);
+                
+                if (errors.minimumPrice) 
+                    $("#error-minimum-price").text(errors.minimumPrice);
+            }
+        }
+    });
+    return false; // Prevent default form submission
+}
 
+function updateCoupon(couponId) {
+    const formData = {
+        couponId: couponId,
+        couponName: document.getElementsByName("couponName")[0].value,
+        startDate: document.getElementsByName("startDate")[0].value,
+        endDate: document.getElementsByName("endDate")[0].value,
+        offerPrice: document.getElementsByName("offerPrice")[0].value,
+        minimumPrice: document.getElementsByName("minimumPrice")[0].value
+    };
 
-   if (sDateObj <= todayDateObj) {
-     document.getElementById("error-start-date").innerHTML ="Starting date should be greater than or equal to today's date";
-     return false;
-   }
+    $.ajax({
+        url: "/admin/updateCoupon",
+        method: "POST",
+        data: formData,
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: response.message,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = "/admin/coupon";
+                });
+            } else {
+                // Display validation errors
+                const errors = response.errors;
+                Object.keys(errors).forEach(key => {
+                    const errorElement = document.getElementById(`error-${key.toLowerCase()}`);
+                    if (errorElement) {
+                        errorElement.innerHTML = errors[key];
+                    }
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: xhr.responseJSON?.message || 'An error occurred'
+            });
+        }
+    });
 
+    return false;
+}
 
-   let name = document.getElementsByName("couponName")[0].value;
-   const nameRegex = /^[A-Za-z0-9]{1,50}$/;
-
-
-   if (!nameRegex.test(name)) {
-     document.getElementById("error-coupon-name").innerHTML =
-       "Coupon Name error";
-     return false;
-   }
-
-
-   const offerPriceInput = document.getElementsByName("offerPrice")[0];
-   const minimumPriceInput = document.getElementsByName("minimumPrice")[0];
-
-
-   const offerPrice = offerPriceInput.value.trim() !== ""? parseInt(offerPriceInput.value): NaN;
-   const minimumPrice = minimumPriceInput.value.trim() !== ""? parseInt(minimumPriceInput.value): NaN;
-
-
-   if (isNaN(offerPrice) || isNaN(minimumPrice) || offerPrice >= minimumPrice) {
-     document.getElementById("error-offer-price").innerHTML = "Offer Price must be greater than Minimum Price";
-     return false;
-   }
-
-
-   if (isNaN(offerPrice) || isNaN(minimumPrice)) {
-     document.getElementById("error-offer-price").innerHTML ="Please enter numeric values for Offer Price and Minimum Price";
-     return false;
-   }
-
-
-       const formData = {
-       couponName: name,
-       startDate: sDateObj,
-       endDate: eDateObj,
-       offerPrice: offerPrice,
-       minimumPrice: minimumPrice
-   };
-   return true;
- }
-
-
- function confirmDelete(couponId) {
-  if (!couponId) {
-    console.error('No coupon ID provided');
-    return;
-  }
-
-  Swal.fire({
-    title: "Are you sure?",
-    text: "You won't be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, delete it!"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      deleteCoupon(couponId);
+function confirmDelete(couponId) {
+    if (!couponId) {
+        console.error('No coupon ID provided');
+        return;
     }
-  });
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteCoupon(couponId);
+        }
+    });
 }
 
 function deleteCoupon(couponId) {
-  $.ajax({
-    url: "/admin/deleteCoupon",
-    method: "POST", // Changed to POST for data modification
-    data: { id: couponId },
-    success: function(response) {
-      if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "The coupon has been deleted.",
-          confirmButtonText: "OK"
-        }).then(() => {
-          window.location.reload();
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: response.message || "Failed to delete the coupon. Please try again."
-        });
-      }
-    },
-    error: function(xhr) {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: xhr.responseText || "Failed to delete the coupon. Please try again."
-      });
-    }
-  });
+    $.ajax({
+        url: "/admin/deleteCoupon",
+        method: "POST",
+        data: { id: couponId },
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Deleted!",
+                    text: response.message,
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: response.message || "Failed to delete the coupon"
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: xhr.responseJSON?.message || "Failed to delete the coupon"
+            });
+        }
+    });
 }
+
 function setDefaultStartDate() {
-  const today = new Date();
-  const dd = String(today.getDate()).padStart(2, "0");
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const yyyy = today.getFullYear();
-  const todayStr = yyyy + "-" + mm + "-" + dd;
-  document.getElementsByName("startDate")[0].value = todayStr;
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    const todayStr = yyyy + "-" + mm + "-" + dd;
+    document.getElementsByName("startDate")[0].value = todayStr;
 }
-
-
-
 </script>
 <%- include("../../views/partials/admin/footer") %>

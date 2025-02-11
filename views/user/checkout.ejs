@@ -445,7 +445,6 @@
         return;
     }
 
-
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
     console.log("Selected Payment Method:", paymentMethod);
     if (!paymentMethod) {
@@ -456,26 +455,30 @@
     const couponCode = document.getElementById("couponCode").value.trim() || null;
     const subtotal = parseFloat(document.getElementById("subtotal").value);
     const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
-    const totalPrice = subtotal + 49 - discount; 
+    const totalPrice = subtotal + 49 - discount; // Adding shipping cost of ₹49
 
+    const orderData = {
+        addressId: selectedAddressId,
+        paymentMethod,
+        couponCode,
+        subtotal,
+        discount,
+        totalAmount: totalPrice
+    };
+
+    console.log("Order Data:", orderData);
 
     if (paymentMethod === "cod") {
         try {
             const response = await fetch("/place-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    addressId: selectedAddressId,
-                    cartId: "<%= cart._id %>", 
-                    paymentMethod,
-                    couponCode,
-                    subtotal,
-                    discount,
-                    totalAmount: totalPrice
-                }),
+                body: JSON.stringify(orderData)
             });
 
             const data = await response.json();
+            console.log("Order Response:", data);
+
             if (response.ok) {
                 Swal.fire({
                     icon: "success",
@@ -487,149 +490,145 @@
                     },
                 });
             } else {
-                Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to place order" });
+                Swal.fire({ 
+                    icon: "error", 
+                    title: "Error", 
+                    text: data.message || "Failed to place order" 
+                });
             }
         } catch (error) {
             console.error("Error placing order:", error);
-            Swal.fire({ icon: "error", title: "Error", text: "Failed to place order" });
+            Swal.fire({ 
+                icon: "error", 
+                title: "Error", 
+                text: "Failed to place order. Please try again." 
+            });
         }
-    }
-
-    // Online Payment (Razorpay)
-    else if (paymentMethod === "online") {
+    } else if (paymentMethod === "online") {
         try {
             const response = await fetch("/placeOrderRazorPay", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    addressId: selectedAddressId,
-                    cartId: "<%= cart._id %>",  
-                    paymentMethod,
-                    couponCode,
-                    subtotal,
-                    discount,
-                    totalAmount: totalPrice
-                }),
+                body: JSON.stringify(orderData)
             });
 
             const data = await response.json();
-            if (data.success) {
-                const { orderId, amount, currency, key } = data;
 
-                if (!key) {
-                    console.error("Razorpay key is missing!");
-                    Swal.fire({
-                        icon: "error",
-                        title: "Payment Error",
-                        text: "Razorpay key is not set. Please contact support.",
-                    });
-                    return;
-                }
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to create Razorpay order");
+            }
 
-                const options = {
-                    key: key,
-                    amount: amount,
-                    currency: currency,
-                    name: "Lensly",
-                    description: "Order Payment",
-                    order_id: orderId,
-                    handler: async function (response) {
-                        const { razorpay_payment_id, razorpay_signature, razorpay_order_id } = response;
-
-                        if (!razorpay_payment_id || !razorpay_signature || !razorpay_order_id) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Payment Failed",
-                                text: "Invalid payment response. Please try again.",
-                            });
-                            return;
-                        }
-
+            const options = {
+                key: data.key,
+                amount: data.amount,
+                currency: data.currency,
+                name: "Lensly",
+                description: "Payment for your order",
+                order_id: data.orderId,
+                handler: async function (response) {
+                    try {
                         const verifyResponse = await fetch("/verifyRazorPayOrder", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                addressId: selectedAddressId,
-                                paymentMethod,
-                                couponId: couponCode,
-                                orderId: razorpay_order_id,
-                                paymentId: razorpay_payment_id,
-                                cartId: "<%= cart._id %>", 
-                                razorpaySignature: razorpay_signature
+                                ...orderData,
+                                orderId: data.orderId,
+                                paymentId: response.razorpay_payment_id,
+                                razorpaySignature: response.razorpay_signature
                             }),
                         });
 
                         const verifyData = await verifyResponse.json();
-                        console.log("Payment Verification Response:", verifyData);
-
-                        if (verifyData.success) {
+                        if (verifyResponse.ok) {
                             Swal.fire({
-                                title: "Payment Success",
-                                text: `Order Placed Successfully. Your OrderId is: ${verifyData.orderId}`,
                                 icon: "success",
-                                confirmButtonText: "OK"
-                            }).then(() => window.location.href = `/order-details/${verifyData.orderId}`);
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Payment Failed",
-                                text: "Payment verification failed. Please try again.",
+                                title: "Payment successful!",
+                                text: "Your order has been placed.",
+                                showConfirmButton: false,
+                                timer: 2000,
+                                willClose: () => {
+                                    window.location.href = `/order-details/${verifyData.orderId}`;
+                                },
                             });
+                        } else {
+                            throw new Error(verifyData.message || "Payment verification failed");
                         }
-                    },
-                    theme: { color: "#3399cc" },
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
-            } else {
-                Swal.fire({ icon: "error", title: "Error", text: data.message || "Failed to initiate payment. Please try again." });
-            }
-        } catch (error) {
-            console.error("Error processing payment:", error);
-            Swal.fire({ title: "Error", text: "An error occurred while processing the payment.", icon: "error" });
-        }
-    } else if (paymentMethod === "wallet") {
-        console.log("Wallet payment method selected.");
-
-        try {
-            const requestData = {
-                addressId: selectedAddressId,
-                cartId: "<%= cart._id %>",  
-                paymentMethod,
-                couponCode,
-                subtotal,
-                discount,
-                finalAmount: totalPrice
+                    } catch (error) {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Payment Failed",
+                            text: "Your order has been placed but payment is pending. You can complete the payment from your orders page.",
+                            confirmButtonText: "View Order",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = `/order-details/${verifyData.orderId}`;
+                            }
+                        });
+                    }
+                },
+                modal: {
+                    ondismiss: function() {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Payment Failed",
+                            text: "Your order has been placed but payment is pending. You can complete the payment from your orders page.",
+                            confirmButtonText: "View Order",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = `/order-details/${verifyData.orderId}`;
+                            }
+                        });
+                    }
+                },
+                prefill: {
+                    name: "<%= user.name %>",
+                    email: "<%= user.email %>",
+                },
+                theme: {
+                    color: "#3399cc",
+                },
             };
 
-            console.log("Request Data:", requestData);
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
+
+        } catch (error) {
+            console.error("Razorpay error:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.message || "Failed to initialize payment"
+            });
+        }
+    } else if (paymentMethod === "wallet") {
+        try {
+            const response = await fetch("/place-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData)
+            });
+
+            const data = await response.json();
+            console.log("Order Response:", data);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to create order");
+            }
 
             const walletResponse = await fetch("/walletPayment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestData),
+                body: JSON.stringify({
+                    ...orderData,
+                    orderId: data.orderId
+                })
             });
 
-            console.log("Wallet Response Status:", walletResponse.status, walletResponse.statusText);
-
-            if (!walletResponse.ok) {
-                console.error("Failed response:", walletResponse.status, walletResponse.statusText);
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: `Request failed with status: ${walletResponse.status}`,
-                });
-                return;
-            }
-
             const walletData = await walletResponse.json();
-            console.log("Wallet Payment Response:", walletData);
-
-            if (walletData.success) {
+            if (walletResponse.ok) {
                 Swal.fire({
                     icon: "success",
-                    title: "Order Placed Successfully!",
+                    title: "Payment successful!",
                     text: "Your order has been placed using wallet balance.",
                     showConfirmButton: false,
                     timer: 2000,
@@ -638,26 +637,151 @@
                     },
                 });
             } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: walletData.message || "Failed to place order using wallet.",
-                });
+                throw new Error(walletData.message || "Wallet payment failed");
             }
         } catch (error) {
-            console.error("Wallet transaction error:", error);
+            console.error("Wallet payment error:", error);
             Swal.fire({
                 icon: "error",
-                title: "Transaction Failed",
-                text: "An error occurred while processing your wallet payment.",
+                title: "Payment Failed",
+                text: error.message || "Failed to process wallet payment"
             });
         }
     }
 }
-
-
-
         
+
+async function initiateRepayment(orderId) {
+    try {
+        const response = await fetch(`/initiate-repayment/${orderId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to initiate repayment");
+        }
+
+        const options = {
+    key: data.key,
+    amount: data.amount,
+    currency: data.currency,
+    name: "Lensly",
+    description: "Payment for your order",
+    order_id: data.orderId,
+    handler: async function (response) {
+        try {
+            const verifyResponse = await fetch("/verifyRazorPayOrder", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...orderData,
+                    orderId: data.orderId,
+                    paymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature
+                }),
+            });
+
+            const verifyData = await verifyResponse.json();
+            if (verifyResponse.ok && verifyData.paymentVerified) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Payment successful!",
+                    text: "Your order has been placed.",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    willClose: () => {
+                        window.location.href = `/order-details/${verifyData.orderId}`;
+                    },
+                });
+            } else {
+                throw new Error("Payment verification failed");
+            }
+        } catch (error) {
+            const failedVerifyResponse = await fetch("/verifyRazorPayOrder", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...orderData,
+                    orderId: data.orderId,
+                }),
+            });
+            
+            const failedVerifyData = await failedVerifyResponse.json();
+            
+            if (failedVerifyData.orderId) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Payment Failed",
+                    text: "Your order has been placed but payment is pending. You can complete the payment from your orders page.",
+                    confirmButtonText: "View Order",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `/order-details/${failedVerifyData.orderId}`;
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong. Please try again.",
+                });
+            }
+        }
+    },
+    modal: {
+        ondismiss: async function() {
+            try {
+                const dismissVerifyResponse = await fetch("/verifyRazorPayOrder", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        ...orderData,
+                        orderId: data.orderId,
+                    }),
+                });
+                
+                const dismissVerifyData = await dismissVerifyResponse.json();
+                
+                if (dismissVerifyData.orderId) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Payment Failed",
+                        text: "Your order has been placed but payment is pending. You can complete the payment from your orders page.",
+                        confirmButtonText: "View Order",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = `/order-details/${dismissVerifyData.orderId}`;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error handling dismiss:", error);
+            }
+        }
+    },
+    prefill: {
+        name: "<%= user.name %>",
+        email: "<%= user.email %>",
+    },
+    theme: {
+        color: "#3399cc",
+    },
+};
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+
+    } catch (error) {
+        console.error("Repayment error:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.message || "Failed to initiate repayment"
+        });
+    }
+}
     
 
    
@@ -1170,7 +1294,6 @@ function updateTotalAmount(finalAmount) {
   .modal-content {
     display: flex;
     flex-direction: column;
-    max-height: 80vh;
   }
 
   .modal-header {

@@ -1,11 +1,394 @@
-<%- include("../../views/partials/admin/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lensly Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0ea5e9;
+            --success-color: #22c55e;
+            --warning-color: #eab308;
+            --danger-color: #ef4444;
+        }
 
-<section class="content-main">
-    <div class="content-header">
-        <div>
-            <h2 class="content-title card-title">Dashboard </h2>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f9fafb;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-change.positive { color: var(--success-color); }
+        .stat-change.negative { color: var(--danger-color); }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/admin/header') %>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="page-header mb-8">
+            <h1 class="text-[1.75rem] font-semibold text-[#2c3e50] mb-2">Dashboard</h1>
+            <p class="text-[0.95rem] text-[#6c757d]">Whole data about your business here</p>
         </div>
-       
+
+        <!-- Overview Stats -->
+        <div class="dashboard-grid">
+            <!-- Revenue Card -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Total Revenue</h3>
+                    <span class="text-xs px-2 py-1 rounded-full <%= dashboardData.revenue.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                        <%= dashboardData.revenue.change %>% from last month
+                    </span>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">₹<%= dashboardData.revenue.current.toLocaleString() %></p>
+            </div>
+
+            <!-- Customers Card -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">New Customers</h3>
+                    <span class="text-xs px-2 py-1 rounded-full <%= dashboardData.customers.change >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                        <%= dashboardData.customers.change %>% from last month
+                    </span>
+                </div>
+                <p class="text-3xl font-bold text-gray-900"><%= dashboardData.customers.new %></p>
+                <div class="mt-2 text-sm text-gray-500">
+                    <span>Total: <%= dashboardData.customers.total %></span>
+                    <span class="mx-2">•</span>
+                    <span>Active: <%= dashboardData.customers.active %></span>
+                </div>
+            </div>
+
+            <!-- Orders Overview -->
+            <div class="card">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Orders Overview</h3>
+                <div class="space-y-3">
+                    <% for (const status of ['Pending', 'Processing', 'Delivered', 'Cancelled']) { %>
+                        <% const monthlyCount = dashboardData.orders.stats.monthly.find(s => s._id === status)?.count || 0 %>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600"><%= status %></span>
+                            <span class="text-sm font-medium text-gray-900"><%= monthlyCount %></span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Revenue Trend -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Revenue Trend</h3>
+                    <select id="timeRange" class="text-sm border border-gray-300 rounded-md px-3 py-1">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="h-96 flex items-center justify-center">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="card">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Top Products</h3>
+                <div class="space-y-4">
+                    <% if (dashboardData.products.top && dashboardData.products.top.length > 0) { %>
+                        <% dashboardData.products.top.forEach(product => { %>
+                            <div class="flex items-center space-x-4 p-2 hover:bg-gray-50 rounded-lg">
+                                <div class="w-12 h-12 flex-shrink-0">
+                                    <img src="<%= product.image ? `/admin-assets/imgs/brands/${product.image}` : '/images/placeholder.jpg' %>" 
+                                         alt="<%= product.name %>" 
+                                         class="w-full h-full object-cover rounded-lg shadow-sm"
+                                         onerror="this.onerror=null; this.src='/images/placeholder.jpg'">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-medium truncate"><%= product.name %></h4>
+                                    <p class="text-sm text-gray-500">Sold: <%= product.totalSold %></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium">₹<%= product.revenue.toLocaleString() %></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-sm text-gray-500 text-center">No products data available</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories and Recent Sales Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Top Categories -->
+            <div class="card">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Top Categories</h3>
+                <div class="h-96 flex items-center justify-center">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Sales -->
+            <div class="card">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Recent Sales</h3>
+                <div class="space-y-2">
+                    <% if (dashboardData.recentSales && dashboardData.recentSales.length > 0) { %>
+                        <div class="grid grid-cols-3 text-xs font-medium text-gray-600 mb-1">
+                            <div>CUSTOMER</div>
+                            <div class="text-right">AMOUNT</div>
+                            <div class="text-right">DATE</div>
+                        </div>
+                        <% dashboardData.recentSales.forEach(sale => { %>
+                            <div class="grid grid-cols-3 items-center py-1.5 border-b border-gray-100 text-sm">
+                                <div class="truncate">
+                                    <p class="font-medium text-gray-800"><%= sale.userId.name %></p>
+                                    <p class="text-xs text-gray-500"><%= sale.userId.email %></p>
+                                </div>
+                                <div class="text-right font-medium">₹<%= sale.finalAmount.toLocaleString() %></div>
+                                <div class="text-right text-gray-500"><%= new Date(sale.createdOn).toLocaleDateString() %></div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-sm text-gray-500 text-center">No recent sales</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            const timeSeriesData = <%- JSON.stringify(dashboardData.revenue.timeSeriesData) %>;
+            let revenueChart;
+            
+            function updateRevenueChart(period) {
+                const data = timeSeriesData[period];
+                let labels, values;
+                
+                switch(period) {
+                    case 'daily':
+                        labels = data.map(d => {
+                            const date = new Date(d._id.date);
+                            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                        });
+                        values = data.map(d => d.revenue);
+                        break;
+                    case 'weekly':
+                        labels = data.map(d => {
+                            const date = new Date(d._id.year, 0, 1);
+                            date.setDate(date.getDate() + (d._id.week * 7));
+                            return `Week ${d._id.week}, ${d._id.year}`;
+                        });
+                        values = data.map(d => d.revenue);
+                        break;
+                    case 'monthly':
+                        labels = data.map(d => {
+                            const date = new Date(d._id.year, d._id.month - 1);
+                            return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+                        });
+                        values = data.map(d => d.revenue);
+                        break;
+                    case 'yearly':
+                        labels = data.map(d => d._id.year.toString());
+                        values = data.map(d => d.revenue);
+                        break;
+                }
+
+                const chartData = {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: values,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                };
+
+                if (revenueChart) {
+                    revenueChart.destroy();
+                }
+
+                revenueChart = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 20,
+                                top: 20,
+                                bottom: 20
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return '₹' + context.parsed.y.toLocaleString('en-IN');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => '₹' + value.toLocaleString('en-IN')
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Initialize with daily data
+            updateRevenueChart('daily');
+
+            // Handle time range changes
+            document.getElementById('timeRange').addEventListener('change', function(e) {
+                updateRevenueChart(e.target.value);
+            });
+
+            // Category Pie Chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            const categoryData = <%- JSON.stringify(dashboardData.products.categories) %>;
+            
+            if (categoryData && categoryData.length > 0) {
+                const categoryColors = [
+                    'rgba(14, 165, 233, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(249, 115, 22, 0.8)',
+                    'rgba(168, 85, 247, 0.8)',
+                    'rgba(236, 72, 153, 0.8)'
+                ];
+
+                new Chart(categoryCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: categoryData.map(c => c.name),
+                        datasets: [{
+                            data: categoryData.map(c => c.revenue),
+                            backgroundColor: categoryColors,
+                            borderColor: categoryColors.map(color => color.replace('0.8', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 20,
+                                top: 20,
+                                bottom: 20
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                align: 'center',
+                                labels: {
+                                    boxWidth: 18,
+                                    padding: 20,
+                                    font: { 
+                                        size: 13,
+                                        weight: '500'
+                                    },
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        if (data.labels.length && data.datasets.length) {
+                                            return data.labels.map((label, i) => {
+                                                const value = data.datasets[0].data[i];
+                                                const total = data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                                                const percentage = ((value / total) * 100).toFixed(1);
+                                                return {
+                                                    text: `${label} (${percentage}%)`,
+                                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                                    strokeStyle: data.datasets[0].borderColor[i],
+                                                    lineWidth: 1,
+                                                    hidden: false
+                                                };
+                                            });
+                                        }
+                                        return [];
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                padding: 12,
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                        const value = context.raw;
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                const ctx = categoryCtx;
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#6B7280';
+                ctx.textAlign = 'center';
+                ctx.fillText('No category data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            }
+        </script>
+
+        <%- include('../partials/admin/footer') %>
     </div>
-</section>
-<%- include("../../views/partials/admin/footer") %>
+</body>
+</html>

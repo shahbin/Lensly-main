@@ -32,7 +32,7 @@ const orderSchema = new Schema({
   paymentStatus:{
     type: String,
     default: 'Pending',
-    enum: ['Pending', 'Paid']
+    enum: ['Pending', 'Paid','Failed']
   },
   totalPrice: {
     type: Number,

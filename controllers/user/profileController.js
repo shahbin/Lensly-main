@@ -14,10 +14,7 @@ const userProfile = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    const cart = await Cart.findOne({ userId });
-    res.locals.cartItems = cart ? cart.items : [];
-    res.locals.cartCount = cart ? cart.items.length : 0;
-    const wishlistItems = await Wishlist.findOne({ userId });
+   
     if (!user) {
       return res.redirect("/login");
     }
@@ -33,9 +30,7 @@ const userProfile = async (req, res) => {
 
     res.render("user-profile", {
       user,
-      userData,
-      cartItems: res.locals.cartItems,
-      wishlistItems: wishlistItems.products 
+      userData
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -706,10 +701,6 @@ const getWalletPage = async(req, res) => {
         const userId = req.session.user;
         const user = await User.findById(userId);
         const wallet = await Wallet.findOne({ userId });
-        const cart = await Cart.findOne({ userId });
-        res.locals.cartItems = cart ? cart.items : [];
-        res.locals.cartCount = cart ? cart.items.length : 0;
-        const wishlistItems = await Wishlist.findOne({ userId:userId });
 
         if (!wallet) {
             wallet = { balance: 0, transactions: [] };
@@ -728,9 +719,7 @@ const getWalletPage = async(req, res) => {
             user,
             wallet,
             currentPage: page,
-            totalPage,
-            wishlistItems: wishlistItems.products,
-            cartItems: res.locals.cartItems
+            totalPage
         });
 
     } catch (error) {

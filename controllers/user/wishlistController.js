@@ -35,14 +35,10 @@ const getWishlist = async (req, res) => {
 
         res.locals.wishlistItems = wishlistItems;
 
-        const cart = await Cart.findOne({ userId });
-        res.locals.cartItems = cart ? cart.items : [];
-        res.locals.cartCount = cart ? cart.items.length : 0;
         
         res.render('wishlist', {
             user: await User.findById(userId),
-            wishlist: wishlistItems,
-            cartItems: res.locals.cartItems
+            wishlist: wishlistItems
         });
 
     } catch (error) {

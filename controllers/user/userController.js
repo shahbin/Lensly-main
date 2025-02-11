@@ -18,12 +18,8 @@ const loadHomePage = async (req,res)=>{
         
         if(user){
           const userData = await User.findById({_id:user})
-          const wishlistItems = await Wishlist.findOne({userId:user})
-          const cart = await Cart.findOne({ userId:user });
-          res.locals.cartItems = cart ? cart.items : [];
-          res.locals.cartCount = cart ? cart.items.length : 0;
             
-            return res.render("home",{user:userData, products:product, cartItems: res.locals.cartItems, wishlistItems:wishlistItems.products})
+            return res.render("home",{user:userData, products:product})
         }else{
             return res.render('home',{user: null, products:product})
         }
@@ -144,11 +140,6 @@ const loadShopPage = async (req, res) => {
 
     if (userId) {
       const userData = await User.findById({ _id: userId });
-      const wishlistItems = await Wishlist.findOne({userId:userId})
-
-      const cart = await Cart.findOne({ userId });
-      res.locals.cartItems = cart ? cart.items : [];
-      res.locals.cartCount = cart ? cart.items.length : 0;
 
       return res.render("shop", {
         user: userData,
@@ -159,9 +150,7 @@ const loadShopPage = async (req, res) => {
         minPrice,
         maxPrice,
         categoryQuantities: categoryQuantitiesMap,
-        totalProducts,
-        cartItems: res.locals.cartItems,
-        wishlistItems: wishlistItems.products
+        totalProducts
       });
     } else {
       return res.render('shop', {

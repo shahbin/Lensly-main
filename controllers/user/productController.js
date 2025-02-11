@@ -8,10 +8,6 @@ const productDetails = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId); 
-        const cart = await Cart.findOne({ userId });
-        res.locals.cartItems = cart ? cart.items : [];
-        res.locals.cartCount = cart ? cart.items.length : 0;
-        const wishlistItems = await Wishlist.findOne({userId:userId})
         const productId = req.query.id;
         const product = await Product.findById(productId).populate('category');
         const findCategory = product.category;
@@ -36,9 +32,7 @@ const productDetails = async (req, res) => {
             product: product,
             quantity: product.quantity,
             relatedProduct: relatedProduct,
-            isInWishlist: isInWishlist,
-            cartItems: res.locals.cartItems,
-            wishlistItems: wishlistItems.products
+            isInWishlist: isInWishlist
         });
 
     } catch (error) {

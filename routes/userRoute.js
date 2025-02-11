@@ -59,6 +59,7 @@ router.post('/place-order', userAuth, cartController.placeOrder);
 
 router.post('/placeOrderRazorPay',userAuth,orderController.orderRazorpay)
 router.post('/verifyRazorPayOrder',userAuth,orderController.verifyRazorPayOrder)
+router.post('/initiate-repayment/:orderId',userAuth,orderController.initiateRepayment)
 router.get('/order-details/:orderId', userAuth, orderController.getOrderDetails);
 
 router.get('/search', userController.searchProducts);

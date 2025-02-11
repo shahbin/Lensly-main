@@ -6,6 +6,7 @@ const Wishlist = require("../../models/wishlistSchema");
 const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
 const { v4: uuidv4 } = require('uuid');
+const razorpayInstance = require('../../controllers/user/orderController')
 
 const getCart = async (req, res) => {
   try {
@@ -14,7 +15,6 @@ const getCart = async (req, res) => {
 
     const user = await User.findById(userId);
     const cart = await Cart.findOne({ userId }).populate({ path: 'items.productId', select: 'productImage productName salePrice regularPrice' });
-    const wishlistItems = await Wishlist.findOne({userId:userId})
 
     if (!cart) return res.render('cart', { user, cartItems: [] });
 
@@ -28,7 +28,7 @@ const getCart = async (req, res) => {
 
     if (!res.locals.cartItems) {
       res.locals.cartItems = cartItems;
-      res.render('cart', { user, cartItems,wishlistItems: wishlistItems.products });
+      res.render('cart', { user});
     }
 
   } catch (error) {
@@ -169,7 +169,6 @@ const getCheckout = async (req, res) => {
 
     const user = await User.findById(userId);
     const cart = await Cart.findOne({ userId }).populate({ path: 'items.productId', select: 'productName salePrice regularPrice productImage' });
-    const wishlistItems = await Wishlist.findOne({userId:userId})
 
     if (!cart || cart.items.length === 0) {
       return res.redirect('/cart');
@@ -183,7 +182,7 @@ const getCheckout = async (req, res) => {
       productName: item.productId.productName
     }));
 
-    res.render('checkout', { user, cart: { items: cartItems }, discount: 0, cartItems, wishlistItems: wishlistItems.products });
+    res.render('checkout', { user, cart: { items: cartItems }, discount: 0, cartItems });
 
   } catch (error) {
     console.error('Error getting checkout:', error);
@@ -193,53 +192,79 @@ const getCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
-    const { addressId, paymentMethod, cartId, couponCode, subtotal, discount, totalAmount } = req.body;
-    const userId = req.session.user;
-    
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
-    
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: 'Cart is empty' });
-    }
- 
-    const orderItems = cart.items.map(item => ({
-      product: item.productId,
-      quantity: item.quantity,
-      price: item.price,
-      dateAdded: new Date() 
-      
-    }));
- 
-    const order = new Order({
-      userId,
-      orderedItems: orderItems,
-      address: addressId,
-      status: 'Pending',
-      totalPrice: cart.items.reduce((total, item) => total + item.totalPrice, 0),
-      discount:discount,
-      finalAmount: totalAmount,
-      paymentMethod,
-      createdAt: new Date() 
-    });
- 
-    await order.save();
- 
-    const productUpdates = cart.items.map(item => 
-      Product.findByIdAndUpdate(item.productId, { 
-        $inc: { quantity: -item.quantity } 
-      })
-    );
-    await Promise.all(productUpdates);
- 
-    await Cart.deleteOne({ userId }); 
-    res.status(200).json({ success: true, orderId: order._id });
- 
-  } catch (error) {
-    console.error('Place order error:', error);
-    res.status(500).json({ success: false, message: 'Failed to place order', error: error.message });
-  }
-}
+      const { addressId, paymentMethod, cartId, couponCode, subtotal, discount } = req.body;
+      const userId = req.session.user;
 
+      // Calculate totalAmount after applying discount
+      const totalAmount = subtotal - discount;
+
+      // 1. Verify cart exists and has items
+      const cart = await Cart.findOne({ userId }).populate('items.productId');
+      if (!cart || !cart.items || cart.items.length === 0) {
+          return res.status(400).json({ success: false, message: 'Cart is empty' });
+      }
+
+      // 2. Create order items
+      const orderItems = cart.items.map(item => ({
+          product: item.productId._id,
+          quantity: item.quantity,
+          price: item.productId.salePrice || item.productId.price,
+          dateAdded: new Date()
+      }));
+
+      // 3. Create order
+      const order = new Order({
+          userId,
+          orderedItems: orderItems,
+          address: addressId,
+          status: 'Pending',
+          totalPrice: subtotal,
+          discount,
+          finalAmount: totalAmount,
+          paymentMethod,
+          paymentStatus: "Pending",
+          createdAt: new Date()
+      });
+
+      const savedOrder = await order.save();
+
+      // 4. Update product quantities
+      await Promise.all(cart.items.map(async (item) => {
+          const product = item.productId;
+          if (product.quantity < item.quantity) {
+              throw new Error(`Insufficient stock for product ${product.name}`);
+          }
+          return Product.findByIdAndUpdate(
+              product._id,
+              { $inc: { quantity: -item.quantity } },
+              { new: true }
+          );
+      }));
+
+      // 5. Don't clear the cart yet if it's a wallet payment
+      if (paymentMethod !== 'wallet') {
+          await Cart.findOneAndUpdate(
+              { userId },
+              { $set: { items: [] } },
+              { new: true }
+          );
+      }
+
+      res.status(200).json({ 
+          success: true, 
+          orderId: savedOrder._id,
+          totalAmount
+      });
+
+  } catch (error) {
+      console.error('Place order error:', error);
+      res.status(500).json({ 
+          success: false, 
+          message: 'Failed to place order', 
+          error: error.message 
+      });
+  }
+};
 
 
 const saveAddress = async (req, res) => {

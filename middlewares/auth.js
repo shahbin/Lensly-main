@@ -14,12 +14,12 @@ const checkUser = async (req, res, next) => {
     }
 }
 
-const checkAdmin = async (req, res, next) => {
-    if(req.session.admin) {
-        res.redirect('/admin/dashboard')
+const checkAdmin = (req, res, next) => {
+    if (req.session.adminId) {
+        return res.redirect('/admin/dashboard');
     } else {
-        next();
-    }
+        next();
+    }
 }
 
 const userAuth = (req,res,next)=>{

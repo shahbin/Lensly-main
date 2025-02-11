@@ -1702,9 +1702,7 @@
 
 <script>
 
-// wishlistAPI.js
 const wishlistAPI = {
-  // Check if item is in wishlist
   async checkWishlistStatus(productId) {
     try {
       const response = await fetch(`/check-wishlist/${productId}`);
@@ -1731,7 +1729,6 @@ const wishlistAPI = {
   }
 };
 
-// Initialize wishlist functionality
 function initializeWishlist() {
   const wishlistBtns = document.querySelectorAll('.action__btn');
 
@@ -1741,7 +1738,6 @@ function initializeWishlist() {
   });
 }
 
-// Handle wishlist button clicks
 async function handleWishlistClick(e) {
   e.preventDefault();
 
