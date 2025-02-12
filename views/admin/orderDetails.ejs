@@ -263,8 +263,12 @@
                 
             <% }); %>
             <tr class="total-row">
+                <td colspan="2">Shipping Charge:</td>
+                <td colspan="3">₹49.00</td>
+            </tr>
+            <tr class="total-row">
                 <td colspan="2">Total:</td>
-                <td colspan="3">₹<%= order.totalPrice.toFixed(2) %></td>
+                <td colspan="3">₹<%= order.finalAmount.toFixed(2) %></td>
             </tr>
         </tbody>
     </table>

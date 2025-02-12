@@ -320,71 +320,7 @@ input[type="range"]::-moz-range-thumb:active {
   </section>
 
   <!--=============== MAIN CONTENT ===============-->
-  <div class="main-content container section--lg" style="margin-top: -50px; ">
-    <!--=============== FILTER ===============-->
-    <div class="filters">
-      <!-- Price Filter -->
-      <div class="filters__price">
-        <h3 class="filters__heading">Filter by Price</h3>
-        <div class="price-input">
-          <div class="field">
-            <span>₹</span>
-            <input type="number" class="input-min" value="0">
-          </div>
-          <div class="field">
-            <span>₹</span>
-            <input type="number" class="input-max" value="500000">
-          </div>
-        </div>
-        <div class="price-range-slider">
-          <div class="slider-track"></div>
-          <div class="slider-range"></div>
-          <div class="range-input">
-            <input type="range" class="range-min" min="0" max="500000" value="0" step="100">
-            <input type="range" class="range-max" min="0" max="500000" value="500000" step="100">
-          </div>
-        </div>
-        <button class="filters__apply" onclick="applyPriceFilter()">Apply Price Filter</button>
-      </div>
-    
-      <!-- Categories -->
-      <div class="filters__categories">
-        <h3 class="filters__heading">Categories</h3>
-        <ul class="filters__category-list">
-          <li class="filters__category-item">
-            <input type="checkbox" id="none" class="filters__checkbox" <%= (typeof selectedCategory !== 'undefined' && selectedCategory.length === 0) ? 'checked' : '' %> onclick="handleNoneSelection(this)">
-            <label for="none">None</label>
-          </li>
-          <% const categories = Object.keys(categoryQuantities); %>
-          <% categories.forEach(category => { %>
-            <li class="filters__category-item">
-              <input type="checkbox" id="<%= category %>" class="filters__checkbox" <%= (typeof selectedCategory !== 'undefined' && selectedCategory.includes(category)) ? 'checked' : '' %> onclick="handleCategorySelection(this)">
-              <label for="<%= category %>"><%= category.charAt(0).toUpperCase() + category.slice(1) %></label>
-              <span class="filters__category-count"><%= categoryQuantities[category] || 0 %></span>
-            </li>
-          <% }); %>
-        </ul>
-      </div>
-    
-      <!-- Sort -->
-      <div class="filters__sort">
-        <h3 class="filters__heading">Sort by</h3>
-        <select class="filters__sort-select">
-          <option value="" <%= !selectedSort ? 'selected' : '' %>>None</option>
-          <option value="featured" <%= selectedSort === 'featured' ? 'selected' : '' %>>Featured</option>
-          <option value="popularity" <%= selectedSort === 'popularity' ? 'selected' : '' %>>Popularity</option>
-          <option value="priceLowToHigh" <%= selectedSort === 'priceLowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
-          <option value="priceHighToLow" <%= selectedSort === 'priceHighToLow' ? 'selected' : '' %>>Price: High to Low</option>
-          <option value="newArrivals" <%= selectedSort === 'newArrivals' ? 'selected' : '' %>>New Arrivals</option>
-          <option value="aToZ" <%= selectedSort === 'aToZ' ? 'selected' : '' %>>A - Z</option>
-          <option value="zToA" <%= selectedSort === 'zToA' ? 'selected' : '' %>>Z - A</option>
-        </select>
-      </div>
-    
-      <button class="filters__apply" onclick="applyFilters()">Apply Filters</button>
-    </div>
-    
-    <!--=============== PRODUCTS ===============-->
+  <div class="main-content container section--lg" style="margin-top: -50px;">
     <div class="products-section">
       <section class="products container section--lg">
         <% if (pagination.currentPage === 1) { %>
@@ -482,66 +418,95 @@ input[type="range"]::-moz-range-thumb:active {
         <ul class="pagination">
           <% if(pagination.hasPrevPage){ %>
           <li>
-            <a href="/shop?page=<%= pagination.prevPage %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>" class="pagination__link icon">
+            <a href="/shop?page=<%= pagination.prevPage %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>&search=<%= searchQuery %>" class="pagination__link icon">
               <i class="fi-rs-angle-double-small-left"></i>
             </a>
           </li>
           <% } %>
 
-          <% 
-          let pageNumbers = []
-          const showMax = 5;
-
-          if(pagination.totalPages <= showMax){
-            for(let i=1; i<= pagination.totalPages; i++){
-              pageNumbers.push(i)
-            }
-          }else{
-            pageNumbers.push(1)
-
-            if(pagination.currentPage > 3){
-              pageNumbers.push('...')
-            }
-
-            for(let i=Math.max(2, pagination.currentPage - 1); 
-            i <= Math.min(pagination.totalPages - 1, pagination.currentPage + 1); i++){
-              pageNumbers.push(i)
-            }
-            
-            if (pagination.currentPage < pagination.totalPages - 2) {
-            pageNumbers.push('...');
-            }
-        
-            if (pagination.totalPages > 1) {
-            pageNumbers.push(pagination.totalPages);
-            }
-
-          }
-          %>
-
-          <% pageNumbers.forEach(num => { %>
-            <% if (num === '...') { %>
-                <li><a class="pagination__link">...</a></li>
-          <% } else { %>
+          <% for(let i = 1; i <= pagination.totalPages; i++) { %>
           <li>
-            <a href="/shop?page=<%= num %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>" 
-               class="pagination__link <%= pagination.currentPage === num ? 'active' : '' %>">
-                <%= String(num).padStart(2, '0') %>
+            <a
+              href="/shop?page=<%= i %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>&search=<%= searchQuery %>"
+              class="pagination__link <%= i === pagination.currentPage ? 'active' : '' %>"
+            >
+              <%= i %>
             </a>
-        </li>
-      <% } %>
-      <% }); %>
+          </li>
+          <% } %>
 
-      <% if (pagination.hasNextPage) { %>
-      <li>
-        <a href="/shop?page=<%= pagination.nextPage %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>" class="pagination__link icon">
-            <i class="fi-rs-angle-double-small-right"></i>
-        </a>
-      </li>
-      <% } %> 
-         
-      </ul>
+          <% if (pagination.hasNextPage) { %>
+          <li>
+            <a href="/shop?page=<%= pagination.nextPage %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&category=<%= selectedCategory.join(',') %>&sort=<%= selectedSort %>&search=<%= searchQuery %>" class="pagination__link icon">
+              <i class="fi-rs-angle-double-small-right"></i>
+            </a>
+          </li>
+          <% } %>
+        </ul>
       </section>
+    </div>
+    
+    <!--=============== FILTER ===============-->
+    <div class="filters">
+      <!-- Price Filter -->
+      <div class="filters__price">
+        <h3 class="filters__heading">Filter by Price</h3>
+        <div class="price-input">
+          <div class="field">
+            <span>₹</span>
+            <input type="number" class="input-min" value="0">
+          </div>
+          <div class="field">
+            <span>₹</span>
+            <input type="number" class="input-max" value="500000">
+          </div>
+        </div>
+        <div class="price-range-slider">
+          <div class="slider-track"></div>
+          <div class="slider-range"></div>
+          <div class="range-input">
+            <input type="range" class="range-min" min="0" max="500000" value="0" step="100">
+            <input type="range" class="range-max" min="0" max="500000" value="500000" step="100">
+          </div>
+        </div>
+        <button class="filters__apply" onclick="applyPriceFilter()">Apply Price Filter</button>
+      </div>
+    
+      <!-- Categories -->
+      <div class="filters__categories">
+        <h3 class="filters__heading">Categories</h3>
+        <ul class="filters__category-list">
+          <li class="filters__category-item">
+            <input type="checkbox" id="none" class="filters__checkbox" <%= (typeof selectedCategory !== 'undefined' && selectedCategory.length === 0) ? 'checked' : '' %> onclick="handleNoneSelection(this)">
+            <label for="none">None</label>
+          </li>
+          <% const categories = Object.keys(categoryQuantities); %>
+          <% categories.forEach(category => { %>
+            <li class="filters__category-item">
+              <input type="checkbox" id="<%= category %>" class="filters__checkbox" <%= (typeof selectedCategory !== 'undefined' && selectedCategory.includes(category)) ? 'checked' : '' %> onclick="handleCategorySelection(this)">
+              <label for="<%= category %>"><%= category.charAt(0).toUpperCase() + category.slice(1) %></label>
+              <span class="filters__category-count"><%= categoryQuantities[category] || 0 %></span>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    
+      <!-- Sort -->
+      <div class="filters__sort">
+        <h3 class="filters__heading">Sort by</h3>
+        <select class="filters__sort-select">
+          <option value="" <%= !selectedSort ? 'selected' : '' %>>None</option>
+          <option value="featured" <%= selectedSort === 'featured' ? 'selected' : '' %>>Featured</option>
+          <option value="popularity" <%= selectedSort === 'popularity' ? 'selected' : '' %>>Popularity</option>
+          <option value="priceLowToHigh" <%= selectedSort === 'priceLowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="priceHighToLow" <%= selectedSort === 'priceHighToLow' ? 'selected' : '' %>>Price: High to Low</option>
+          <option value="newArrivals" <%= selectedSort === 'newArrivals' ? 'selected' : '' %>>New Arrivals</option>
+          <option value="aToZ" <%= selectedSort === 'aToZ' ? 'selected' : '' %>>A - Z</option>
+          <option value="zToA" <%= selectedSort === 'zToA' ? 'selected' : '' %>>Z - A</option>
+        </select>
+      </div>
+    
+      <button class="filters__apply" onclick="applyFilters()">Apply Filters</button>
     </div>
   </div>
 
@@ -574,7 +539,71 @@ input[type="range"]::-moz-range-thumb:active {
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+  /* SweetAlert Custom Styles */
+  .swal2-popup {
+    padding: 2em;
+    border-radius: 12px;
+    width: 400px;
+    background: #fff;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  }
 
+  .swal2-icon.swal2-success {
+    border-color: rgba(165, 220, 134, 0.5);
+    margin: 1em auto;
+  }
+
+  .swal2-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(165, 220, 134, 0.5);
+  }
+
+  .swal2-icon.swal2-success [class^=swal2-success-line] {
+    background-color: #a5dc86;
+  }
+
+  .swal2-title {
+    font-size: 24px !important;
+    color: #545454 !important;
+    font-weight: 600 !important;
+    margin: 0.5em 0 !important;
+  }
+
+  .swal2-html-container {
+    font-size: 16px !important;
+    color: #666 !important;
+    margin: 0.5em 0 1.5em !important;
+    font-weight: normal !important;
+  }
+
+  .swal2-actions {
+    gap: 0.5em;
+    margin-top: 1em;
+  }
+
+  .swal2-styled {
+    padding: 0.6em 1.5em !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+  }
+
+  .swal2-confirm {
+    background-color: #2196f3 !important;
+    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3) !important;
+  }
+
+  .swal2-cancel {
+    background-color: #757575 !important;
+    box-shadow: 0 2px 5px rgba(117, 117, 117, 0.3) !important;
+  }
+
+  .swal2-success-circular-line-left,
+  .swal2-success-circular-line-right,
+  .swal2-success-fix {
+    background-color: transparent !important;
+  }
+</style>
 
 <script>
   const rangeInput = document.querySelectorAll(".range-input input");
@@ -803,8 +832,9 @@ const cartAPI = {
 
   async updateQuantity(productId, quantity) {
     try {
-      const response = await fetch('/update-cart', {
-        method: 'POST',
+      const url = `/update-cart`;
+      const response = await fetch(url, {
+        method: "POST",
         headers: {
           'Content-Type': 'application/json'
         },
@@ -845,21 +875,22 @@ async function handleAddToCart(productId, availableStock) {
         icon: 'warning',
         title: 'Out of Stock!',
         text: 'Sorry, this product is currently unavailable.',
-        confirmButtonColor: '#3085d6',
+        confirmButtonColor: '#2196f3',
         confirmButtonText: 'Continue Shopping'
       });
       return;
     }
 
     Swal.fire({
-      title: 'Adding to cart...',
+      title: 'Adding to Cart...',
       allowOutsideClick: false,
+      showConfirmButton: false,
       didOpen: () => {
         Swal.showLoading();
       }
     });
 
-    const response = await cartAPI.addToCart(productId, 1); 
+    const response = await cartAPI.addToCart(productId, 1);
     
     Swal.close();
 
@@ -869,12 +900,8 @@ async function handleAddToCart(productId, availableStock) {
           icon: 'warning',
           title: 'Out of Stock!',
           text: response.message || 'Sorry, this product is currently unavailable.',
-          confirmButtonColor: '#3085d6',
+          confirmButtonColor: '#2196f3',
           confirmButtonText: 'Continue Shopping'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = "/shop";
-          }
         });
         return;
       }
@@ -883,7 +910,7 @@ async function handleAddToCart(productId, availableStock) {
         icon: 'error',
         title: 'Oops...',
         text: response.message || 'Failed to add item to cart',
-        confirmButtonColor: '#d33'
+        confirmButtonColor: '#2196f3'
       });
       return;
     }
@@ -892,16 +919,23 @@ async function handleAddToCart(productId, availableStock) {
       icon: 'success',
       title: 'Added to Cart!',
       text: 'Your item has been successfully added to the cart.',
-      confirmButtonColor: '#3085d6',
       showCancelButton: true,
       confirmButtonText: 'Go to Cart',
       cancelButtonText: 'Continue Shopping',
-      cancelButtonColor: '#6c757d'
+      confirmButtonColor: '#2196f3',
+      cancelButtonColor: '#757575',
+      width: '400px',
+      customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        actions: 'swal2-actions',
+        confirmButton: 'swal2-styled swal2-confirm',
+        cancelButton: 'swal2-styled swal2-cancel'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         window.location.href = "/cart";
-      } else {
-        window.location.href = "/shop";
       }
     });
 
@@ -911,7 +945,7 @@ async function handleAddToCart(productId, availableStock) {
       icon: 'error',
       title: 'Oops...',
       text: 'Something went wrong. Please try again later.',
-      confirmButtonColor: '#d33'
+      confirmButtonColor: '#2196f3'
     });
   }
 }
@@ -937,5 +971,4 @@ function updateQuantity(action) {
 
   </script>
 
-<!--=============== FOOTER ===============-->
 <%- include("../../views/partials/user/footer") %>

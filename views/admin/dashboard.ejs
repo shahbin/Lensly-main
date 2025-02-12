@@ -134,29 +134,9 @@
 
             <!-- Top Products -->
             <div class="card">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">Top Products</h3>
-                <div class="space-y-4">
-                    <% if (dashboardData.products.top && dashboardData.products.top.length > 0) { %>
-                        <% dashboardData.products.top.forEach(product => { %>
-                            <div class="flex items-center space-x-4 p-2 hover:bg-gray-50 rounded-lg">
-                                <div class="w-12 h-12 flex-shrink-0">
-                                    <img src="<%= product.image ? `/admin-assets/imgs/brands/${product.image}` : '/images/placeholder.jpg' %>" 
-                                         alt="<%= product.name %>" 
-                                         class="w-full h-full object-cover rounded-lg shadow-sm"
-                                         onerror="this.onerror=null; this.src='/images/placeholder.jpg'">
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-medium truncate"><%= product.name %></h4>
-                                    <p class="text-sm text-gray-500">Sold: <%= product.totalSold %></p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-medium">₹<%= product.revenue.toLocaleString() %></p>
-                                </div>
-                            </div>
-                        <% }) %>
-                    <% } else { %>
-                        <p class="text-sm text-gray-500 text-center">No products data available</p>
-                    <% } %>
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Top 10 Products</h3>
+                <div class="h-96 flex items-center justify-center">
+                    <canvas id="topProductsChart"></canvas>
                 </div>
             </div>
         </div>
@@ -385,6 +365,97 @@
                 ctx.fillStyle = '#6B7280';
                 ctx.textAlign = 'center';
                 ctx.fillText('No category data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            }
+
+            // Initialize Top Products Chart
+            const topProductsCanvas = document.getElementById('topProductsChart');
+            const topProductsData = <%- JSON.stringify(dashboardData.products ? dashboardData.products.top || [] : []) %>;
+            
+            if (topProductsCanvas && topProductsData && topProductsData.length > 0) {
+                console.log('Top Products Data:', topProductsData); // Debug log
+                
+                // Function to shorten product names
+                const shortenName = (name) => {
+                    if (name.length > 15) {
+                        return name.substring(0, 12) + '...';
+                    }
+                    return name;
+                };
+
+                const topProductsChart = new Chart(topProductsCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: topProductsData.map(product => shortenName(product.name)),
+                        datasets: [{
+                            label: 'Sales',
+                            data: topProductsData.map(product => product.totalSold),
+                            borderColor: 'rgba(59, 130, 246, 1)', // Blue color
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        // Show full product name in tooltip
+                                        return topProductsData[context[0].dataIndex].name;
+                                    },
+                                    label: function(context) {
+                                        return 'Sales: ' + context.raw;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 2,
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.log('No top products data available or canvas not found');
+                const ctx = topProductsCanvas.getContext('2d');
+                ctx.font = '14px Inter';
+                ctx.fillStyle = '#6B7280';
+                ctx.textAlign = 'center';
+                ctx.fillText('No product data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
             }
         </script>
 

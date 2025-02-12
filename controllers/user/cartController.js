@@ -194,14 +194,44 @@ const placeOrder = async (req, res) => {
   try {
       const { addressId, paymentMethod, cartId, couponCode, subtotal, discount } = req.body;
       const userId = req.session.user;
+      const deliveryCharge = 49;
 
-      // Calculate totalAmount after applying discount
-      const totalAmount = subtotal - discount;
+      // Calculate totalAmount after applying discount and adding delivery charge
+      const totalAmount = subtotal - discount + deliveryCharge;
+
+      // Check if COD is allowed for this order amount
+      if (paymentMethod === 'cod' && totalAmount > 1000) {
+          return res.status(400).json({ 
+              success: false, 
+              message: 'Cash on Delivery is not available for orders above ₹1000. Please choose a different payment method.' 
+          });
+      }
 
       // 1. Verify cart exists and has items
       const cart = await Cart.findOne({ userId }).populate('items.productId');
       if (!cart || !cart.items || cart.items.length === 0) {
           return res.status(400).json({ success: false, message: 'Cart is empty' });
+      }
+
+      // Check product quantities before proceeding
+      const quantityErrors = [];
+      for (const item of cart.items) {
+          const product = item.productId;
+          if (!product) {
+              quantityErrors.push(`Product not found in the cart`);
+              continue;
+          }
+          if (product.quantity < item.quantity) {
+              quantityErrors.push(`Only ${product.quantity} units of ${product.productName} are available. You have ${item.quantity} in cart.`);
+          }
+      }
+
+      if (quantityErrors.length > 0) {
+          return res.status(400).json({
+              success: false,
+              message: 'Some items in your cart are no longer available in the requested quantity',
+              errors: quantityErrors
+          });
       }
 
       // 2. Create order items
@@ -220,6 +250,7 @@ const placeOrder = async (req, res) => {
           status: 'Pending',
           totalPrice: subtotal,
           discount,
+          deliveryCharge,
           finalAmount: totalAmount,
           paymentMethod,
           paymentStatus: "Pending",
@@ -230,12 +261,8 @@ const placeOrder = async (req, res) => {
 
       // 4. Update product quantities
       await Promise.all(cart.items.map(async (item) => {
-          const product = item.productId;
-          if (product.quantity < item.quantity) {
-              throw new Error(`Insufficient stock for product ${product.name}`);
-          }
           return Product.findByIdAndUpdate(
-              product._id,
+              item.productId._id,
               { $inc: { quantity: -item.quantity } },
               { new: true }
           );

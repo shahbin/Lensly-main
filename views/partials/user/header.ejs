@@ -46,7 +46,7 @@
               <a href="/" class="nav__link active-link">Home</a>
             </li>
             <li class="nav__item">
-              <a href="shop" class="nav__link">Shop</a>
+              <a href="/shop" class="nav__link">Shop</a>
             </li>
             <li class="nav__item">
               <a href="account" class="nav__link">Contact Us</a>
@@ -56,17 +56,54 @@
             </li>
           </ul>
           <div class="header__search">
-            <form action="/search" method="GET" class="search-form">
-              <input
-                type="text"
-                name="query"
-                placeholder="Search For Items..."
-                class="form__input"
-                value="<%= typeof query !== 'undefined' ? query : '' %>"
-              />
-              <button type="submit" class="search__btn">
-                <img src="/assets/img/search.png" alt="search icon" />
-              </button>
+            <form action="/shop" method="GET" class="search-form">
+              <% if (typeof selectedCategory !== 'undefined' && selectedCategory && selectedCategory.length > 0) { %>
+                <input type="hidden" name="category" value="<%= selectedCategory.join(',') %>">
+              <% } %>
+              <% if (typeof selectedSort !== 'undefined' && selectedSort) { %>
+                <input type="hidden" name="sort" value="<%= selectedSort %>">
+              <% } %>
+              <% if (typeof minPrice !== 'undefined') { %>
+                <input type="hidden" name="minPrice" value="<%= minPrice %>">
+              <% } %>
+              <% if (typeof maxPrice !== 'undefined') { %>
+                <input type="hidden" name="maxPrice" value="<%= maxPrice %>">
+              <% } %>
+              
+              <div class="search-box" style="
+                display: flex;
+                align-items: center;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                overflow: hidden;
+                width: 300px;
+                background: white;
+              ">
+                <input
+                  type="text"
+                  name="search"
+                  value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+                  placeholder="Search For Items..."
+                  style="
+                    border: none;
+                    padding: 8px 15px;
+                    flex: 1;
+                    outline: none;
+                    font-size: 14px;
+                  "
+                />
+                <button 
+                  type="submit" 
+                  style="
+                    border: none;
+                    background: none;
+                    padding: 8px 15px;
+                    cursor: pointer;
+                  "
+                >
+                  <i class="fi fi-rs-search" style="color: #666; font-size: 16px;"></i>
+                </button>
+              </div>
             </form>
           </div>
         </div>

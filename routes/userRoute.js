@@ -14,9 +14,7 @@ router.get('/signup', checkUser, userController.loadSignup);
 router.post('/signup', userController.signup);
 router.post('/verify-otp', userController.verifyOtp);
 router.post('/resend-otp', userController.resendOtp);
-router.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+router.get('/auth/google',passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/signup' }),
@@ -68,6 +66,7 @@ router.get('/orders-list',userAuth,orderController.getOrdersList);
 router.post('/cancel-order-item/:orderId/:itemId', orderController.cancelOrderItem);
 router.post('/returnOrder/:orderId/:itemId', orderController.returnOrder);
 
+router.post('/update-payment-method', userAuth, orderController.updatePaymentMethod);
 
 router.get('/wishlist',userAuth,wishlistController.getWishlist)
 router.post('/add/:productId', userAuth, wishlistController.addToWishlist);
@@ -80,5 +79,6 @@ router.post('/apply-coupon',userAuth,orderController.applyCoupon);
 router.get('/wallet',userAuth,profileController.getWalletPage)
 router.post('/walletPayment',userAuth,orderController.walletPayment)
 
+router.get('/download-invoice/:orderId', userAuth, orderController.generateInvoice);
 
 module.exports = router;
