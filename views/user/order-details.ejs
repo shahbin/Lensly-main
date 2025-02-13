@@ -841,7 +841,7 @@
                             </div>
                         </div>
                     </div>
-                    <% if (order && (order.paymentStatus === "Failed" || order.paymentStatus === "Pending")) { %>
+                    <% if (order && (order.paymentStatus === "Failed" || order.paymentStatus === "Pending" )&& order.paymentMethod !== "cod") { %>
                         <button onclick="initiateRepayment('<%= order._id %>', '<%= order.finalAmount %>')"
                                 class="btn btn-primary"
                                 style="width: 100%; margin-top: 1rem;">
@@ -983,7 +983,16 @@
     <div id="cancelModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.2s ease-in-out;">
         <div class="modal-content" style="background-color: #fff; margin: 15% auto; padding: 20px; border-radius: 5px; width: 50%; max-width: 500px;">
             <h3>Cancellation Reason</h3>
-            <textarea id="cancelReason" rows="4" style="width: 100%; margin: 10px 0; padding: 8px;" placeholder="Please provide a reason for cancellation"></textarea>
+            <select id="cancelReasonSelect" style="width: 100%; margin: 10px 0; padding: 8px;">
+                <option value="">Select a reason</option>
+                <option value="Changed my mind">Changed my mind</option>
+                <option value="Found a better price">Found a better price</option>
+                <option value="Product not needed anymore">Product not needed anymore</option>
+                <option value="Incorrect product ordered">Incorrect product ordered</option>
+                <option value="Shipping time too long">Shipping time too long</option>
+                <option value="Other">Other</option>
+            </select>
+            <textarea id="cancelReason" rows="4" style="width: 100%; margin: 10px 0; padding: 8px; display: none;" placeholder="Please specify the reason"></textarea>
             <div style="text-align: right; margin-top: 15px;">
                 <button class="btn btn-primary" onclick="submitCancel()">Confirm</button>
                 <button class="btn btn-secondary" onclick="hideModal('cancelModal')">Cancel</button>
@@ -994,7 +1003,16 @@
     <div id="returnModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.2s ease-in-out;">
         <div class="modal-content" style="background-color: #fff; margin: 15% auto; padding: 20px; border-radius: 5px; width: 50%; max-width: 500px;">
             <h3>Return Reason</h3>
-            <textarea id="returnReason" rows="4" style="width: 100%; margin: 10px 0; padding: 8px;" placeholder="Please provide a reason for returning"></textarea>
+            <select id="returnReasonSelect" style="width: 100%; margin: 10px 0; padding: 8px;">
+                <option value="">Select a reason</option>
+                <option value="Product damaged">Product damaged</option>
+                <option value="Wrong product received">Wrong product received</option>
+                <option value="Product not as described">Product not as described</option>
+                <option value="Defective product">Defective product</option>
+                <option value="No longer needed">No longer needed</option>
+                <option value="Other">Other</option>
+            </select>
+            <textarea id="returnReason" rows="4" style="width: 100%; margin: 10px 0; padding: 8px; display: none;" placeholder="Please specify the reason"></textarea>
             <div style="text-align: right; margin-top: 15px;">
                 <button class="btn btn-primary" onclick="submitReturn()">Confirm</button>
                 <button class="btn btn-secondary" onclick="hideModal('returnModal')">Cancel</button>
@@ -1133,9 +1151,36 @@ function hideModal(modalId, showError = true) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const cancelReasonSelect = document.getElementById('cancelReasonSelect');
+    const returnReasonSelect = document.getElementById('returnReasonSelect');
+
+    if (cancelReasonSelect) {
+        cancelReasonSelect.addEventListener('change', function() {
+            const cancelReasonTextarea = document.getElementById('cancelReason');
+            if (this.value === 'Other') {
+                cancelReasonTextarea.style.display = 'block';
+            } else {
+                cancelReasonTextarea.style.display = 'none';
+            }
+        });
+    }
+
+    if (returnReasonSelect) {
+        returnReasonSelect.addEventListener('change', function() {
+            const returnReasonTextarea = document.getElementById('returnReason');
+            if (this.value === 'Other') {
+                returnReasonTextarea.style.display = 'block';
+            } else {
+                returnReasonTextarea.style.display = 'none';
+            }
+        });
+    }
+});
+
 async function submitCancel() {
     console.log("Submit cancel called with stored IDs:", { currentOrderId, currentItemId });
-    
+
     if (!currentOrderId || !currentItemId || currentOrderId === 'undefined' || currentItemId === 'undefined') {
         console.error('Missing or invalid order/item ID');
         Swal.fire({
@@ -1146,7 +1191,14 @@ async function submitCancel() {
         return;
     }
 
-    const reason = document.getElementById('cancelReason').value.trim();
+    const cancelReasonSelect = document.getElementById('cancelReasonSelect');
+    const cancelReasonTextarea = document.getElementById('cancelReason');
+    let reason = cancelReasonSelect.value;
+
+    if (reason === 'Other') {
+        reason = cancelReasonTextarea.value.trim();
+    }
+
     if (!reason) {
         Swal.fire({
             icon: 'error',
@@ -1162,7 +1214,7 @@ async function submitCancel() {
             itemId: currentItemId,
             reason: reason
         };
-        
+
         console.log('Sending request with data:', requestData);
 
         const response = await fetch(`/cancel-order-item/${currentOrderId}/${currentItemId}`, {
@@ -1179,8 +1231,10 @@ async function submitCancel() {
 
         if (data.success) {
             hideModal('cancelModal', false);
-            document.getElementById('cancelReason').value = '';
-            
+            cancelReasonSelect.value = '';
+            cancelReasonTextarea.value = '';
+            cancelReasonTextarea.style.display = 'none';
+
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
@@ -1205,7 +1259,7 @@ async function submitCancel() {
 
 async function submitReturn() {
     console.log("Submit return called with stored IDs:", { currentOrderId, currentItemId });
-    
+
     if (!currentOrderId || !currentItemId || currentOrderId === 'undefined' || currentItemId === 'undefined') {
         console.error('Missing or invalid order/item ID');
         Swal.fire({
@@ -1216,7 +1270,14 @@ async function submitReturn() {
         return;
     }
 
-    const reason = document.getElementById('returnReason').value.trim();
+    const returnReasonSelect = document.getElementById('returnReasonSelect');
+    const returnReasonTextarea = document.getElementById('returnReason');
+    let reason = returnReasonSelect.value;
+
+    if (reason === 'Other') {
+        reason = returnReasonTextarea.value.trim();
+    }
+
     if (!reason) {
         Swal.fire({
             icon: 'error',
@@ -1232,7 +1293,7 @@ async function submitReturn() {
             itemId: currentItemId,
             reason: reason
         };
-        
+
         console.log('Sending return request with data:', requestData);
 
         const response = await fetch(`/returnOrder/${currentOrderId}/${currentItemId}`, {
@@ -1248,9 +1309,11 @@ async function submitReturn() {
         console.log('Response:', data);
 
         if (data.success) {
-            hideModal('returnModal', false); 
-            document.getElementById('returnReason').value = '';
-            
+            hideModal('returnModal', false);
+            returnReasonSelect.value = '';
+            returnReasonTextarea.value = '';
+            returnReasonTextarea.style.display = 'none';
+
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
@@ -1272,7 +1335,6 @@ async function submitReturn() {
         });
     }
 }
-
 
 const initiateRepayment = async (orderId, amount) => {
     try {

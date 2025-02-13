@@ -125,7 +125,7 @@ const loadShopPage = async (req, res) => {
           searchQuery,
           categoryQuantities: await getCategoryQuantities(),
           totalProducts: featuredProducts.length,
-          cartItems: cartItems.items
+          cartItems: cartItems?.items || [] // Handle case where cartItems is undefined
         });
       } else if (selectedSort === 'newArrivals') {
         sort.createdOn = -1;
@@ -166,7 +166,7 @@ const loadShopPage = async (req, res) => {
       searchQuery,
       categoryQuantities: await getCategoryQuantities(),
       totalProducts,
-      cartItems: cartItems.items
+      cartItems: cartItems?.items || [] // Handle case where cartItems is undefined
     });
 
   } catch (error) {

@@ -254,8 +254,6 @@
                             <option value="Shipped">Shipped</option>
                             <option value="Delivered">Delivered</option>
                             <option value="Cancelled">Cancelled</option>
-                            <option value="Return Request">Return Request</option>
-                            <option value="Returned">Returned</option>
                         </select>
                         <button class="save-btn" onclick="updateStatus()">Save Changes</button>
                     </div>
@@ -274,6 +272,8 @@
     </table>
   </div>
 
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     function openModal(itemId, currentStatus) {
         document.getElementById('statusModal').style.display = 'block';
@@ -308,11 +308,19 @@
                 statusElement.textContent = newStatus;
                 closeModal();
             } else {
-                alert('Failed to update status. Please try again.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Status Change Not Allowed',
+                    text: 'The status cannot be changed as it is already Delivered, Returned, or Canceled.'
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred while updating the status.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while updating the status.'
+            });
         }
     }
 

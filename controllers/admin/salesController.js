@@ -305,8 +305,23 @@ const downloadExcel = async (req, res) => {
             'Order Status': order.status
         }));
 
-        const worksheet = xlsx.utils.json_to_sheet(worksheetData);
-        xlsx.utils.book_append_sheet(workbook, worksheet, 'Sales Report');
+        const ordersWorksheet = xlsx.utils.json_to_sheet(worksheetData);
+        xlsx.utils.book_append_sheet(workbook, ordersWorksheet, 'Sales Report');
+
+        const totalOrders = orders.length;
+        const totalRevenue = orders.reduce((sum, order) => sum + order.finalAmount, 0);
+        const averageOrderValue = totalRevenue / totalOrders;
+        const totalDiscounts = orders.reduce((sum, order) => sum + order.discount, 0);
+
+        const summaryData = [
+            ['Total Orders', totalOrders],
+            ['Total Revenue', totalRevenue],
+            ['Average Order Value', averageOrderValue],
+            ['Total Discounts', totalDiscounts]
+        ];
+
+        const summaryWorksheet = xlsx.utils.aoa_to_sheet(summaryData);
+        xlsx.utils.book_append_sheet(workbook, summaryWorksheet, 'Summary');
 
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=sales-report.xlsx');

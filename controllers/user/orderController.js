@@ -358,88 +358,94 @@ const initiateRepayment = async (req, res) => {
 };
 
 const cancelOrderItem = async (req, res) => {
-    try {
-        const { orderId, itemId, reason } = req.body;
+  try {
+      const { orderId, itemId, reason } = req.body;
 
-        if (!reason || !reason.trim()) {
-            return res.status(400).json({
-                success: false,
-                message: 'Cancellation reason is required'
-            });
-        }
+      if (!reason || !reason.trim()) {
+          return res.status(400).json({
+              success: false,
+              message: 'Cancellation reason is required'
+          });
+      }
 
-        const order = await Order.findById(orderId);
-        if (!order) {
-            return res.status(404).json({
-                success: false,
-                message: 'Order not found'
-            });
-        }
+      const order = await Order.findById(orderId);
+      if (!order) {
+          return res.status(404).json({
+              success: false,
+              message: 'Order not found'
+          });
+      }
 
-        const orderItem = order.orderedItems.find(item => 
-            item._id.toString() === itemId
-        );
+      const orderItem = order.orderedItems.find(item => 
+          item._id.toString() === itemId
+      );
 
+      if (!orderItem) {
+          return res.status(404).json({
+              success: false,
+              message: 'Order item not found'
+          });
+      }
 
-        if (!orderItem) {
-            return res.status(404).json({
-                success: false,
-                message: 'Order item not found'
-            });
-        }
+      if (orderItem.status === 'Cancelled') {
+          return res.status(400).json({
+              success: false,
+              message: 'This item is already cancelled'
+          });
+      }
 
-        if (orderItem.status === 'Cancelled') {
-            return res.status(400).json({
-                success: false,
-                message: 'This item is already cancelled'
-            });
-        }
+      if (orderItem.status === 'Delivered') {
+          return res.status(400).json({
+              success: false,
+              message: 'Cannot cancel a delivered item'
+          });
+      }
 
-        if (orderItem.status === 'Delivered') {
-            return res.status(400).json({
-                success: false,
-                message: 'Cannot cancel a delivered item'
-            });
-        }
+      // Update product quantity
+      const product = await Product.findById(orderItem.product);
+      if (product) {
+          product.quantity += orderItem.quantity;
+          await product.save();
+      }
 
-        orderItem.status = 'Cancelled';
-        orderItem.cancellationReason = reason;
-        orderItem.cancelledAt = new Date();
+      orderItem.status = 'Cancelled';
+      orderItem.cancellationReason = reason;
+      orderItem.cancelledAt = new Date();
 
-        const cancelledItemTotal = orderItem.price * orderItem.quantity;
-        order.totalPrice -= cancelledItemTotal;
-        order.finalAmount -= cancelledItemTotal;
+      const cancelledItemTotal = orderItem.price * orderItem.quantity;
+      order.totalPrice -= cancelledItemTotal;
+      order.finalAmount -= cancelledItemTotal;
 
-        if (order.paymentMethod !== 'cod') {
-            const cancelAmount = orderItem.price * orderItem.quantity;
-            const transactionType = 'credit';
-            const userId = req.session.user;
-            await walletHelper.updateWalletBalance(userId, cancelAmount, transactionType);
-        }
+      if (order.paymentMethod !== 'cod') {
+          const cancelAmount = orderItem.price * orderItem.quantity;
+          const transactionType = 'credit';
+          const userId = req.session.user;
+          await walletHelper.updateWalletBalance(userId, cancelAmount, transactionType);
+      }
 
-        const allItemsCancelled = order.orderedItems.every(item => 
-            item.status === 'Cancelled'
-        );
+      const allItemsCancelled = order.orderedItems.every(item => 
+          item.status === 'Cancelled'
+      );
 
-        if (allItemsCancelled) {
-            order.status = 'Cancelled';
-        }
+      if (allItemsCancelled) {
+          order.status = 'Cancelled';
+      }
 
-        await order.save();
+      await order.save();
 
-        res.status(200).json({
-            success: true,
-            message: 'Order item cancelled successfully'
-        });
+      res.status(200).json({
+          success: true,
+          message: 'Order item cancelled successfully'
+      });
 
-    } catch (error) {
-        console.error('Error in cancelOrderItem:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error processing cancellation request'
-        });
-    }
-}
+  } catch (error) {
+      console.error('Error in cancelOrderItem:', error);
+      res.status(500).json({
+          success: false,
+          message: 'Error processing cancellation request'
+      });
+  }
+};
 const returnOrder = async (req, res) => {
   try {
       const { orderId, itemId } = req.params;
@@ -489,6 +495,13 @@ const returnOrder = async (req, res) => {
           });
       }
 
+      // Update product quantity
+      const product = await Product.findById(orderItem.product);
+      if (product) {
+          product.quantity += orderItem.quantity;
+          await product.save();
+      }
+
       orderItem.status = 'Returned';
       orderItem.returnReason = reason;
       orderItem.returnRequestedAt = new Date();
@@ -500,17 +513,16 @@ const returnOrder = async (req, res) => {
       await walletHelper.updateWalletBalance(userId, returnAmount, transactionType);
 
       const allItemsReturned = order.orderedItems.every(item => 
-        item.status === 'Returned'
-    );
+          item.status === 'Returned'
+      );
 
-    if (allItemsReturned) {
-        order.status = 'Returned';
-    }
+      if (allItemsReturned) {
+          order.status = 'Returned';
+      }
 
-
-    const ReturnedItemTotal = orderItem.price * orderItem.quantity;
-        order.totalPrice -= ReturnedItemTotal;
-        order.finalAmount -= ReturnedItemTotal;
+      const ReturnedItemTotal = orderItem.price * orderItem.quantity;
+      order.totalPrice -= ReturnedItemTotal;
+      order.finalAmount -= ReturnedItemTotal;
 
       await order.save();
 
@@ -526,7 +538,7 @@ const returnOrder = async (req, res) => {
           message: 'Error processing return request'
       });
   }
-}
+};
 
   const walletPayment = async (req, res) => {
     try {

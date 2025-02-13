@@ -232,9 +232,11 @@ const placeOrder = async (req, res) => {
 
       const orderItems = cart.items.map(item => ({
           product: item.productId._id,
+          productName: item.productId.productName, // Include productName
+          productImage: item.productId.images,    // Include productImage
           quantity: item.quantity,
           price: item.productId.salePrice || item.productId.price,
-          dateAdded: new Date()
+          status: 'Pending' // Default status for each item
       }));
 
       const order = new Order({

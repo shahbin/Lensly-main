@@ -1894,174 +1894,172 @@ table {
 
 /* =============== SIGNUP PAGE =============== */
 
-/* Signup Page - Styles */
+
 
 .signup-section {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f4f6f9; /* Soft background color */
+  min-height: 100vh;
+  background-color: #f8f9fe;
+  margin: 0;
+  padding: 0;
 }
 
 .signup-container {
   background-color: #fff;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 500px; /* Limit the width */
-  width: 100%;
-  display: grid;
-  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 480px;  /* Match login form width */
+  margin: auto;
 }
 
-/* Heading and form styling */
 .signup-form h3 {
   text-align: center;
   color: #333;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.signup-form__grid {
-  display: grid;
-  gap: 1rem;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .signup-field {
-  position: relative;
+  margin-bottom: 1rem;
 }
 
+/* Label styling */
+.signup-field label {
+  display: block;
+  color: #333;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Input field styling */
 .signup-form__input {
   width: 100%;
-  padding: 12px;
+  height: 38px;  /* Match login input height */
+  padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-/* Input focus effect */
-.signup-form__input:focus {
-  border-color: #286d31; /* Blue color for focus */
-  outline: none;
-}
-
-/* Error message styling */
-.signup-error-message {
-  color: red;
   font-size: 0.875rem;
-  position: absolute;
-  bottom: -18px;
-  left: 0;
+  background-color: #f0f4f8;
+  box-sizing: border-box;
 }
 
-/* Submit button style */
+.signup-form__input:focus {
+  border-color: #00796b;
+  outline: none;
+  background-color: #fff;
+}
+
+/* Submit button */
 .signup-btn {
   background-color: #00796b;
   color: #fff;
-  padding: 14px;
+  height: 38px;
   border: none;
-  border-radius: 5px;
-  font-size: 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
   width: 100%;
+  margin-top: 1rem;
 }
 
-/* Hover effect for the button */
 .signup-btn:hover {
-  background-color: #005a4f;
+  background-color: #006156;
 }
 
-/* Style for social media buttons */
-.signup-social-btns {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: -1.5rem;
+/* Forgot password link */
+.forgot-password {
+  display: block;
+  text-align: left;
+  color: #8b5cf6;
+  text-decoration: none;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
+/* Or sign up with section */
+.signup-alt-options {
+  text-align: center;
+  color: #666;
+  font-size: 0.875rem;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.signup-alt-options::before,
+.signup-alt-options::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.signup-alt-options::before {
+  right: 52%;
+}
+
+.signup-alt-options::after {
+  left: 52%;
+}
+
+.signup-alt-options p {
+  display: inline-block;
+  background-color: #fff;
+  padding: 0 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Google button */
 .signup-google-btn {
   display: flex;
   align-items: center;
-  background-color: #f5f5f5;
-  padding: 10px;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #f8f9fa;
+  height: 38px;
+  padding: 0 1rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
   text-decoration: none;
   color: #333;
-  transition: background-color 0.3s ease;
+  font-size: 0.875rem;
+  margin: 0 auto;
 }
 
 .signup-google-btn:hover {
-  background-color: #e0e0e0;
+  background-color: #f0f0f0;
 }
 
-.signup-google-btn img {
-  margin-right: 8px;
-}
-
-/* Link to login page */
-/* Styling for the border beneath the Google button */
+/* Create account link */
 .existing-user-link {
   text-align: center;
-  margin-top: 1rem;
-  padding-top: 1rem;  /* Adds space above the border */
-  border-top: 1px solid #ddd;  /* Light gray border for separation */
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
 }
 
 .existing-user-link a {
   color: #007bff;
   text-decoration: none;
-  font-weight: 500;
-  padding-top: 10px;  /* Some padding to give space around the link */
+  font-size: 0.875rem;
 }
 
 .existing-user-link a:hover {
   text-decoration: underline;
 }
 
-
-/* Styling for "or log in with" and "or sign up with" with lines reduced from both sides */
-.signup-alt-options{
-  text-align: center;
-  color: #777;
-  font-size: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
+/* Reset body margins */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  
 }
-
-.signup-alt-options::before, .signup-alt-options::after{
-  content: '';
-  position: absolute;
-  top: 20%;  /* Vertical alignment of the lines */
-  width: 35%;  /* Adjusted width of the line */
-  height: 1px;
-  background-color: #ddd; /* Light gray line */
-}
-
-.signup-alt-options::before{
-  right: 50%; /* Adjusts the line to start from the right of the text */
-  margin-right: 10px; /* Controls the distance from the text */
-}
-
-.signup-alt-options::after{
-  left: 50%; /* Adjusts the line to start from the left of the text */
-  margin-left: 10px; /* Controls the distance from the text */
-}
-
-.signup-alt-options p{
-  display: inline-block;
-  background-color: #fff; /* White background to overlay the line */
-  padding: 0 1rem;
-  position: relative;
-  z-index: 1;
-  line-height: 1.3;
-  position: relative;
-  top: -10px;  /* Moves the text slightly up */
-}
-
 
 
 /*=============== ACCOUNTS ===============*/

@@ -179,44 +179,46 @@
         </div>
 
         <script>
-            // Revenue Chart
+        
+            const timeSeriesData = JSON.parse('<%- JSON.stringify(dashboardData.revenue.timeSeriesData) %>');
+            const categoryData = JSON.parse('<%- JSON.stringify(dashboardData.products.categories) %>');
+            const topProductsData = JSON.parse('<%- JSON.stringify(dashboardData.products.top) %>');
+        
+            console.log('Time Series Data:', timeSeriesData);
+            console.log('Category Data:', categoryData);
+            console.log('Top Products Data:', topProductsData);
+        
             const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            const timeSeriesData = '<%- JSON.stringify(dashboardData.revenue.timeSeriesData) %>';
             let revenueChart;
-            
+        
             function updateRevenueChart(period) {
                 const data = timeSeriesData[period];
-                let labels, values;
-                
-                switch(period) {
-                    case 'daily':
-                        labels = data.map(d => {
-                            const date = new Date(d._id.date);
-                            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-                        });
-                        values = data.map(d => d.revenue);
-                        break;
-                    case 'weekly':
-                        labels = data.map(d => {
-                            const date = new Date(d._id.year, 0, 1);
-                            date.setDate(date.getDate() + (d._id.week * 7));
-                            return `Week ${d._id.week}, ${d._id.year}`;
-                        });
-                        values = data.map(d => d.revenue);
-                        break;
-                    case 'monthly':
-                        labels = data.map(d => {
-                            const date = new Date(d._id.year, d._id.month - 1);
-                            return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-                        });
-                        values = data.map(d => d.revenue);
-                        break;
-                    case 'yearly':
-                        labels = data.map(d => d._id.year.toString());
-                        values = data.map(d => d.revenue);
-                        break;
+                if (!data || !data.length) {
+                    console.log('No revenue data available for period:', period);
+                    return;
                 }
-
+        
+                const labels = data.map(d => {
+                    switch(period) {
+                        case 'daily':
+                            return new Date(d._id.date).toLocaleDateString('en-IN', { 
+                                day: 'numeric', 
+                                month: 'short' 
+                            });
+                        case 'weekly':
+                            return `Week ${d._id.week}, ${d._id.year}`;
+                        case 'monthly':
+                            return new Date(d._id.year, d._id.month - 1).toLocaleDateString('en-IN', { 
+                                month: 'short', 
+                                year: 'numeric' 
+                            });
+                        case 'yearly':
+                            return d._id.year.toString();
+                    }
+                });
+        
+                const values = data.map(d => d.revenue);
+        
                 const chartData = {
                     labels: labels,
                     datasets: [{
@@ -228,29 +230,19 @@
                         tension: 0.4
                     }]
                 };
-
+        
                 if (revenueChart) {
                     revenueChart.destroy();
                 }
-
+        
                 revenueChart = new Chart(revenueCtx, {
                     type: 'line',
                     data: chartData,
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        layout: {
-                            padding: {
-                                left: 20,
-                                right: 20,
-                                top: 20,
-                                bottom: 20
-                            }
-                        },
                         plugins: {
-                            legend: {
-                                display: false
-                            },
+                            legend: { display: false },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
@@ -270,19 +262,14 @@
                     }
                 });
             }
-
-            // Initialize with daily data
+        
             updateRevenueChart('daily');
-
-            // Handle time range changes
+        
             document.getElementById('timeRange').addEventListener('change', function(e) {
                 updateRevenueChart(e.target.value);
             });
 
-            // Category Pie Chart
             const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-            const categoryData = '<%- JSON.stringify(dashboardData.products.categories) %>';
-            
             if (categoryData && categoryData.length > 0) {
                 const categoryColors = [
                     'rgba(14, 165, 233, 0.8)',
@@ -291,7 +278,7 @@
                     'rgba(168, 85, 247, 0.8)',
                     'rgba(236, 72, 153, 0.8)'
                 ];
-
+        
                 new Chart(categoryCtx, {
                     type: 'pie',
                     data: {
@@ -300,59 +287,21 @@
                             data: categoryData.map(c => c.revenue),
                             backgroundColor: categoryColors,
                             borderColor: categoryColors.map(color => color.replace('0.8', '1')),
-                            borderWidth: 1
+                            borderWidth: 0.3
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        layout: {
-                            padding: {
-                                left: 20,
-                                right: 20,
-                                top: 20,
-                                bottom: 20
-                            }
-                        },
                         plugins: {
-                            legend: {
-                                position: 'bottom',
-                                align: 'center',
-                                labels: {
-                                    boxWidth: 18,
-                                    padding: 20,
-                                    font: { 
-                                        size: 13,
-                                        weight: '500'
-                                    },
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            return data.labels.map((label, i) => {
-                                                const value = data.datasets[0].data[i];
-                                                const total = data.datasets[0].data.reduce((acc, val) => acc + val, 0);
-                                                const percentage = ((value / total) * 100).toFixed(1);
-                                                return {
-                                                    text: `${label} (${percentage}%)`,
-                                                    fillStyle: data.datasets[0].backgroundColor[i],
-                                                    strokeStyle: data.datasets[0].borderColor[i],
-                                                    lineWidth: 1,
-                                                    hidden: false
-                                                };
-                                            });
-                                        }
-                                        return [];
-                                    }
-                                }
-                            },
+                            legend: { position: 'bottom' },
                             tooltip: {
-                                padding: 12,
                                 callbacks: {
                                     label: function(context) {
                                         const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
                                         const value = context.raw;
                                         const percentage = ((value / total) * 100).toFixed(1);
-                                        return `${context.label}: ₹${value.toLocaleString()} (${percentage}%)`;
+                                        return `${context.label}: ₹${value.toLocaleString('en-IN')} (${percentage}%)`;
                                     }
                                 }
                             }
@@ -360,99 +309,55 @@
                     }
                 });
             } else {
-                const ctx = categoryCtx;
-                ctx.font = '14px Arial';
-                ctx.fillStyle = '#6B7280';
-                ctx.textAlign = 'center';
-                ctx.fillText('No category data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                console.log('No category data available');
             }
 
             const topProductsCanvas = document.getElementById('topProductsChart');
-            const topProductsData = '<%- JSON.stringify(dashboardData.products ? dashboardData.products.top || [] : []) %>';
-            
             if (topProductsCanvas && topProductsData && topProductsData.length > 0) {
-                console.log('Top Products Data:', topProductsData); 
-
-                const shortenName = (name) => {
-                    if (name.length > 15) {
-                        return name.substring(0, 12) + '...';
-                    }
-                    return name;
-                };
-
-                const topProductsChart = new Chart(topProductsCanvas, {
+                new Chart(topProductsCanvas, {
                     type: 'line',
                     data: {
-                        labels: topProductsData.map(product => shortenName(product.name)),
+                        labels: topProductsData.map(product => 
+                            product.name.length > 15 ? product.name.substring(0, 12) + '...' : product.name
+                        ),
                         datasets: [{
                             label: 'Sales',
                             data: topProductsData.map(product => product.totalSold),
-                            borderColor: 'rgba(59, 130, 246, 1)', 
+                            borderColor: 'rgba(59, 130, 246, 1)',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderWidth: 2,
                             tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
+                            fill: true
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: {
-                                display: false
-                            },
+                            legend: { display: false },
                             tooltip: {
                                 callbacks: {
                                     title: function(context) {
                                         return topProductsData[context[0].dataIndex].name;
                                     },
                                     label: function(context) {
-                                        return 'Sales: ' + context.raw;
+                                        const product = topProductsData[context.dataIndex];
+                                        return [
+                                            `Sales: ${context.raw}`,
+                                            `Revenue: ₹${product.revenue.toLocaleString('en-IN')}`
+                                        ];
                                     }
                                 }
                             }
                         },
                         scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 2,
-                                    font: {
-                                        size: 12
-                                    }
-                                },
-                                grid: {
-                                    display: true,
-                                    color: 'rgba(0, 0, 0, 0.05)'
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    font: {
-                                        size: 11
-                                    },
-                                    maxRotation: 45,
-                                    minRotation: 45
-                                },
-                                grid: {
-                                    display: false
-                                }
-                            }
+                            y: { beginAtZero: true },
+                            x: { ticks: { maxRotation: 45, minRotation: 45 } }
                         }
                     }
                 });
             } else {
                 console.log('No top products data available or canvas not found');
-                const ctx = topProductsCanvas.getContext('2d');
-                ctx.font = '14px Inter';
-                ctx.fillStyle = '#6B7280';
-                ctx.textAlign = 'center';
-                ctx.fillText('No product data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
             }
         </script>
 

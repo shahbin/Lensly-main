@@ -114,6 +114,12 @@ const getOrderDetails = async (req, res) => {
         if (orderItem.status == "Cancelled"){
           return res.status(400).json({success: false, error:"Cannot change status of a cancelled item"})
         }
+        if (orderItem.status == "Returned"){
+            return res.status(400).json({success: false, error:"Cannot change status of a returned item"})
+          }
+          if (orderItem.status == "Delivered"){
+            return res.status(400).json({success: false, error:"Cannot change status of a delivered item"})
+          }
 
         orderItem.status = newStatus;
         await order.save();
@@ -121,6 +127,7 @@ const getOrderDetails = async (req, res) => {
         const itemStatuses = order.orderedItems.map(item => item.status);
         if (itemStatuses.every(s => s === "Delivered")) {
             order.status = "Delivered";
+            order.paymentStatus = "Paid"
         } else if (itemStatuses.some(s => s === "Processing" || s === "Shipped" || s === "Delivered")) {
             order.status = "Processing";
         } else if (itemStatuses.some(s => s === "Pending")) {
