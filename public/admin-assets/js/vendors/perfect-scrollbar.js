@@ -1258,8 +1258,8 @@
 
     this.settings.handlers.forEach(function (handlerName) { return handlers[handlerName](this$1); });
 
-    this.lastScrollTop = Math.floor(element.scrollTop); // for onScroll only
-    this.lastScrollLeft = element.scrollLeft; // for onScroll only
+    this.lastScrollTop = Math.floor(element.scrollTop); 
+    this.lastScrollLeft = element.scrollLeft; 
     this.event.bind(this.element, 'scroll', function (e) { return this$1.onScroll(e); });
     updateGeometry(this);
   };
@@ -1269,12 +1269,10 @@
       return;
     }
 
-    // Recalcuate negative scrollLeft adjustment
     this.negativeScrollAdjustment = this.isNegativeScroll
       ? this.element.scrollWidth - this.element.clientWidth
       : 0;
 
-    // Recalculate rail margins
     set(this.scrollbarXRail, { display: 'block' });
     set(this.scrollbarYRail, { display: 'block' });
     this.railXMarginWidth =
@@ -1284,7 +1282,6 @@
       toInt(get(this.scrollbarYRail).marginTop) +
       toInt(get(this.scrollbarYRail).marginBottom);
 
-    // Hide scrollbars not to affect scrollWidth and scrollHeight
     set(this.scrollbarXRail, { display: 'none' });
     set(this.scrollbarYRail, { display: 'none' });
 
@@ -1326,7 +1323,6 @@
     remove(this.scrollbarYRail);
     this.removePsClasses();
 
-    // unset elements
     this.element = null;
     this.scrollbarX = null;
     this.scrollbarY = null;

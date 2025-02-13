@@ -4,7 +4,6 @@ const Wallet = require('../models/walletSchema');
 
 async function updateWalletBalance(userId, amount, transactionType) {
   try {
-      console.log(userId, amount, transactionType, 'userid')
       let wallet = await Wallet.findOne({ userId });
 
       if (!wallet) {
@@ -38,7 +37,6 @@ async function updateWalletBalance(userId, amount, transactionType) {
       wallet.transactions.push(newTransaction);
 
       const walletcreated = await wallet.save();
-      console.log(walletcreated, 'create wallet')
       return { success: true, message: 'Wallet updated successfully' };
   } catch (error) {
       console.error(error);

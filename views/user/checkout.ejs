@@ -1106,7 +1106,7 @@ async function applyCouponCode() {
 
             document.querySelector(".order__discount").textContent = `₹${discount.toFixed(2)}`;
             updateTotalAmount(finalAmount);
-            updatePaymentMethods(); // Update COD availability
+            updatePaymentMethods(); 
 
             Swal.fire("Success", `Coupon applied! ₹${discount} discount`, "success");
         } else {
@@ -1126,11 +1126,10 @@ function updateTotalAmount(finalAmount) {
     document.querySelector(".order__grand-total").textContent = `₹${finalAmount.toFixed(2)}`;
 }
 
-// Function to update payment methods based on total amount
 function updatePaymentMethods() {
     const subtotal = parseFloat(document.getElementById("subtotal").value);
     const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
-    const totalPrice = subtotal + 49 - discount; // Adding shipping cost of ₹49
+    const totalPrice = subtotal + 49 - discount; 
 
     const codInput = document.querySelector('input[value="cod"]');
     const codLabel = codInput.parentElement;
@@ -1140,13 +1139,11 @@ function updatePaymentMethods() {
       codInput.disabled = true;
       codLabel.style.opacity = '0.5';
       codLabel.style.cursor = 'not-allowed';
-      
-      // If COD was selected, switch to online payment
+
       if (codInput.checked) {
         document.querySelector('input[value="online"]').checked = true;
       }
 
-      // Show warning message
       if (!codWarning) {
         const warningDiv = document.createElement('div');
         warningDiv.id = 'codWarning';
@@ -1164,10 +1161,8 @@ function updatePaymentMethods() {
     }
   }
 
-  // Call updatePaymentMethods initially and whenever the total changes
   document.addEventListener('DOMContentLoaded', updatePaymentMethods);
 
-  // Update payment methods when coupon is applied or removed
   const originalApplyCoupon = applyCoupon;
   applyCoupon = async function() {
     await originalApplyCoupon.apply(this, arguments);

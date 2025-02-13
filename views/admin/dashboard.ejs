@@ -181,7 +181,7 @@
         <script>
             // Revenue Chart
             const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            const timeSeriesData = <%- JSON.stringify(dashboardData.revenue.timeSeriesData) %>;
+            const timeSeriesData = '<%- JSON.stringify(dashboardData.revenue.timeSeriesData) %>';
             let revenueChart;
             
             function updateRevenueChart(period) {
@@ -281,7 +281,7 @@
 
             // Category Pie Chart
             const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-            const categoryData = <%- JSON.stringify(dashboardData.products.categories) %>;
+            const categoryData = '<%- JSON.stringify(dashboardData.products.categories) %>';
             
             if (categoryData && categoryData.length > 0) {
                 const categoryColors = [
@@ -367,14 +367,12 @@
                 ctx.fillText('No category data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
             }
 
-            // Initialize Top Products Chart
             const topProductsCanvas = document.getElementById('topProductsChart');
-            const topProductsData = <%- JSON.stringify(dashboardData.products ? dashboardData.products.top || [] : []) %>;
+            const topProductsData = '<%- JSON.stringify(dashboardData.products ? dashboardData.products.top || [] : []) %>';
             
             if (topProductsCanvas && topProductsData && topProductsData.length > 0) {
-                console.log('Top Products Data:', topProductsData); // Debug log
-                
-                // Function to shorten product names
+                console.log('Top Products Data:', topProductsData); 
+
                 const shortenName = (name) => {
                     if (name.length > 15) {
                         return name.substring(0, 12) + '...';
@@ -389,7 +387,7 @@
                         datasets: [{
                             label: 'Sales',
                             data: topProductsData.map(product => product.totalSold),
-                            borderColor: 'rgba(59, 130, 246, 1)', // Blue color
+                            borderColor: 'rgba(59, 130, 246, 1)', 
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderWidth: 2,
                             tension: 0.4,
@@ -411,7 +409,6 @@
                             tooltip: {
                                 callbacks: {
                                     title: function(context) {
-                                        // Show full product name in tooltip
                                         return topProductsData[context[0].dataIndex].name;
                                     },
                                     label: function(context) {

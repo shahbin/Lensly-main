@@ -4,7 +4,7 @@ const mongoose = require("mongoose")
 const getCouponPage = async (req, res) => {
   try {
       const page = parseInt(req.query.page) || 1;
-      const limit = 4; // Number of coupons per page
+      const limit = 4; 
       const skip = (page - 1) * limit;
 
       const totalCoupons = await Coupon.countDocuments({});
@@ -13,13 +13,13 @@ const getCouponPage = async (req, res) => {
       const findCoupons = await Coupon.find({})
           .skip(skip)
           .limit(limit)
-          .sort({ createdOn: -1 }); // Optional: sort by most recent first
+          .sort({ createdOn: -1 }); 
 
       return res.render("coupon", {
           coupons: findCoupons,
           currentPage: page,
           totalPages: totalPages,
-          activeColor: '#088178' // Active button color
+          activeColor: '#088178' 
       });
   } catch (error) {
       console.error(error);
@@ -93,7 +93,6 @@ const updateCoupon = async (req, res) => {
       const couponId = req.body.couponId;
       const oid = new mongoose.Types.ObjectId(couponId);
 
-      // Check for duplicate coupon name excluding current coupon
       const existingCoupon = await Coupon.findOne({
           name: req.body.couponName,
           _id: { $ne: oid }
@@ -162,18 +161,15 @@ const validateCouponData = async (data) => {
   const offerPrice = parseInt(data.offerPrice);
   const minimumPrice = parseInt(data.minimumPrice);
 
-  // Check for existing coupon with the same name
   const existingCoupon = await Coupon.findOne({ name: data.couponName });
   if (existingCoupon) {
     errors.couponName = "Coupon with this name already exists";
   }
 
-  // Validate coupon name
   if (!nameRegex.test(data.couponName)) {
     errors.couponName = "Coupon name must be alphanumeric and between 1-50 characters";
   }
 
-  // Validate dates
   if (startDate <= today) {
     errors.startDate = "Start date must be after today";
   }
@@ -182,7 +178,6 @@ const validateCouponData = async (data) => {
     errors.endDate = "End date must be after start date";
   }
 
-  // Validate prices
   if (isNaN(offerPrice) || isNaN(minimumPrice)) {
     errors.prices = "Both offer price and minimum price must be valid numbers";
   } else if (offerPrice >= minimumPrice) {

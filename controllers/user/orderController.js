@@ -542,10 +542,12 @@ const returnOrder = async (req, res) => {
         const wallet = await Wallet.findOne({ userId });
         if (!wallet || wallet.balance < amount) {
             return res.status(400).json({ message: "Insufficient balance in your wallet" });
+
         }
+        const Amount = order.finalAmount
 
         const transactionType = 'debit';
-        await walletHelper.updateWalletBalance(userId, order.finalAmount , transactionType);
+        await walletHelper.updateWalletBalance(userId, Amount, transactionType);
 
         order.paymentStatus = "Paid";
         order.paymentMethod = paymentMethod;

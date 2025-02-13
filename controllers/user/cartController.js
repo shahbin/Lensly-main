@@ -196,10 +196,8 @@ const placeOrder = async (req, res) => {
       const userId = req.session.user;
       const deliveryCharge = 49;
 
-      // Calculate totalAmount after applying discount and adding delivery charge
       const totalAmount = subtotal - discount + deliveryCharge;
 
-      // Check if COD is allowed for this order amount
       if (paymentMethod === 'cod' && totalAmount > 1000) {
           return res.status(400).json({ 
               success: false, 
@@ -207,13 +205,11 @@ const placeOrder = async (req, res) => {
           });
       }
 
-      // 1. Verify cart exists and has items
       const cart = await Cart.findOne({ userId }).populate('items.productId');
       if (!cart || !cart.items || cart.items.length === 0) {
           return res.status(400).json({ success: false, message: 'Cart is empty' });
       }
 
-      // Check product quantities before proceeding
       const quantityErrors = [];
       for (const item of cart.items) {
           const product = item.productId;
@@ -234,7 +230,6 @@ const placeOrder = async (req, res) => {
           });
       }
 
-      // 2. Create order items
       const orderItems = cart.items.map(item => ({
           product: item.productId._id,
           quantity: item.quantity,
@@ -242,7 +237,6 @@ const placeOrder = async (req, res) => {
           dateAdded: new Date()
       }));
 
-      // 3. Create order
       const order = new Order({
           userId,
           orderedItems: orderItems,
@@ -259,7 +253,6 @@ const placeOrder = async (req, res) => {
 
       const savedOrder = await order.save();
 
-      // 4. Update product quantities
       await Promise.all(cart.items.map(async (item) => {
           return Product.findByIdAndUpdate(
               item.productId._id,
@@ -268,7 +261,6 @@ const placeOrder = async (req, res) => {
           );
       }));
 
-      // 5. Don't clear the cart yet if it's a wallet payment
       if (paymentMethod !== 'wallet') {
           await Cart.findOneAndUpdate(
               { userId },

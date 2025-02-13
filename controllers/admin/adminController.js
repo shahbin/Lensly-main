@@ -42,7 +42,6 @@ const login = async (req, res) => {
             return res.render('admin-login', { message: 'Invalid password' });
         }
 
-        // Store admin details in session
         req.session.admin = {
             id: admin._id,
             email: admin.email,
@@ -66,13 +65,11 @@ const loadDashboard = async (req, res) => {
         const previousMonth = new Date(lastMonth);
         previousMonth.setMonth(previousMonth.getMonth() - 1);
 
-        // Time ranges for different periods
         const lastWeek = new Date(today);
         lastWeek.setDate(today.getDate() - 7);
         const lastYear = new Date(today);
         lastYear.setFullYear(today.getFullYear() - 1);
 
-        // Revenue Metrics
         const [currentMonthRevenue, previousMonthRevenue, topProducts, topCategories, productTrends, categoryData] = await Promise.all([
             Order.aggregate([
                 { $match: { status: "Delivered", createdOn: { $gte: lastMonth } } },
@@ -82,7 +79,7 @@ const loadDashboard = async (req, res) => {
                 { $match: { status: "Delivered", createdOn: { $gte: previousMonth, $lt: lastMonth } } },
                 { $group: { _id: null, total: { $sum: "$finalAmount" } } }
             ]),
-            // Top selling products
+        
             Order.aggregate([
                 { $match: { status: "Delivered", createdOn: { $gte: lastMonth } } },
                 { $unwind: "$orderedItems" },
@@ -113,7 +110,7 @@ const loadDashboard = async (req, res) => {
                 { $sort: { revenue: -1 } },
                 { $limit: 5 }
             ]),
-            // Top categories
+            
             Order.aggregate([
                 { $match: { status: "Delivered", createdOn: { $gte: lastMonth } } },
                 { $unwind: "$orderedItems" },
@@ -132,7 +129,7 @@ const loadDashboard = async (req, res) => {
                 { $sort: { totalSales: -1 } },
                 { $limit: 5 }
             ]),
-            // Top selling products with trends
+            
             Order.aggregate([
                 { $match: { status: "Delivered", createdOn: { $gte: new Date(Date.now() - 30*24*60*60*1000) } } },
                 { $unwind: "$orderedItems" },
@@ -173,7 +170,7 @@ const loadDashboard = async (req, res) => {
                 { $sort: { totalRevenue: -1 } },
                 { $limit: 5 }
             ]),
-            // Category data for doughnut chart
+
             Order.aggregate([
                 { $match: { status: "Delivered", createdOn: { $gte: lastMonth } } },
                 { $unwind: "$orderedItems" },
@@ -202,13 +199,11 @@ const loadDashboard = async (req, res) => {
             ])
         ]);
 
-        // Calculate metrics
         const currentRevenue = currentMonthRevenue[0]?.total || 0;
         const prevRevenue = previousMonthRevenue[0]?.total || 0;
         const revenueChange = prevRevenue ? 
             ((currentRevenue - prevRevenue) / prevRevenue * 100).toFixed(1) : 0;
 
-        // Customer Metrics
         const [currentMonthCustomers, previousMonthCustomers, customerStats] = await Promise.all([
             User.countDocuments({ createdAt: { $gte: lastMonth, $lt: today } }),
             User.countDocuments({ createdAt: { $gte: previousMonth, $lt: lastMonth } }),
@@ -234,7 +229,6 @@ const loadDashboard = async (req, res) => {
         const customerChange = previousMonthCustomers ? 
             ((currentMonthCustomers - previousMonthCustomers) / previousMonthCustomers * 100).toFixed(1) : 0;
 
-        // Order Metrics
         const [orderStats, recentOrders] = await Promise.all([
             Order.aggregate([
                 {
@@ -256,16 +250,13 @@ const loadDashboard = async (req, res) => {
                     }
                 }
             ]),
-            // Recent orders
             Order.find()
                 .sort({ createdOn: -1 })
                 .limit(10)
                 .populate('userId', 'name email')
         ]);
 
-        // Time series data for charts
         const [dailyData, weeklyData, monthlyData, yearlyData] = await Promise.all([
-            // Daily data (last 30 days)
             Order.aggregate([
                 {
                     $match: {
@@ -290,12 +281,12 @@ const loadDashboard = async (req, res) => {
                 },
                 { $sort: { "_id.date": 1 } }
             ]),
-            // Weekly data (last 12 weeks)
+            
             Order.aggregate([
                 {
                     $match: {
                         status: "Delivered",
-                        createdOn: { $gte: new Date(today.getTime() - (84 * 24 * 60 * 60 * 1000)) } // 12 weeks ago
+                        createdOn: { $gte: new Date(today.getTime() - (84 * 24 * 60 * 60 * 1000)) } 
                     }
                 },
                 {
@@ -310,7 +301,6 @@ const loadDashboard = async (req, res) => {
                 },
                 { $sort: { "_id.year": 1, "_id.week": 1 } }
             ]),
-            // Monthly data (last 12 months)
             Order.aggregate([
                 {
                     $match: {
@@ -330,7 +320,6 @@ const loadDashboard = async (req, res) => {
                 },
                 { $sort: { "_id.year": 1, "_id.month": 1 } }
             ]),
-            // Yearly data
             Order.aggregate([
                 {
                     $match: {
@@ -350,14 +339,12 @@ const loadDashboard = async (req, res) => {
             ])
         ]);
 
-        // Recent Sales
         const recentSales = await Order.find({ status: "Delivered" })
             .sort({ createdOn: -1 })
             .limit(5)
             .populate('userId', 'name email')
             .select('userId finalAmount createdOn orderedItems');
 
-        // Prepare dashboard data
         const dashboardData = {
             revenue: {
                 current: currentRevenue,
