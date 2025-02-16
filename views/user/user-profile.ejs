@@ -26,7 +26,7 @@ body {
 
 
 
-.header {
+.header-profile {
   background: white;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -327,7 +327,6 @@ body {
 
 .error-message {
   color: #dc2626;
-  background-color: #fee2e2;
   padding: 0.75rem;
   border-radius: 0.375rem;
   margin-bottom: 1rem;
@@ -565,6 +564,20 @@ body {
   margin-bottom: 20px;
 }
 
+.referral-close { 
+  color: #aaa; 
+  float: right; 
+  font-size: 28px; 
+  font-weight: bold; 
+  cursor: pointer; 
+  transition: color 0.2s ease; 
+}
+
+.referral-close:hover, .referral-close:focus { 
+  color: #000; 
+  text-decoration: none; 
+}
+
 .referral-stats {
   background-color: #f0f7eb;
   border-radius: 8px;
@@ -575,7 +588,7 @@ body {
 }
 
 .referral-icon {
-  background-color: #9ed36a;
+  background-color: #5A8A5A;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -602,7 +615,7 @@ body {
 .referral-count {
   font-size: 24px;
   font-weight: bold;
-  color: #9ed36a;
+  color: #5A8A5A;
 }
 
 .referral-sublabel {
@@ -636,7 +649,7 @@ body {
 }
 
 .copy-button, #applyReferralBtn {
-  background-color: #9ed36a;
+  background-color: #5A8A5A;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -645,7 +658,7 @@ body {
 }
 
 .copy-button:hover, #applyReferralBtn:hover {
-  background-color: #8bc34a;
+  background-color: #478d47;
 }
 
 .copy-button svg {
@@ -666,7 +679,13 @@ body {
 }
 
 .success-message {
-  color: #4caf50;
+  color: #5A8A5A;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.apply-referral p {
+  color: #5A8A5A;
   font-size: 14px;
   margin-top: 10px;
 }
@@ -684,7 +703,7 @@ body {
       
         </ul>
       </section>
-  <header class="header">
+  <header class="header-profile">
     <div class="container">
         <h1 class="welcome-text" id="welcomeText">Welcome back, <%= user.name %>!</h1>
         <div class="date-time" id="dateTime"></div>
@@ -893,7 +912,7 @@ body {
               <p>Check your balance</p>
           </div>
           
-          <div class="dashboard-item" data-type="history">
+          <!-- <div class="dashboard-item" data-type="history">
               <div class="icon-wrapper cyan">
                   <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M12 20V4m-7 4l7-4 7 4M5 16l7 4 7-4"/>
@@ -901,7 +920,7 @@ body {
               </div>
               <h3>History</h3>
               <p>View transaction history</p>
-          </div>
+          </div> -->
           
           <div class="dashboard-item" data-type="referral">
               <div class="icon-wrapper yellow">
@@ -919,8 +938,9 @@ body {
 <!-- Referral Modal -->
 <div id="referralModal" class="referral-modal">
     <div class="referral-modal-content">
+      <span class="referral-close">&times;</span>
       <h2>Refer a Friend & Earn</h2>
-      <p class="subtitle">Share your unique code and both you and your friend get FLAT 100</p>
+      <p class="subtitle">Your friend gets ₹100, and you get ₹50 when they apply your referral code!</p>
       
       <div class="referral-stats">
         <div class="referral-icon">
@@ -929,7 +949,6 @@ body {
         <div class="referral-info">
           <span class="referral-label">Referred Users</span>
           <span class="referral-count" id="referralCount"><%= user.referralCount %></span>
-          <span class="referral-sublabel">Total referrals</span>
         </div>
       </div>
       
@@ -1650,22 +1669,49 @@ function showMessage(message, type) {
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('referralModal');
   const btn = document.querySelector('.dashboard-item[data-type="referral"]');
+  const closeBtn = document.querySelector('.referral-close');
+  const copyBtn = document.getElementById('copyReferralCode');
   const referralCodeDisplay = document.getElementById('userReferralCode');
   const referralCountDisplay = document.getElementById('referralCount');
   const applyBtn = document.getElementById('applyReferralBtn');
   const errorMessage = document.getElementById('referralCodeError');
   const referralCodeInput = document.getElementById('referralCodeInput');
-  const copyBtn = document.getElementById('copyReferralCode');
+  const applyReferralSection = document.querySelector('.apply-referral');
 
   function openModal() {
-    modal.style.display = 'block';
-    setTimeout(() => modal.classList.add('show'), 10);
+    if (modal) {
+      modal.style.display = 'block';
+      setTimeout(() => modal.classList.add('show'), 10);
+    }
   }
 
-  function closeModal() {
-    modal.classList.remove('show');
-    setTimeout(() => modal.style.display = 'none', 300);
+  function closeModal(callback) {
+    if (modal) {
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        if (callback) callback();
+      }, 100); // Reduced delay for faster closing
+    }
   }
+
+  if (btn) {
+    btn.addEventListener('click', openModal);
+  } else {
+    console.error("Referral button not found. Make sure it exists in the HTML.");
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => closeModal());
+  } else {
+    console.error("Close button not found.");
+  }
+
+  window.addEventListener('click', (event) => {
+    if (modal && event.target === modal) {
+      closeModal();
+    }
+  });
 
   fetch('/user-data')
     .then(response => response.json())
@@ -1674,25 +1720,25 @@ document.addEventListener('DOMContentLoaded', () => {
         referralCodeDisplay.value = data.referralCode;
         referralCountDisplay.textContent = data.referralCount;
         if (data.hasAppliedReferral) {
-          const applyReferralSection = document.querySelector('.apply-referral');
           if (applyReferralSection) {
-            applyReferralSection.style.display = 'none';
+            applyReferralSection.innerHTML = `
+              <p style="color: green; font-weight: bold;">You already earned cash with a referral code!</p>
+            `;
           }
         }
       }
     });
 
-  btn.onclick = openModal;
-  window.onclick = (event) => { if (event.target === modal) closeModal(); };
-
-  copyBtn.onclick = () => {
-    referralCodeDisplay.select();
-    document.execCommand('copy');
-    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-    setTimeout(() => {
-      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-    }, 2000);
-  };
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      referralCodeDisplay.select();
+      document.execCommand('copy');
+      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      setTimeout(() => {
+        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+      }, 2000);
+    };
+  }
 
   referralCodeInput.addEventListener('input', () => {
     errorMessage.textContent = '';
@@ -1716,16 +1762,16 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        createConfetti();
-        // Import Swal here
-        const Swal = require('sweetalert2');
-        Swal.fire({ 
-          icon: 'success', 
-          title: 'Success', 
-          text: 'Referral applied!',
-          showConfirmButton: false,
-          timer: 1500
-        }).then(() => window.location.reload());
+        createConfetti(() => {
+          closeModal(() => {
+            showMessage('Referral applied successfully!', 'success');
+            if (applyReferralSection) {
+              applyReferralSection.innerHTML = `
+                <p style="color: green; font-weight: bold;">You already earned cash with a referral code!</p>
+              `;
+            }
+          });
+        });
       } else {
         errorMessage.textContent = data.message;
         applyBtn.disabled = false;
@@ -1734,9 +1780,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  function createConfetti() {
+  function showMessage(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}-message notification`;
+    messageDiv.textContent = message;
+    messageDiv.style.color = 'white'; // Set text color to white
+
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertBefore(messageDiv, container.firstChild);
+        setTimeout(() => messageDiv.remove(), 5000);
+    }
+  }
+
+  function createConfetti(callback) {
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-    const confettiCount = 100;
+    const confettiCount = 50; // Reduced confetti count for faster animation
+    let finishedCount = 0;
 
     for (let i = 0; i < confettiCount; i++) {
       const confetti = document.createElement('div');
@@ -1756,16 +1816,23 @@ document.addEventListener('DOMContentLoaded', () => {
           { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
         ],
         {
-          duration: Math.random() * 2000 + 3000,
+          duration: Math.random() * 1000 + 1000, // Reduced animation duration
           easing: 'cubic-bezier(0,0.9,0.57,1)',
-          delay: Math.random() * 2000
+          delay: Math.random() * 400 
         }
       );
 
-      animation.onfinish = () => confetti.remove();
+      animation.onfinish = () => {
+        confetti.remove();
+        finishedCount++;
+        if (finishedCount === confettiCount && callback) {
+          callback();
+        }
+      };
     }
   }
 });
+
     
 </script>
 
