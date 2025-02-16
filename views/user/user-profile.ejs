@@ -494,8 +494,8 @@ body {
 .modal-content {
     display: flex;
     flex-direction: column;
-    max-height: 80vh; /* Limit modal height */
-    overflow: hidden; /* Prevent content overflow */
+    max-height: 80vh;
+    overflow: hidden; 
 }
 
 .modal-header {
@@ -508,9 +508,9 @@ body {
 
 .modal-body {
     padding: 16px;
-    flex: 1; /* Allow modal body to expand */
-    overflow-y: auto; /* Enable vertical scrolling */
-    max-height: calc(80vh - 100px); /* Adjust based on header height */
+    flex: 1;
+    overflow-y: auto; 
+    max-height: calc(80vh - 100px); 
 }
 
 .address-list {
@@ -524,6 +524,153 @@ body {
     margin-bottom: 8px;
     background: #f9f9f9;
 }
+
+.referral-modal {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.referral-modal.show {
+  opacity: 1;
+}
+
+.referral-modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.referral-modal-content h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.referral-modal-content .subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.referral-stats {
+  background-color: #f0f7eb;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.referral-icon {
+  background-color: #9ed36a;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.referral-icon svg {
+  color: white;
+}
+
+.referral-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.referral-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.referral-count {
+  font-size: 24px;
+  font-weight: bold;
+  color: #9ed36a;
+}
+
+.referral-sublabel {
+  font-size: 12px;
+  color: #666;
+}
+
+.referral-code-section, .apply-referral {
+  margin-bottom: 20px;
+}
+
+.referral-code-section label, .apply-referral label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.referral-code-container, .input-group {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#userReferralCode, #referralCodeInput {
+  flex-grow: 1;
+  padding: 10px;
+  border: none;
+  font-size: 16px;
+}
+
+.copy-button, #applyReferralBtn {
+  background-color: #9ed36a;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.copy-button:hover, #applyReferralBtn:hover {
+  background-color: #8bc34a;
+}
+
+.copy-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.terms {
+  font-size: 12px;
+  color: #666;
+  margin-top: 20px;
+}
+
+.success-message {
+  color: #4caf50;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
 
 </style>
 
@@ -558,6 +705,72 @@ body {
             <h3>Profile</h3>
             <p>View and edit your profile</p>
         </div>
+
+
+          <!-- Edit Field Modal -->
+   
+  <div class="modal" id="editDetailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Profile Details</h2>
+            <button class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+        </div>
+        <form id="editProfileForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editName">Name</label>
+                    <input type="text" id="editName" name="name" class="form-input" value="<%= user.name %>">
+                    <div class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Phone</label>
+                    <input type="tel" id="editPhone" name="phone" class="form-input" value="<%= user.phone %>">
+                    <div class="validation-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="action-btn">Save Changes</button>
+                <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal" id="changePasswordModal">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h2>Change Password</h2>
+          <button type="button" class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+      </div>
+      <form id="changePasswordForm">
+          <div class="modal-body">
+              <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" name="currentPassword" class="form-input">
+                  <div class="validation-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" name="newPassword" class="form-input">
+                  <div class="validation-message"></div>
+                  <div class="password-strength"></div>
+              </div>
+              <div class="form-group">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <input type="password" id="confirmPassword" name="confirmPassword" class="form-input">
+                  <div class="validation-message"></div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="submit" class="action-btn">Update Password</button>
+              <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+
           <div class="dashboard-item" data-type="address">
               <div class="icon-wrapper pink">
                   <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -703,6 +916,53 @@ body {
       </div>
   </main>
 
+<!-- Referral Modal -->
+<div id="referralModal" class="referral-modal">
+    <div class="referral-modal-content">
+      <h2>Refer a Friend & Earn</h2>
+      <p class="subtitle">Share your unique code and both you and your friend get FLAT 100</p>
+      
+      <div class="referral-stats">
+        <div class="referral-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="referral-info">
+          <span class="referral-label">Referred Users</span>
+          <span class="referral-count" id="referralCount"><%= user.referralCount %></span>
+          <span class="referral-sublabel">Total referrals</span>
+        </div>
+      </div>
+      
+      <div class="referral-code-section">
+        <label for="userReferralCode">Your Referral Code</label>
+        <div class="referral-code-container">
+          <input type="text" id="userReferralCode" value="<%= user.referralCode %>" readonly>
+          <button id="copyReferralCode" class="copy-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+        </div>
+      </div>
+      
+      <% if (!user.hasAppliedReferral) { %>
+        <div class="apply-referral">
+          <label for="referralCodeInput">Apply a Referral Code</label>
+          <div class="input-group">
+            <input type="text" id="referralCodeInput" placeholder="Enter code">
+            <button id="applyReferralBtn">Apply</button>
+          </div>
+          <div id="referralCodeError" class="error-message"></div>
+        </div>
+      <% } else { %>
+        <p class="success-message">You have already earned cash from a referral!</p>
+      <% } %>
+      
+      <p class="terms">Terms and conditions apply. Offer valid for new customers only.</p>
+    </div>
+  </div>
+  
+  <div id="confetti-container"></div>
+
+
   <!-- Profile Modal -->
   <div class="modal" id="profileModal">
     <div class="modal-content">
@@ -745,69 +1005,6 @@ body {
             </button>
         </div>
     </div>
-</div>
-
-  <!-- Edit Field Modal -->
-   
-  <div class="modal" id="editDetailsModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit Profile Details</h2>
-            <button class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
-        </div>
-        <form id="editProfileForm">
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="editName">Name</label>
-                    <input type="text" id="editName" name="name" class="form-input" value="<%= user.name %>">
-                    <div class="validation-message"></div>
-                </div>
-                <div class="form-group">
-                    <label for="editPhone">Phone</label>
-                    <input type="tel" id="editPhone" name="phone" class="form-input" value="<%= user.phone %>">
-                    <div class="validation-message"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="action-btn">Save Changes</button>
-                <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-<div class="modal" id="changePasswordModal">
-  <div class="modal-content">
-      <div class="modal-header">
-          <h2>Change Password</h2>
-          <button type="button" class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
-      </div>
-      <form id="changePasswordForm">
-          <div class="modal-body">
-              <div class="form-group">
-                  <label for="currentPassword">Current Password</label>
-                  <input type="password" id="currentPassword" name="currentPassword" class="form-input">
-                  <div class="validation-message"></div>
-              </div>
-              <div class="form-group">
-                  <label for="newPassword">New Password</label>
-                  <input type="password" id="newPassword" name="newPassword" class="form-input">
-                  <div class="validation-message"></div>
-                  <div class="password-strength"></div>
-              </div>
-              <div class="form-group">
-                  <label for="confirmPassword">Confirm Password</label>
-                  <input type="password" id="confirmPassword" name="confirmPassword" class="form-input">
-                  <div class="validation-message"></div>
-              </div>
-          </div>
-          <div class="modal-footer">
-              <button type="submit" class="action-btn">Update Password</button>
-              <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
-          </div>
-      </form>
-  </div>
 </div>
 
 
@@ -1300,7 +1497,6 @@ window.addEventListener('click', (event) => {
     }
 
    async function deleteAddress(id) {
-    // Show confirmation dialog using SweetAlert
     const result = await Swal.fire({
         title: 'Are you sure?',
         text: 'Do you want to delete this address?',
@@ -1312,7 +1508,6 @@ window.addEventListener('click', (event) => {
         cancelButtonText: 'Cancel'
     });
 
-    // If user didn't confirm, exit the function
     if (!result.isConfirmed) {
         return;
     }
@@ -1328,8 +1523,7 @@ window.addEventListener('click', (event) => {
 
         addresses = addresses.filter(addr => addr._id !== id);
         renderAddresses();
-        
-        // Show success message
+
         await Swal.fire({
             title: 'Deleted!',
             text: 'Address has been deleted successfully',
@@ -1339,8 +1533,7 @@ window.addEventListener('click', (event) => {
         });
     } catch (error) {
         console.error('Error deleting address:', error);
-        
-        // Show error message
+
         await Swal.fire({
             title: 'Error!',
             text: 'Failed to delete address',
@@ -1451,6 +1644,128 @@ function showMessage(message, type) {
     }
 }
 
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('referralModal');
+  const btn = document.querySelector('.dashboard-item[data-type="referral"]');
+  const referralCodeDisplay = document.getElementById('userReferralCode');
+  const referralCountDisplay = document.getElementById('referralCount');
+  const applyBtn = document.getElementById('applyReferralBtn');
+  const errorMessage = document.getElementById('referralCodeError');
+  const referralCodeInput = document.getElementById('referralCodeInput');
+  const copyBtn = document.getElementById('copyReferralCode');
+
+  function openModal() {
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('show'), 10);
+  }
+
+  function closeModal() {
+    modal.classList.remove('show');
+    setTimeout(() => modal.style.display = 'none', 300);
+  }
+
+  fetch('/user-data')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        referralCodeDisplay.value = data.referralCode;
+        referralCountDisplay.textContent = data.referralCount;
+        if (data.hasAppliedReferral) {
+          const applyReferralSection = document.querySelector('.apply-referral');
+          if (applyReferralSection) {
+            applyReferralSection.style.display = 'none';
+          }
+        }
+      }
+    });
+
+  btn.onclick = openModal;
+  window.onclick = (event) => { if (event.target === modal) closeModal(); };
+
+  copyBtn.onclick = () => {
+    referralCodeDisplay.select();
+    document.execCommand('copy');
+    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    setTimeout(() => {
+      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+    }, 2000);
+  };
+
+  referralCodeInput.addEventListener('input', () => {
+    errorMessage.textContent = '';
+  });
+
+  applyBtn.onclick = () => {
+    const referralCode = referralCodeInput.value.trim();
+    if (!referralCode) {
+      errorMessage.textContent = 'Please enter a referral code.';
+      return;
+    }
+    
+    applyBtn.disabled = true;
+    applyBtn.textContent = 'Applying...';
+
+    fetch('/apply-referral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ referralCode })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        createConfetti();
+        // Import Swal here
+        const Swal = require('sweetalert2');
+        Swal.fire({ 
+          icon: 'success', 
+          title: 'Success', 
+          text: 'Referral applied!',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => window.location.reload());
+      } else {
+        errorMessage.textContent = data.message;
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+      }
+    });
+  };
+
+  function createConfetti() {
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const confettiCount = 100;
+
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.position = 'fixed';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.top = -20 + 'px';
+      confetti.style.width = '10px';
+      confetti.style.height = '10px';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.borderRadius = '50%';
+      confetti.style.zIndex = '1002';
+      document.body.appendChild(confetti);
+
+      const animation = confetti.animate(
+        [
+          { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+          { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+        ],
+        {
+          duration: Math.random() * 2000 + 3000,
+          easing: 'cubic-bezier(0,0.9,0.57,1)',
+          delay: Math.random() * 2000
+        }
+      );
+
+      animation.onfinish = () => confetti.remove();
+    }
+  }
+});
     
 </script>
 

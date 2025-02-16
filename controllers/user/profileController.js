@@ -700,7 +700,7 @@ const getWalletPage = async(req, res) => {
     try {
         const userId = req.session.user;
         const user = await User.findById(userId);
-        const wallet = await Wallet.findOne({ userId });
+        let wallet = await Wallet.findOne({ userId });
 
         if (!wallet) {
             wallet = { balance: 0, transactions: [] };
@@ -729,6 +729,117 @@ const getWalletPage = async(req, res) => {
 };
 
 
+const applyReferral = async (req, res) => {
+    const { referralCode } = req.body;
+    const userId = req.session.user;
+
+    if (!referralCode) {
+        return res.json({ success: false, message: 'Enter a valid referral code.' });
+    }
+
+    if (!userId) {
+        return res.json({ success: false, message: 'User not authenticated.' });
+    }
+
+    try {
+        const referringUser = await User.findOne({ referralCode });
+        if (!referringUser) {
+            return res.json({ success: false, message: 'Invalid referral code.' });
+        }
+
+        if (referringUser._id.toString() === userId) {
+            return res.json({ success: false, message: 'Cannot use your own referral code.' });
+        }
+
+        const currentUser = await User.findById(userId);
+        if (!currentUser) {
+            return res.json({ success: false, message: 'User not found.' });
+        }
+
+        if (currentUser.hasAppliedReferral) {
+            return res.json({ success: false, message: 'Referral code already used.' });
+        }
+
+        // ✅ Update User Balances
+        currentUser.hasAppliedReferral = true;
+        currentUser.walletBalance += 50;
+        referringUser.walletBalance += 100;
+        referringUser.referralCount += 1;
+
+        // ✅ Update Wallet Model with Transactions
+        let currentUserWallet = await Wallet.findOne({ userId });
+        let referringUserWallet = await Wallet.findOne({ userId: referringUser._id });
+
+        if (!currentUserWallet) {
+            currentUserWallet = new Wallet({ userId, balance: 50, transactions: [] });
+        } else {
+            currentUserWallet.balance += 50;
+        }
+
+        if (!referringUserWallet) {
+            referringUserWallet = new Wallet({ userId: referringUser._id, balance: 100, transactions: [] });
+        } else {
+            referringUserWallet.balance += 100;
+        }
+
+        // ✅ Log Transactions
+        currentUserWallet.transactions.push({
+            type: 'credit',
+            amount: 50
+        });
+
+        referringUserWallet.transactions.push({
+            type: 'credit',
+            amount: 100
+        });
+
+        // ✅ Save Updates
+        await currentUser.save();
+        await referringUser.save();
+        await currentUserWallet.save();
+        await referringUserWallet.save();
+
+        res.json({ success: true, message: 'Referral applied successfully!' });
+
+    } catch (error) {
+        console.error('Error applying referral code:', error.message);
+        res.json({ success: false, message: 'An error occurred while applying the referral code.' });
+    }
+};
+
+
+const userData = async (req, res) => {
+    try {
+        const userId = req.session.user;
+
+        const user = await User.findById(userId).select('referralCode referralCount hasAppliedReferral');
+        if (!user) {
+            console.log("User not found.");
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+
+        if (!user.referralCode) {        
+            await User.generateMissingReferralCodes();  
+        } 
+        const updatedUser = await User.findById(userId).select('referralCode referralCount hasAppliedReferral');
+
+        res.json({ 
+            success: true, 
+            referralCode: updatedUser.referralCode, 
+            referralCount: updatedUser.referralCount, 
+            hasAppliedReferral: updatedUser.hasAppliedReferral 
+        });
+    } catch (error) {
+        console.log("Error in userData:", error.message);
+        res.status(500).json({ success: false, message: 'Error fetching user data.' });
+    }
+};
+
+
+
+
+
 module.exports = {
   userProfile,
   editProfile,
@@ -744,5 +855,7 @@ module.exports = {
   resendEmailOtp,
   createPassword,
   saveNewPassword,
-  getWalletPage
+  getWalletPage,
+  applyReferral,
+  userData 
 };

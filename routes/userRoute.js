@@ -49,6 +49,8 @@ router.post('/addAddress', userAuth, profileController.addAddress);
 router.get('/addresses', userAuth, profileController.getAddresses);
 router.put('/addresses/:id', userAuth, profileController.editAddress);
 router.delete('/addresses/:id', userAuth, profileController.deleteAddress);
+router.post('/apply-referral', userAuth,profileController.applyReferral);
+router.get('/user-data', userAuth, profileController.userData )
 
 router.get('/cart', userAuth, cartController.getCart);
 router.post('/cart', userAuth, cartController.addToCart);

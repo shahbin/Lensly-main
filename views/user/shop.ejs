@@ -302,7 +302,21 @@ input[type="range"]::-moz-range-thumb:active {
     fill: red; /* or any other color you want for the outline */
 }
 
-/* Ensure the button background (circle) remains unchanged */
+.small-toast {
+  font-size: 2px;   
+  padding: 10px;     
+  width: 200px;     
+}
+
+.small-toast-icon {
+  font-size: 12px;  
+  margin-right: 4px;
+}
+
+.small-toast-title {
+  font-size: 6px; 
+  font-weight: 400;
+}
 
 
 
@@ -747,7 +761,12 @@ async function handleWishlistClick(e) {
         icon: isInWishlist ? 'info' : 'success',
         title: isInWishlist ? 'Removed from Wishlist!' : 'Added to Wishlist!',
         showConfirmButton: false,
-        timer: 2000
+        timer: 2000,
+        customClass: {
+          popup:'small-toast',
+          icon: 'small-toast-icon',  // Custom class for the icon
+          title: 'small-toast-title' 
+        }
       });
     }
   } catch (error) {
