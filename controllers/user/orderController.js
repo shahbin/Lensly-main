@@ -574,7 +574,7 @@ const walletPayment = async (req, res) => {
 
     } catch (error) {
         console.error("Error during wallet payment:", error);
-        res.status(500).json({ message: "Insufficient balance in your wallet" });
+        res.status(500).json({ message: "Server error" })
     }
 };
 

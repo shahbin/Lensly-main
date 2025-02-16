@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
 const Wishlist = require("../../models/wishlistSchema");
+const Wallet = require("../../models/walletSchema") 
 const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
 const { v4: uuidv4 } = require('uuid');
@@ -193,7 +194,7 @@ const getCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
-      const { addressId, paymentMethod, subtotal, discount,couponCode } = req.body;
+      const { addressId, paymentMethod, subtotal, discount, couponCode } = req.body;
       const userId = req.session.user;
       const deliveryCharge = 49;
 
@@ -204,6 +205,16 @@ const placeOrder = async (req, res) => {
               success: false, 
               message: 'Cash on Delivery is not available for orders above ₹1000. Please choose a different payment method.' 
           });
+      }
+
+      if (paymentMethod === 'wallet') {
+          const wallet = await Wallet.findOne({ userId });
+          if (!wallet || wallet.balance < totalAmount) {
+              return res.status(400).json({ 
+                  success: false, 
+                  message: 'Insufficient balance in your wallet' 
+              });
+          }
       }
 
       const cart = await Cart.findOne({ userId }).populate('items.productId');
@@ -218,8 +229,10 @@ const placeOrder = async (req, res) => {
               quantityErrors.push(`Product not found in the cart`);
               continue;
           }
-          if (product.quantity < item.quantity) {
-              quantityErrors.push(`Only ${product.quantity} units of ${product.productName} are available. You have ${item.quantity} in cart.`);
+          if (product.quantity === 0) {
+              quantityErrors.push(`${product.productName} is out of stock.`);
+          } else if (product.quantity < item.quantity) {
+              quantityErrors.push(`Only ${product.quantity} left. You have ${item.quantity} in cart.`);
           }
       }
 
@@ -253,15 +266,17 @@ const placeOrder = async (req, res) => {
           createdAt: new Date()
       });
 
-      if(paymentMethod === 'cod') {
-        order.paymentStatus = "Pending"
+      if (paymentMethod === 'cod') {
+          order.paymentStatus = "Pending";
+      } else if (paymentMethod === 'wallet') {
+          order.paymentStatus = "Paid";
       } else {
-        order.paymentStatus = "Failed"
+          order.paymentStatus = "Failed";
       }
 
-      if(couponCode) {
-        const coupon = await Coupon.findOne({name: couponCode})
-        order.couponId = coupon._id
+      if (couponCode) {
+          const coupon = await Coupon.findOne({ name: couponCode });
+          order.couponId = coupon._id;
       }
 
       const savedOrder = await order.save();
