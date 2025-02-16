@@ -414,6 +414,28 @@ async function getCategoryQuantities() {
   return categoryQuantitiesMap;
 }
 
+
+const getContact = async(req,res)=>{
+  try{
+    res.render('contact')
+  }
+  catch (error){
+    res.redirect("/pageNotFound")
+  }
+} 
+
+
+const getAbout = async(req,res)=>{
+  try{
+    res.render('about')
+  }
+  catch (error){
+    res.redirect("/pageNotFound")
+  }
+} 
+
+
+
 module.exports = {
     loadHomePage,
     pageNotFound,
@@ -425,6 +447,8 @@ module.exports = {
     loadLogin,
     login,
     logout,
+    getContact,
+    getAbout,
     searchProducts,
     getCategoryQuantities
 }

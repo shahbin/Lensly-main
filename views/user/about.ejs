@@ -1,0 +1,179 @@
+<%- include("../../views/partials/user/header", { user: user }) %>
+
+    <style>
+       /* Modern CSS Reset and Base Styles */
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --background: #ffffff;
+  --background-alt: #f9fafb;
+  --spacing-base: 2rem;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--background);
+  margin: 0;
+}
+
+/* Container and Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-base);
+}
+
+/* Header Styles */
+.about-header {
+  text-align: center;
+  padding: calc(var(--spacing-base) * 2) 0;
+  background: linear-gradient(to bottom, var(--background), var(--background-alt));
+}
+
+.about-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+/* Decorative Underline */
+.header-underline {
+  width: 60px;
+  height: 3px;
+  background: var(--primary);
+  margin: 1rem auto 2rem;
+}
+
+/* Services Grid */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-base);
+  padding: var(--spacing-base) 0;
+}
+
+.service-card {
+  background: var(--background);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.service-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.service-card p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Mission Section */
+.mission-section {
+  padding: calc(var(--spacing-base) * 2) 0;
+  background: var(--background-alt);
+  margin-top: var(--spacing-base);
+}
+
+.mission-section h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+/* Footer */
+.footer {
+  padding: var(--spacing-base);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  :root {
+    --spacing-base: 1.5rem;
+  }
+
+  .about-header h1 {
+    font-size: 2rem;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card {
+    padding: 1.5rem;
+  }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>About Lensly</h1><br>
+        </header>
+
+        <main class="about-section">
+            <section class="about-content">
+                <h2>Our Story</h2>
+                <p>Welcome to Lensly, your premier destination for all things photography. Founded by Shahbin, a visionary with a deep love for the art of capturing moments, Lensly was born out of a desire to create a community where photographers of all levels could find the tools, inspiration, and support they need to bring their creative visions to life.</p>
+
+                <p>Shahbin's journey into photography began as a hobby, but it quickly evolved into a lifelong passion. Frustrated by the lack of accessible, high-quality resources and equipment for aspiring photographers, he decided to take matters into his own hands. In 2015, Shahbin launched Lensly with a simple mission: to make top-notch photography gear and expert advice available to everyone, regardless of their experience level.</p>
+                
+                <p>Over the years, Lensly has grown into more than just a store; it's a thriving hub for photographers to connect, learn, and grow. Our curated selection of cameras, lenses, lighting equipment, and accessories is carefully chosen to meet the needs of both professionals and hobbyists. We pride ourselves on offering not only the latest technology but also timeless classics that have stood the test of time.</p>
+                
+                <p>But Lensly is more than just a place to shop. We believe that photography is about more than just the equipment—it's about the stories you tell, the moments you capture, and the memories you create. That's why we offer a wealth of resources, from in-depth tutorials and gear reviews to inspiring interviews with renowned photographers. Our blog and YouTube channel are filled with tips, tricks, and insights to help you hone your craft and push the boundaries of your creativity.</p>
+                
+                <p>At Lensly, we also understand the importance of community. Our online forums and social media channels are spaces where photographers can share their work, ask questions, and connect with like-minded individuals. Whether you're looking for feedback on your latest project or simply want to geek out over the newest camera releases, you'll find a welcoming and supportive community here.</p>
+                
+                <p>As we look to the future, Lensly remains committed to empowering photographers around the world. We're constantly exploring new ways to innovate and improve, from expanding our product offerings to hosting workshops and events that bring the photography community together. Our goal is to be more than just a retailer—we want to be your trusted partner on your photographic journey.</p>
+                
+                <p>Thank you for choosing Lensly. Whether you're a seasoned pro or just starting out, we're here to help you capture the world through your lens, one shot at a time. Let's create something beautiful together.</p><br>
+                
+                <h2>What We Offer</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <h3>Cameras</h3>
+                        <p>Wide range of DSLR, mirrorless, and professional cameras from leading brands.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Lenses</h3>
+                        <p>Premium quality lenses for every photography style and need.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Bags</h3>
+                        <p>Durable and stylish camera bags to protect your valuable equipment.</p>
+                    </div>
+                    <div class="service-card">
+                        <h3>Accessories</h3>
+                        <p>Essential photography accessories to enhance your shooting experience.</p>
+                    </div>
+                </div>
+
+                <h2>Our Mission</h2>
+                <p>At Lensly, we strive to provide photographers with the highest quality equipment and exceptional customer service. We believe in building lasting relationships with our customers and supporting their photographic journey.</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Lensly. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+<%- include("../../views/partials/user/footer") %>

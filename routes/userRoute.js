@@ -36,6 +36,9 @@ router.post('/resendEmail-otp', profileController.resendEmailOtp);
 router.get('/create-password', profileController.createPassword);
 router.post('/create-password', profileController.saveNewPassword);
 
+router.get('/contact', userController.getContact)
+router.get('/about', userController.getAbout)
+
 router.get('/shop', userController.loadShopPage);
 
 router.get('/productDetails', productController.productDetails);

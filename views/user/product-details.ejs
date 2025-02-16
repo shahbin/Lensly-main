@@ -48,24 +48,18 @@
         
         <div class="details__price flex">
           <% 
-              // Get offers
               const productOffer = product.productOffer || 0;
               const categoryOffer = product.category?.categoryOffer || 0;
               
-              // Get the best offer
               const bestOffer = Math.max(productOffer, categoryOffer);
-              
-              // Calculate final price
               const regularPrice = product.regularPrice;
               const finalPrice = bestOffer > 0 
                   ? Math.floor(regularPrice - (regularPrice * bestOffer / 100)) 
                   : product.salePrice;
           %>
       
-          <!-- Display final price -->
           <span class="new__price">₹<%= finalPrice %></span>
       
-          <!-- Show original price and discount ONLY if there's an offer -->
           <% if (bestOffer > 0 && finalPrice < regularPrice) { %>
               <span class="old__price">₹<%= regularPrice %></span>
               <span class="save__price">
