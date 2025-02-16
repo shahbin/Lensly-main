@@ -114,7 +114,6 @@ const loadSalesReport = async (req, res) => {
 
 
 const generatePDF = async (orders, metrics) => {
-    console.log(metrics, "rtyuikuytrfgthjkl")
     const doc = new PDFDocument({
         margin: 50,
         size: 'A4'

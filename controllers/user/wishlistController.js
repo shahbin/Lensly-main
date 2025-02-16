@@ -50,7 +50,6 @@ const getWishlist = async (req, res) => {
 
 const addToWishlist = async (req, res) => {
     try {
-        console.log("Request received!");
         const userId = req.session.user;
         const productId = req.params.productId;
 
@@ -90,8 +89,6 @@ const addToWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
     try {
-        console.log("Request received!");
-        console.log("Product ID:", req.params.productId || req.body.productId);
 
         const userId = req.session.user;
         let productId = req.params.productId || req.body.productId;

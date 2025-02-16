@@ -517,7 +517,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...orderData,
-                    paymentStatus: "Pending"
+                    paymentStatus: "Failed"
                 })
             });
 
@@ -584,7 +584,6 @@
                             throw new Error("Payment verification failed");
                         }
                     } catch (error) {
-                        // Don't attempt payment verification since we don't have Razorpay parameters
                         Swal.fire({
                             icon: "warning",
                             title: "Payment Failed",
@@ -600,7 +599,6 @@
                 modal: {
                     ondismiss: async function() {
                         try {
-                            // Don't attempt payment verification since we don't have Razorpay parameters
                             Swal.fire({
                                 icon: "warning",
                                 title: "Payment Cancelled",

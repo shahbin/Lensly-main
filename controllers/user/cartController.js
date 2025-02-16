@@ -6,7 +6,8 @@ const Wishlist = require("../../models/wishlistSchema");
 const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
 const { v4: uuidv4 } = require('uuid');
-const razorpayInstance = require('../../controllers/user/orderController')
+const razorpayInstance = require('../../controllers/user/orderController');
+const Coupon = require("../../models/couponSchema");
 
 const getCart = async (req, res) => {
   try {
@@ -192,7 +193,7 @@ const getCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
-      const { addressId, paymentMethod, cartId, couponCode, subtotal, discount } = req.body;
+      const { addressId, paymentMethod, subtotal, discount,couponCode } = req.body;
       const userId = req.session.user;
       const deliveryCharge = 49;
 
@@ -232,11 +233,11 @@ const placeOrder = async (req, res) => {
 
       const orderItems = cart.items.map(item => ({
           product: item.productId._id,
-          productName: item.productId.productName, // Include productName
-          productImage: item.productId.images,    // Include productImage
+          productName: item.productId.productName, 
+          productImage: item.productId.images,    
           quantity: item.quantity,
           price: item.productId.salePrice || item.productId.price,
-          status: 'Pending' // Default status for each item
+          status: 'Pending' 
       }));
 
       const order = new Order({
@@ -249,9 +250,19 @@ const placeOrder = async (req, res) => {
           deliveryCharge,
           finalAmount: totalAmount,
           paymentMethod,
-          paymentStatus: "Pending",
           createdAt: new Date()
       });
+
+      if(paymentMethod === 'cod') {
+        order.paymentStatus = "Pending"
+      } else {
+        order.paymentStatus = "Failed"
+      }
+
+      if(couponCode) {
+        const coupon = await Coupon.findOne({name: couponCode})
+        order.couponId = coupon._id
+      }
 
       const savedOrder = await order.save();
 

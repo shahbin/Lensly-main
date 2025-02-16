@@ -2,7 +2,7 @@ const Order = require('../../models/orderSchema');
 const Address = require('../../models/addressSchema')
 const User = require('../../models/userSchema')
 const getAllOrders = async (req, res) => {
-    console.log('getAllOrders');
+
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;

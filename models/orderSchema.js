@@ -76,9 +76,9 @@ const orderSchema = new Schema({
     default: Date.now,
     required: true
   },
-  couponApplied: {
-    type: Boolean,
-    default: false
+  couponId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Coupon',
   },
   paymentMethod:{
     type:String
