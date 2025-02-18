@@ -417,7 +417,12 @@ async function getCategoryQuantities() {
 
 const getContact = async(req,res)=>{
   try{
-    res.render('contact')
+    const user = req.session.user
+    if(user){
+      const userData = await User.findById({_id:user})
+        
+        return res.render("contact",{user:userData})
+    }
   }
   catch (error){
     res.redirect("/pageNotFound")
@@ -427,7 +432,12 @@ const getContact = async(req,res)=>{
 
 const getAbout = async(req,res)=>{
   try{
-    res.render('about')
+    const user = req.session.user
+    if(user){
+      const userData = await User.findById({_id:user})
+      return res.render('about',{user:userData})
+    }
+    
   }
   catch (error){
     res.redirect("/pageNotFound")

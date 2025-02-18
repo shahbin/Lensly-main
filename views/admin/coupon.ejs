@@ -367,7 +367,13 @@
                          <td class="text-start"><%= new Date(coupons[i].expireOn).toLocaleDateString('en-GB') %></td>
                          <td class="text-start"><%= coupons[i].offerPrice %></td>
                          <td class="text-start"><%= coupons[i].minimumPrice %></td>
-                         <td class="text-start"><%= coupons[i].isListed %></td>
+                         <td class="text-start">
+                          <% if (new Date(coupons[i].expireOn) > new Date()) { %>
+                            <span class="badge badge-success">Active</span>
+                          <% } else { %>
+                            <span class="badge badge-danger">Expired</span>
+                          <% } %>
+                        </td>
                          <td class="text-start">
                              <a href="/admin/editCoupon/?id=<%= coupons[i]._id %>" class="btn btn-primary btn-sm" >Edit</a>
 

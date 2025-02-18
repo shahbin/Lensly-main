@@ -39,16 +39,22 @@
         gap: 1.5rem;
         font-size: 0.85rem;
         color: #666;
+        margin-left: 0px;
     }
 
     .order-id {
         font-family: monospace;
         letter-spacing: 0.5px;
-        font-weight: 500;
+        font-weight: 600;
+        margin-top: -15px;
+        font-size: 16px;
     }
 
     .order-date {
         color: #666;
+        margin-left: -187px;
+        margin-bottom: -30px;
+        font-size: 11px;
     }
 
     .order-grid {
@@ -773,7 +779,7 @@
             <div class="order-header__main">
                 <h1 class="order-header__title">Order Details</h1>
                 <div class="order-header__meta">
-                    <span class="order-id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></span>
+                    <span class="order-id">Order #<%= order._id.toString().slice(-8).toUpperCase() %></span><br>
                     <span class="order-date">Ordered on <%= new Date(order.createdOn).toLocaleDateString('en-IN', { 
                         day: 'numeric', 
                         month: 'long', 

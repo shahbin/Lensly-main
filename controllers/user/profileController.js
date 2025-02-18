@@ -519,8 +519,6 @@ const forgotEmailValid = async(req, res) => {
         const { email } = req.body;
         const findUser = await User.findOne({ email: email });
 
-        console.log(findUser);
-
         if (findUser) {
             const otp = generateOtp();
             const sendMail = await sendVerificationEmail(email, otp);

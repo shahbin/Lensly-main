@@ -286,24 +286,34 @@
             <% if (totalPage > 1) { %>
                 <div style="display: flex; justify-content: center; margin-top: 20px;">
                     <nav aria-label="Page navigation">
-                        <ul class="pagination">
+                        <ul class="pagination" style="list-style: none; display: flex; padding: 0; margin: 0;">
                             <% if (currentPage > 1) { %>
                                 <li class="page-item">
-                                    <a class="page-link" href="/wallet?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                    <a class="page-link" href="/wallet?page=<%= currentPage - 1 %>" aria-label="Previous" style="text-decoration: none; color: #000; padding: 8px 12px; margin: 0 4px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa;">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
                             <% } %>
-                            
-                            <% for(let i = 1; i <= totalPage; i++) { %>
-                                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                    <a class="page-link" href="/wallet?page=<%= i %>"><%= i %></a>
+            
+                            <% if (currentPage > 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="/wallet?page=<%= currentPage - 1 %>" style="text-decoration: none; color: #000; padding: 8px 12px; margin: 0 4px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa;"><%= currentPage - 1 %></a>
                                 </li>
                             <% } %>
-                            
+            
+                            <li class="page-item active">
+                                <a class="page-link" href="/wallet?page=<%= currentPage %>" style="text-decoration: none; color: #fff; padding: 8px 12px; margin: 0 4px; border: 1px solid #088179; border-radius: 4px; background-color: #088179;"><%= currentPage %></a>
+                            </li>
+            
                             <% if (currentPage < totalPage) { %>
                                 <li class="page-item">
-                                    <a class="page-link" href="/wallet?page=<%= currentPage + 1 %>" aria-label="Next">
+                                    <a class="page-link" href="/wallet?page=<%= currentPage + 1 %>" style="text-decoration: none; color: #000; padding: 8px 12px; margin: 0 4px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa;"><%= currentPage + 1 %></a>
+                                </li>
+                            <% } %>
+            
+                            <% if (currentPage < totalPage) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="/wallet?page=<%= currentPage + 1 %>" aria-label="Next" style="text-decoration: none; color: #000; padding: 8px 12px; margin: 0 4px; border: 1px solid #ddd; border-radius: 4px; background-color: #f8f9fa;">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
