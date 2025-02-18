@@ -271,7 +271,7 @@
 
 let cropper;
 const croppedImages = [];
-const maxImages = 5;
+const maxImages = 8;
 
 document.addEventListener('DOMContentLoaded', function() {
     const modalBackdrop = document.getElementById('modalBackdrop');
@@ -288,7 +288,7 @@ function handleImageSelect(event) {
     
     const file = files[0];
     if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        swal("Invalid File", "Please select an image file", "error");
         return;
     }
 
@@ -298,6 +298,7 @@ function handleImageSelect(event) {
     };
     reader.readAsDataURL(file);
 }
+
 
 function showCropper(imageSrc) {
     const modal = document.getElementById('cropperContainer');

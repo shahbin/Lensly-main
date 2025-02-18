@@ -181,8 +181,13 @@ const getCheckout = async (req, res) => {
       quantity: item.quantity,
       totalPrice: item.totalPrice,
       productImage: item.productId.productImage[0],
-      productName: item.productId.productName
+      productName: item.productId.productName,
     }));
+
+    let defaultAddress = user.addresses.find((addr) => addr.isDefault);
+    if (!defaultAddress && user.addresses.length > 0) {
+      defaultAddress = user.addresses[0];
+    }
 
     res.render('checkout', { user, cart: { items: cartItems }, discount: 0, cartItems });
 
