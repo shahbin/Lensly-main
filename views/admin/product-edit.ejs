@@ -95,7 +95,6 @@
     transition: opacity 0.2s ease;
 }
 
-/* Cropper Modal Container */
 #cropperContainer {
     display: none;
     position: fixed;
@@ -103,20 +102,47 @@
     left: 50%;
     transform: translate(-50%, -50%);
     background: #fff;
-    padding: 24px;
+    padding: 16px;
     border-radius: 12px;
     z-index: 1000;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    max-width: 90%;
-    width: 600px;
-    max-height: 90vh;
-    overflow: auto;
+    width: 600px;  /* Slightly increased for better visibility */
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow: visible; /* Changed to visible */
 }
 
 #cropperImage {
     max-width: 100%;
-    max-height: 60vh;
+    max-height: none; /* Removed height restriction */
     display: block;
+}
+
+.cropper-container {
+    overflow: visible; /* Allow overflow */
+}
+
+.cropper-wrap-box {
+    overflow: visible;
+}
+
+.cropper-view-box {
+    outline: none;
+}
+
+.cropper-face {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+@media (max-width: 768px) {
+    #cropperContainer {
+        width: 95vw;
+        padding: 16px;
+        max-height: 95vh;
+    }
+
+    #cropperImage {
+        max-height: 60vh;
+    }
 }
 
 /* Cropper Controls */
@@ -620,10 +646,10 @@ function showCropper(imageSrc) {
     cropperImage.onload = function () {
         cropper = new Cropper(cropperImage, {
             aspectRatio: 1,
-            viewMode: 2,
-            autoCropArea: 0.9,
+            viewMode: 1,
+            autoCropArea: 1,
             responsive: true,
-            background: true,
+            background: false,
             modal: true,
             guides: true,
             center: true,
@@ -631,7 +657,25 @@ function showCropper(imageSrc) {
             cropBoxMovable: true,
             cropBoxResizable: true,
             zoomable: true,
+            dragMode: 'move',
+            toggleDragModeOnDblclick: false,
+            checkOrientation: true,
+            minCropBoxWidth: 100,   // Added minimum crop box size
+            minCropBoxHeight: 100,  // Added minimum crop box size
+            initialAspectRatio: 1,
+            movable: true,         // Allow image to be moved
+            rotatable: true,       // Allow rotation if needed
+            scalable: true  
         });
+        setTimeout(() => {
+            if (cropper) {
+                cropper.reset();
+                cropper.setData({
+                    width: cropper.getContainerData().width,
+                    height: cropper.getContainerData().height
+                });
+            }
+        }, 100);
     };
 }
 

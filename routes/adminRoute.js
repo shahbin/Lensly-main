@@ -10,7 +10,7 @@ const couponController = require("../controllers/admin/couponController")
 const salesController = require("../controllers/admin/salesController")
 const {userAuth,adminAuth, checkAdmin} = require("../middlewares/auth")
 const uploads = require("../helpers/multer")
-const handleUpload = require("../helpers/multer")
+const {handleSingleUpload,handleMultipleUpload} = require("../helpers/multer")
 
 
 router.get('/pageError',adminController.pageError)
@@ -33,20 +33,20 @@ router.get('/editCategory',adminAuth,categoryController.getEditCategory)
 router.post('/editCategory/:id',adminAuth,categoryController.editCategory)
 
 router.get('/brands',adminAuth,brandController.getBrandPage)
-router.post('/addBrand',adminAuth,handleUpload,brandController.addBrand)
+router.post('/addBrand',adminAuth,handleSingleUpload,brandController.addBrand)
 router.get("/blockBrand",adminAuth,brandController.blockBrand)
 router.get("/unblockBrand",adminAuth,brandController.unblockBrand)
 router.get("/deleteBrand",adminAuth,brandController.deleteBrand)
 
 router.get('/addProducts',adminAuth,productController.getProductAddPage)
-router.post('/addProducts',adminAuth,handleUpload,productController.addProducts)
+router.post('/addProducts',adminAuth,handleMultipleUpload,productController.addProducts)
 router.get('/products',adminAuth,productController.getAllProducts)
 router.post('/addProductOffer', adminAuth,productController.addProductOffer);
 router.post('/removeProductOffer', adminAuth,productController.removeProductOffer);
 router.get('/blockProduct',adminAuth,productController.blockProduct)
 router.get('/unblockProduct',adminAuth,productController.unblockProduct)
 router.get('/editProduct',adminAuth,productController.getEditProduct)
-router.post('/editProduct/:id',adminAuth,handleUpload, productController.updateProduct);
+router.post('/editProduct/:id',adminAuth,handleMultipleUpload, productController.updateProduct);
 
 router.get('/orders', adminAuth, orderController.getAllOrders)
 router.post('/orders/update-status', adminAuth, orderController. updateOrderItemStatus);
