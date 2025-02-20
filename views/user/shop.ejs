@@ -764,7 +764,7 @@ async function handleWishlistClick(e) {
         timer: 2000,
         customClass: {
           popup:'small-toast',
-          icon: 'small-toast-icon',  // Custom class for the icon
+          icon: 'small-toast-icon',  
           title: 'small-toast-title' 
         }
       });
@@ -818,7 +818,7 @@ const cartAPI = {
       return { 
         success: false, 
         status: 'error', 
-        message: 'Something went wrong. Please try again later.' 
+        message: ' Please log in to add items to your cart. If you don’t have an account, sign up now to start shopping!' 
       }; 
     }
   },
@@ -900,8 +900,8 @@ async function handleAddToCart(productId, availableStock) {
       }
       
       Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
+        icon: 'info',
+        title: 'Login required',
         text: response.message || 'Failed to add item to cart',
         confirmButtonColor: '#2196f3'
       });
@@ -940,6 +940,7 @@ async function handleAddToCart(productId, availableStock) {
       text: 'Something went wrong. Please try again later.',
       confirmButtonColor: '#2196f3'
     });
+
   }
 }
 

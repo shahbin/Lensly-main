@@ -43,6 +43,14 @@ const addToCart = async (req, res) => {
     const { productId, quantity } = req.body;
     const userId = req.session.user;
 
+    if (!userId) {
+      return res.status(401).json({ 
+        success: false, 
+        status: 'unauthorized', 
+        message: 'You need to be logged in to add items to your cart.' 
+      });
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ success: false, status:'not_found', message: 'Product not found' });

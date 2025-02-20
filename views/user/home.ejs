@@ -275,7 +275,7 @@
         <h3 class="section__title"><span>New</span> Arrivals</h3>
         <div class="new__container swiper">
           <div class="swiper-wrapper">
-            <% for(let i=10; i<products.length-2; i++){ %>
+            <% for(let i=10; i<products.length-3; i++){ %>
             <div class="product__item">
               <div class="product__banner">
                 <a href="/productDetails?id=<%= products[i]._id %>" class="product__images">
@@ -316,6 +316,7 @@
                   <i class="fi fi-rs-star"></i>
                   <i class="fi fi-rs-star"></i>
                 </div>
+              
                 <div class="product__price">
                   <% 
                       const productOffer = products[i].productOffer || 0;
@@ -346,15 +347,15 @@
             </a>
               </div>
             </div>
-            <% } %>
+            <% } %>         
           </div>
-
           <div class="swiper-button-prev">
             <i class="fi fi-rs-angle-left"></i>
           </div>
           <div class="swiper-button-next">
             <i class="fi fi-rs-angle-right"></i>
           </div>
+
         </div>
       </section>
     </main>

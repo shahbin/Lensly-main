@@ -110,7 +110,7 @@ label {
 
 .error-message {
   font-size: 0.8rem;
-  color: var(--error-color);
+  color: red;
   margin-top: 0.5rem;
   font-weight: 500;
   opacity: 0;
@@ -168,7 +168,7 @@ input:-webkit-autofill:focus {
   <div class="login-container">
     <h2 class="text-center">Admin Login</h2>
     <% if (message) { %>
-    <div class="alert alert-danger text-center"><%= message %></div>
+    <div class="alert alert-danger text-center" style="color: #e74c3c; display: flex; justify-content: center; margin-top: -20px;"><%= message %></div>
     <% } %>
     <form id="adminLoginForm" method="post" action="/admin">
       <div class="form-group">

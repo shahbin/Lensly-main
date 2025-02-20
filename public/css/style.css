@@ -1924,12 +1924,13 @@ table {
 
 .signup-field {
   margin-bottom: 1rem;
+  color: #8a1212;
 }
 
 /* Label styling */
 .signup-field label {
   display: block;
-  color: #333;
+  color: #8a1212;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
 }

@@ -125,7 +125,7 @@ const loadShopPage = async (req, res) => {
           searchQuery,
           categoryQuantities: await getCategoryQuantities(),
           totalProducts: featuredProducts.length,
-          cartItems: cartItems?.items || [] // Handle case where cartItems is undefined
+          cartItems: cartItems?.items || []
         });
       } else if (selectedSort === 'newArrivals') {
         sort.createdOn = -1;
@@ -166,7 +166,7 @@ const loadShopPage = async (req, res) => {
       searchQuery,
       categoryQuantities: await getCategoryQuantities(),
       totalProducts,
-      cartItems: cartItems?.items || [] // Handle case where cartItems is undefined
+      cartItems: cartItems?.items || [] 
     });
 
   } catch (error) {
@@ -422,6 +422,8 @@ const getContact = async(req,res)=>{
       const userData = await User.findById({_id:user})
         
         return res.render("contact",{user:userData})
+    }else{
+      res.redirect('/login')
     }
   }
   catch (error){
@@ -436,6 +438,8 @@ const getAbout = async(req,res)=>{
     if(user){
       const userData = await User.findById({_id:user})
       return res.render('about',{user:userData})
+    }else{
+      res.redirect('/login')
     }
     
   }
