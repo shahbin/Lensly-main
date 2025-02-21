@@ -125,13 +125,15 @@ body {
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s ease;
+  justify-content: center;
+    align-items: center;
 }
 
 .modal.active {
   display: flex;
-  opacity: 1;
+  /* opacity: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: center; */
 }
 
 .modal-content {
@@ -478,6 +480,7 @@ body {
   }
 }
 .modal {
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -726,68 +729,7 @@ body {
         </div>
 
 
-          <!-- Edit Field Modal -->
-   
-  <div class="modal" id="editDetailsModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Edit Profile Details</h2>
-            <button class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
-        </div>
-        <form id="editProfileForm">
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="editName">Name</label>
-                    <input type="text" id="editName" name="name" class="form-input" value="<%= user.name %>">
-                    <div class="validation-message"></div>
-                </div>
-                <div class="form-group">
-                    <label for="editPhone">Phone</label>
-                    <input type="tel" id="editPhone" name="phone" class="form-input" value="<%= user.phone %>">
-                    <div class="validation-message"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="action-btn">Save Changes</button>
-                <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-<div class="modal" id="changePasswordModal">
-  <div class="modal-content">
-      <div class="modal-header">
-          <h2>Change Password</h2>
-          <button type="button" class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
-      </div>
-      <form id="changePasswordForm">
-          <div class="modal-body">
-              <div class="form-group">
-                  <label for="currentPassword">Current Password</label>
-                  <input type="password" id="currentPassword" name="currentPassword" class="form-input">
-                  <div class="validation-message"></div>
-              </div>
-              <div class="form-group">
-                  <label for="newPassword">New Password</label>
-                  <input type="password" id="newPassword" name="newPassword" class="form-input">
-                  <div class="validation-message"></div>
-                  <div class="password-strength"></div>
-              </div>
-              <div class="form-group">
-                  <label for="confirmPassword">Confirm Password</label>
-                  <input type="password" id="confirmPassword" name="confirmPassword" class="form-input">
-                  <div class="validation-message"></div>
-              </div>
-          </div>
-          <div class="modal-footer">
-              <button type="submit" class="action-btn">Update Password</button>
-              <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
-          </div>
-      </form>
-  </div>
-</div>
+  
 
 
           <div class="dashboard-item" data-type="address">
@@ -1027,18 +969,89 @@ body {
 </div>
 
 
+        <!-- Edit Field Modal -->
+   
+        <div class="modal" id="editDetailsModal">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h2>Edit Profile Details</h2>
+                  <button class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+              </div>
+              <form id="editProfileForm">
+                  <div class="modal-body">
+                      <div class="form-group">
+                          <label for="editName">Name</label>
+                          <input type="text" id="editName" name="name" class="form-input" value="<%= user.name %>">
+                          <div class="validation-message"></div>
+                      </div>
+                      <div class="form-group">
+                          <label for="editPhone">Phone</label>
+                          <input type="tel" id="editPhone" name="phone" class="form-input" value="<%= user.phone %>">
+                          <div class="validation-message"></div>
+                      </div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="submit" class="action-btn">Save Changes</button>
+                      <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+      
+      
+      <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button type="button" class="close-btn" aria-label="Close" onclick="closeModals()">&times;</button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="form-input">
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" class="form-input">
+                        <div class="validation-message"></div>
+                        <div class="password-strength"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input">
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="action-btn">Update Password</button>
+                    <button type="button" class="action-btn secondary" onclick="closeModals()">Cancel</button>
+                </div>
+            </form>
+        </div>
+      </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 
-
+  
 function showEditDetailsModal() {
     const modal = document.getElementById('editDetailsModal');
     if (modal) {
         modal.classList.add('active'); 
     }
 }
+
+function showPasswordModal() {
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) {
+        modal.classList.add('active'); 
+    }
+}
+
 
 function closeModals() {
     const modals = document.querySelectorAll('.modal');
@@ -1057,265 +1070,272 @@ window.addEventListener('click', (event) => {
 });
 
     
-    document.addEventListener('DOMContentLoaded', function() {
-        function toggleModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.toggle("active");
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    function toggleModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.toggle("active");
+        } else {
+            console.error(`Modal with ID ${modalId} not found`);
         }
+    }
 
-        document.querySelectorAll('.dashboard-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const type = item.getAttribute('data-type');
-                if (type === 'profile') {
-                    toggleModal('profileModal');
-                } else if (type === 'address') {
-                    showAddressModal();
-                }
-            });
+    document.querySelectorAll('.dashboard-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const type = item.getAttribute('data-type');
+            if (type === 'profile') {
+                toggleModal('profileModal');
+            } else if (type === 'address') {
+                showAddressModal();
+            }
         });
+    });
 
-        document.querySelectorAll('.close-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const modal = button.closest('.modal');
-                if (modal) {
-                    modal.classList.remove('active');
-                }
-            });
+    document.querySelectorAll('.close-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         });
+    });
 
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
         });
+    });
 
-        function updateDateTime() {
-            const dateTimeElement = document.getElementById('dateTime');
+    function updateDateTime() {
+        const dateTimeElement = document.getElementById('dateTime');
+        if (dateTimeElement) {
             const now = new Date();
             dateTimeElement.textContent = now.toLocaleString();
         }
-        updateDateTime();
-        setInterval(updateDateTime, 60000);
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
 
-        const editProfileForm = document.getElementById('editProfileForm');
-        if (editProfileForm) {
-            editProfileForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                clearValidationMessages(this);
+    const editProfileForm = document.getElementById('editProfileForm');
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearValidationMessages(this);
 
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
 
-                let isValid = true;
+            let isValid = true;
 
-                if (!data.name.trim()) {
-                    showValidationError('editName', 'Name is required');
-                    isValid = false;
-                } else if (data.name.trim().length < 3) {
-                    showValidationError('editName', 'Name must be at least 3 characters');
-                    isValid = false;
-                }
-
-                const phoneRegex = /^\d{10}$/;
-                const invalidPhonePattern = /0{7,}/; 
-                if (!phoneRegex.test(data.phone.replace(/\s+/g, ''))) {
-                    showValidationError('editPhone', 'Please enter a valid 10-digit phone number');
-                    isValid = false;
-                } else if (invalidPhonePattern.test(data.phone)) {
-                    showValidationError('editPhone', 'Phone number cannot contain 7 or more consecutive zeros');
-                    isValid = false;
-                }
-
-                if (!isValid) return;
-
-                try {
-                    const response = await fetch('/editProfile', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data)
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        document.getElementById('profileName').textContent = data.name;
-                        document.getElementById('profilePhone').textContent = data.phone;
-                        sessionStorage.setItem('profileUpdateMessage', result.message);
-                        closeModals();
-                        
-                        window.location.href = "/userProfile"
-                        
-                    } 
-                    else {
-                        result.errors.forEach(error => {
-                            if (error.toLowerCase().includes('name')) {
-                                showValidationError('editName', error);
-                            } else if (error.toLowerCase().includes('phone')) {
-                                showValidationError('editPhone', error);
-                            }
-                        });
-                    }
-                } catch (error) {
-                    showMessage('An error occurred', 'error');
-                }
-            })
-            const message = sessionStorage.getItem('profileUpdateMessage');
-      if (message) {
-          showMessage(message, 'success'); 
-
-          sessionStorage.removeItem('profileUpdateMessage');
-      }
-          
-        }
-
-        const changePasswordForm = document.getElementById('changePasswordForm');
-        if (changePasswordForm) {
-            const newPasswordInput = document.getElementById('newPassword');
-            if (newPasswordInput) {
-                newPasswordInput.addEventListener('input', function() {
-                    const password = this.value;
-                    const strength = checkPasswordStrength(password);
-                    updatePasswordStrength(this, strength);
-                });
+            if (!data.name.trim()) {
+                showValidationError('editName', 'Name is required');
+                isValid = false;
+            } else if (data.name.trim().length < 3) {
+                showValidationError('editName', 'Name must be at least 3 characters');
+                isValid = false;
             }
 
-            changePasswordForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                clearValidationMessages(this);
+            const phoneRegex = /^\d{10}$/;
+            const invalidPhonePattern = /0{7,}/; 
+            if (!phoneRegex.test(data.phone.replace(/\s+/g, ''))) {
+                showValidationError('editPhone', 'Please enter a valid 10-digit phone number');
+                isValid = false;
+            } else if (invalidPhonePattern.test(data.phone)) {
+                showValidationError('editPhone', 'Phone number cannot contain 7 or more consecutive zeros');
+                isValid = false;
+            }
 
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
+            if (!isValid) return;
 
-                let isValid = true;
+            try {
+                const response = await fetch('/editProfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
 
-                if (!data.currentPassword) {
-                    showValidationError('currentPassword', 'Current password is required');
-                    isValid = false;
-                }
+                const result = await response.json();
 
-                if (!data.newPassword) {
-                    showValidationError('newPassword', 'New password is required');
-                    isValid = false;
-                } else if (data.newPassword.length < 8) {
-                    showValidationError('newPassword', 'Password must be at least 8 characters');
-                    isValid = false;
-                }
-
-                if (!data.confirmPassword) {
-                    showValidationError('confirmPassword', 'Please confirm your password');
-                    isValid = false;
-                } else if (data.newPassword !== data.confirmPassword) {
-                    showValidationError('confirmPassword', 'Passwords do not match');
-                    isValid = false;
-                }
-
-                if (!isValid) return;
-
-                try {
-                    const response = await fetch('/changePassword', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data)
+                if (result.success) {
+                    document.getElementById('profileName').textContent = data.name;
+                    document.getElementById('profilePhone').textContent = data.phone;
+                    sessionStorage.setItem('profileUpdateMessage', result.message);
+                    closeModals();
+                    
+                    window.location.href = "/userProfile"
+                    
+                } 
+                else {
+                    result.errors.forEach(error => {
+                        if (error.toLowerCase().includes('name')) {
+                            showValidationError('editName', error);
+                        } else if (error.toLowerCase().includes('phone')) {
+                            showValidationError('editPhone', error);
+                        }
                     });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showMessage(result.message, 'success');
-                        closeModals();
-                    } else {
-                        result.errors.forEach(error => {
-                            if (error.toLowerCase().includes('current')) {
-                                showValidationError('currentPassword', error);
-                            } else if (error.toLowerCase().includes('new')) {
-                                showValidationError('newPassword', error);
-                            } else if (error.toLowerCase().includes('confirm') || error.toLowerCase().includes('match')) {
-                                showValidationError('confirmPassword', error);
-                            }
-                        });
-                    }
-                } catch (error) {
-                    showMessage('An error occurred', 'error');
                 }
+            } catch (error) {
+                showMessage('An error occurred', 'error');
+            }
+        });
+
+        const message = sessionStorage.getItem('profileUpdateMessage');
+        if (message) {
+            showMessage(message, 'success'); 
+            sessionStorage.removeItem('profileUpdateMessage');
+        }
+    }
+
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        const newPasswordInput = document.getElementById('newPassword');
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strength = checkPasswordStrength(password);
+                updatePasswordStrength(this, strength);
             });
         }
-        function showValidationError(fieldId, message) {
-            const input = document.getElementById(fieldId);
+
+        changePasswordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearValidationMessages(this);
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            let isValid = true;
+
+            if (!data.currentPassword) {
+                showValidationError('currentPassword', 'Current password is required');
+                isValid = false;
+            }
+
+            if (!data.newPassword) {
+                showValidationError('newPassword', 'New password is required');
+                isValid = false;
+            } else if (data.newPassword.length < 8) {
+                showValidationError('newPassword', 'Password must be at least 8 characters');
+                isValid = false;
+            }
+
+            if (!data.confirmPassword) {
+                showValidationError('confirmPassword', 'Please confirm your password');
+                isValid = false;
+            } else if (data.newPassword !== data.confirmPassword) {
+                showValidationError('confirmPassword', 'Passwords do not match');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                const response = await fetch('/changePassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    closeModals();
+                } else {
+                    result.errors.forEach(error => {
+                        if (error.toLowerCase().includes('current')) {
+                            showValidationError('currentPassword', error);
+                        } else if (error.toLowerCase().includes('new')) {
+                            showValidationError('newPassword', error);
+                        } else if (error.toLowerCase().includes('confirm') || error.toLowerCase().includes('match')) {
+                            showValidationError('confirmPassword', error);
+                        }
+                    });
+                }
+            } catch (error) {
+                showMessage('An error occurred', 'error');
+            }
+        });
+    }
+
+    function showValidationError(fieldId, message) {
+        const input = document.getElementById(fieldId);
+        if (input) {
             const validationDiv = input.nextElementSibling;
             input.classList.add('error');
             validationDiv.textContent = message;
         }
+    }
 
-        function clearValidationMessages(form) {
-            form.querySelectorAll('.validation-message').forEach(div => div.textContent = '');
-            form.querySelectorAll('.form-input').forEach(input => input.classList.remove('error'));
+    function clearValidationMessages(form) {
+        form.querySelectorAll('.validation-message').forEach(div => div.textContent = '');
+        form.querySelectorAll('.form-input').forEach(input => input.classList.remove('error'));
+    }
+
+    function updatePasswordStrength(input, strength) {
+        const existingIndicator = input.parentElement.querySelector('.password-strength');
+        if (existingIndicator) existingIndicator.remove();
+
+        const strengthIndicator = document.createElement('div');
+        strengthIndicator.className = 'password-strength';
+
+        const strengthTexts = ['Weak', 'Medium', 'Strong'];
+        const strengthClasses = ['weak', 'medium', 'strong'];
+
+        if (input.value.length > 0) {
+            strengthIndicator.textContent = `Password Strength: ${strengthTexts[strength - 1] || 'Very Weak'}`;
+            strengthIndicator.className = `password-strength ${strengthClasses[strength - 1] || 'very-weak'}`;
         }
 
-        function updatePasswordStrength(input, strength) {
-            const existingIndicator = input.parentElement.querySelector('.password-strength');
-            if (existingIndicator) existingIndicator.remove();
+        input.parentElement.appendChild(strengthIndicator);
+    }
 
-            const strengthIndicator = document.createElement('div');
-            strengthIndicator.className = 'password-strength';
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[A-Za-z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        return strength;
+    }
 
-            const strengthTexts = ['Weak', 'Medium', 'Strong'];
-            const strengthClasses = ['weak', 'medium', 'strong'];
-
-            if (input.value.length > 0) {
-                strengthIndicator.textContent = `Password Strength: ${strengthTexts[strength - 1] || 'Very Weak'}`;
-                strengthIndicator.className = `password-strength ${strengthClasses[strength - 1] || 'very-weak'}`;
-            }
-
-            input.parentElement.appendChild(strengthIndicator);
-        }
-
-        function checkPasswordStrength(password) {
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (/[A-Za-z]/.test(password)) strength++;
-            if (/\d/.test(password)) strength++;
-            return strength;
-        }
-
-        function closeModals() {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                modal.classList.remove('active');
-                const form = modal.querySelector('form');
-                if (form) {
-                    form.reset();
-                    clearValidationMessages(form);
-                    const strengthIndicator = form.querySelector('.password-strength');
-                    if (strengthIndicator) {
-                        strengthIndicator.remove();
-                    }
+    function closeModals() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.classList.remove('active');
+            const form = modal.querySelector('form');
+            if (form) {
+                form.reset();
+                clearValidationMessages(form);
+                const strengthIndicator = form.querySelector('.password-strength');
+                if (strengthIndicator) {
+                    strengthIndicator.remove();
                 }
-            });
-        }
-
-        function showMessage(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}-message notification`;
-            messageDiv.textContent = message;
-
-            const container = document.querySelector('.container');
-            if (container) {
-                container.insertBefore(messageDiv, container.firstChild);
-                setTimeout(() => messageDiv.remove(), 5000);
             }
-        }
-    });
+        });
+    }
 
-    let addresses = [];
-    let editingAddressId = null;
+    function showMessage(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}-message notification`;
+        messageDiv.textContent = message;
+        messageDiv.style.color = 'white';
+
+        const container = document.querySelector('.container');
+        if (container) {
+            container.insertBefore(messageDiv, container.firstChild);
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+    }
+});
+
+  let addresses = [];
+  let editingAddressId = null;
 
     const VALIDATION_RULES = {
         phone: {
@@ -1655,6 +1675,7 @@ function showMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message notification`;
     messageDiv.textContent = message;
+    messageDiv.style.color = 'white';
 
     const container = document.querySelector('.container');
     if (container) {
@@ -1691,7 +1712,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         modal.style.display = 'none';
         if (callback) callback();
-      }, 100); // Reduced delay for faster closing
+      }, 100); 
     }
   }
 
@@ -1784,7 +1805,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message notification`;
     messageDiv.textContent = message;
-    messageDiv.style.color = 'white'; // Set text color to white
+    messageDiv.style.color = 'white'; 
 
     const container = document.querySelector('.container');
     if (container) {
@@ -1795,7 +1816,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function createConfetti(callback) {
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-    const confettiCount = 50; // Reduced confetti count for faster animation
+    const confettiCount = 50; 
     let finishedCount = 0;
 
     for (let i = 0; i < confettiCount; i++) {
@@ -1816,7 +1837,7 @@ document.addEventListener('DOMContentLoaded', () => {
           { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
         ],
         {
-          duration: Math.random() * 1000 + 1000, // Reduced animation duration
+          duration: Math.random() * 1000 + 1000, 
           easing: 'cubic-bezier(0,0.9,0.57,1)',
           delay: Math.random() * 400 
         }
