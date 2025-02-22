@@ -337,7 +337,6 @@ const cancelOrderItem = async (req, res) => {
     }
 
     const order = await Order.findById(orderId);
-    
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -369,19 +368,19 @@ const cancelOrderItem = async (req, res) => {
         message: 'Cannot cancel a delivered item'
       });
     }
-
+    
     const product = await Product.findById(orderItem.product);
     if (product) {
       product.quantity += orderItem.quantity;
       await product.save();
     }
-
     orderItem.status = 'Cancelled';
-    orderItem.cancellationReason = reason;
-    orderItem.cancelledAt = new Date();
+    orderItem.cancelReason = reason; 
+    orderItem.cancelledAt = new Date(); 
+
 
     const itemTotal = orderItem.price * orderItem.quantity;
-    const shippingCost = 0;
+    const shippingCost = 49;
 
     let refundAmount = 0;
 
@@ -392,13 +391,11 @@ const cancelOrderItem = async (req, res) => {
       refundAmount = (itemTotal - itemDiscount) + shippingCost;
 
       order.discount = Math.max(0, order.discount - itemDiscount);
-
     } else {
       refundAmount = itemTotal + shippingCost;
-
     }
 
-    if (order.paymentMethod !== 'cod') {
+    if (order.paymentMethod !== 'cod' && order.paymentStatus !== 'Failed') {
       const userId = req.session.user;
       await walletHelper.updateWalletBalance(userId, refundAmount, 'credit');
     }
@@ -413,7 +410,6 @@ const cancelOrderItem = async (req, res) => {
       order.status = 'Cancelled';
       order.finalAmount = 0; 
     } else {
-
       order.finalAmount = order.totalPrice - (order.discount || 0) + shippingCost;
     }
 
@@ -438,6 +434,9 @@ const returnOrder = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { reason } = req.body;
 
+    console.log('Received Params:', { orderId, itemId });
+    console.log('Received Body:', { reason });
+
     if (!reason || !reason.trim()) {
       return res.status(400).json({
         success: false,
@@ -453,6 +452,8 @@ const returnOrder = async (req, res) => {
       });
     }
 
+    console.log('Order Found:', order);
+
     const orderItem = order.orderedItems.find(item =>
       item._id.toString() === itemId
     );
@@ -464,6 +465,8 @@ const returnOrder = async (req, res) => {
       });
     }
 
+    console.log('Order Item Found:', orderItem);
+
     if (orderItem.status !== 'Delivered') {
       return res.status(400).json({
         success: false,
@@ -471,59 +474,22 @@ const returnOrder = async (req, res) => {
       });
     }
 
-    if (['Returned', 'Return Processing'].includes(orderItem.status)) {
+    if (['Return Requested', 'Returned'].includes(orderItem.status)) {
       return res.status(400).json({
         success: false,
         message: `Return already ${orderItem.status.toLowerCase()} for this item`
       });
     }
 
-    const product = await Product.findById(orderItem.product);
-    if (product) {
-      product.quantity += orderItem.quantity;
-      await product.save();
-    }
-
-    orderItem.status = 'Returned';
+    orderItem.status = 'Return Requested';
     orderItem.returnReason = reason;
     orderItem.returnRequestedAt = new Date();
-
-    const itemTotal = orderItem.price * orderItem.quantity;
-
-    let returnAmount = 0;
-    if (order.couponId) {
-      const itemRatio = itemTotal / order.totalPrice;
-
-      const itemDiscount = order.discount * itemRatio;
-
-      returnAmount = itemTotal - itemDiscount;
-
-      order.discount -= itemDiscount;
-    } else {
-      returnAmount = itemTotal;
-    }
-
-    const userId = req.session.user;
-    await walletHelper.updateWalletBalance(userId, returnAmount, 'credit');
-
-    order.totalPrice -= itemTotal;
-
-    const allItemsReturned = order.orderedItems.every(item => 
-      item.status === 'Returned'
-    );
-
-    if (allItemsReturned) {
-      order.status = 'Returned';
-      order.finalAmount = 49; 
-    } else {
-      order.finalAmount = order.totalPrice - (order.discount || 0) + 49;
-    }
 
     await order.save();
 
     res.status(200).json({
       success: true,
-      message: 'Return request processed successfully'
+      message: 'Return request submitted successfully. Waiting for admin approval.'
     });
 
   } catch (error) {
@@ -534,7 +500,6 @@ const returnOrder = async (req, res) => {
     });
   }
 };
-
 const walletPayment = async (req, res) => {
     try {
         const { orderId, amount, paymentMethod } = req.body;
@@ -589,14 +554,37 @@ const updatePaymentMethod = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
+       // If paymentStatus is "Failed", do not credit the amount to the wallet
+       if (paymentStatus === "Failed") {
+        // Simply update the payment status and method
         order.paymentMethod = paymentMethod;
         order.paymentStatus = paymentStatus;
         await order.save();
 
-        res.json({
+        return res.json({
             success: true,
-            message: 'Payment method updated successfully'
+            message: 'Payment status updated to Failed. No amount credited to wallet.'
         });
+    }
+
+            // If paymentStatus is "Paid" and the previous status was not "Paid", credit the amount
+        if (paymentStatus === "Paid" && order.paymentStatus !== "Paid" && order.finalAmount > 0) {
+          const userId = order.userId;
+          const Amount = order.finalAmount;
+          const transactionType = 'credit';
+
+          await walletHelper.updateWalletBalance(userId, Amount, transactionType);
+      }
+
+      // Update the payment method and status
+      order.paymentMethod = paymentMethod;
+      order.paymentStatus = paymentStatus;
+      await order.save();
+
+      res.json({
+          success: true,
+          message: 'Payment method updated successfully'
+      });
     } catch (error) {
         console.error('Error updating payment method:', error);
         res.status(500).json({

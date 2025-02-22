@@ -51,6 +51,7 @@ router.post('/editProduct/:id',adminAuth,handleMultipleUpload, productController
 router.get('/orders', adminAuth, orderController.getAllOrders)
 router.post('/orders/update-status', adminAuth, orderController. updateOrderItemStatus);
 router.get('/orderDetails/:orderId', adminAuth, orderController.getOrderDetails);
+router.post('/process-return/:orderId/:itemId', adminAuth,orderController. processReturnRequest);
 
 router.get('/coupon',adminAuth,couponController.getCouponPage)
 router.post('/createCoupon',adminAuth,couponController.createCoupon)

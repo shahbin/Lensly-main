@@ -54,14 +54,18 @@ const loadShopPage = async (req, res) => {
     let limit = 8;
     const skip = (page - 1) * limit;
 
+    const listedCategories = await Category.find({isListed:true})
+
     let query = {
       isBlocked: false,
-      salePrice: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) }
+      salePrice: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) },
+      category: { $in: listedCategories.map(cat => cat._id) }
     };
 
     if (searchQuery) {
       const matchingCategories = await Category.find({
-        name: { $regex: searchQuery, $options: 'i' }
+        name: { $regex: searchQuery, $options: 'i' },
+        isListed: true
       });
 
       query.$or = [
@@ -71,7 +75,7 @@ const loadShopPage = async (req, res) => {
     }
 
     if (selectedCategory.length > 0) {
-      const categories = await Category.find({ name: { $in: selectedCategory } });
+      const categories = await Category.find({ name: { $in: selectedCategory }, isListed: true });
       if (!query.$or) {
         query.category = { $in: categories.map(cat => cat._id) };
       } else {
@@ -81,7 +85,8 @@ const loadShopPage = async (req, res) => {
             { $or: [{ category: { $in: categories.map(cat => cat._id) } }] }
           ],
           isBlocked: false,
-          salePrice: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) }
+          salePrice: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) },
+          category: { $in: listedCategories.map(cat => cat._id) }
         };
       }
     }
@@ -96,7 +101,7 @@ const loadShopPage = async (req, res) => {
         sort.orders = -1;
         limit = 6;
       } else if (selectedSort === 'featured') {
-        const categories = await Category.find({});
+        const categories = await Category.find({isListed: true});
         const featuredProducts = [];
         for (const category of categories) {
           const product = await Product.findOne({ 

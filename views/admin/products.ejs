@@ -236,21 +236,26 @@
 
 
 <script>
-   async function addOffer(productId) {
+ async function addOffer(productId) {
     const { value: amount } = await Swal.fire({
         title: 'Offer in percentage',
         input: 'number',
         inputLabel: 'Percentage',
         inputPlaceholder: '%',
+        inputAttributes: {
+            min: 1,  
+            max: 99, 
+        },
         inputValidator: (value) => {
             if (!value) {
                 return 'Please enter a percentage';
             }
-            if (value < 0 || value > 100) {
-                return 'Percentage must be between 0 and 100';
+            if (value < 1 || value > 99) {
+                return 'Percentage must be between 1 and 99';
             }
         }
     });
+
 
     if (amount) {
         try {

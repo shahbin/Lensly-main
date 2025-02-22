@@ -32,12 +32,18 @@
                                 </div>
                             </td>
                             <td class="order-date"><%= order.createdOn.toLocaleDateString() %></td>
-                            <td>
-                                <% const statusClass = order.status ? order.status.toLowerCase().replace(/\s+/g, '-') : 'unknown' %>
-                                <span class="status-badge <%= statusClass %>">
+                            <td class="status-container">
+                                <% const hasReturnRequested = order.orderedItems.some(item => item.status === 'Return Requested'); %>
+                                
+                                <% if (hasReturnRequested) { %>
+                                    <span class="return-requested-text" style="color: #842029; font-size: small;">Return requested</span><br>
+                                <% } %>
+                                
+                                <span class="status-badge <%= order.status.toLowerCase().replace(/\s+/g, '-') %>">
                                     <%= order.status || 'Unknown' %>
                                 </span>
                             </td>
+                            
                             <td>
                                 <a href="orderDetails/<%= order._id %>" class="btn-view">View</a>
                             </td>

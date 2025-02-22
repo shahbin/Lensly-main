@@ -106,6 +106,7 @@
             background: white;
             border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         th {
@@ -186,6 +187,35 @@
     .save-btn:hover {
         background: #368b48;
     }
+    .accept-btn {
+  background-color: #28a745; /* Green */
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.reject-btn {
+  background-color: #dc3545; /* Red */
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.accept-btn:hover {
+  background-color: #218838; /* Darker Green */
+}
+
+.reject-btn:hover {
+  background-color: #c82333; /* Darker Red */
+}
     </style>
 </head>
   <div class="main-body" style="margin-left:10px">
@@ -229,13 +259,17 @@
                 <span><%= order?.userId.phone %></span>
 
                 <span class="label">Shipping Address:</span><br>
-                <span>Type: <%= order?.shippingAddress.addressType %></span>
-                <span>City: <%= order?.shippingAddress.city %></span>
-                <span>LandMark: <%= order?.shippingAddress.landMark %></span>
-                <span>State: <%= order?.shippingAddress.state %></span>
-                <span>PinCode: <%= order?.shippingAddress.pincode %></span>
-                <span>Phone: <%= order?.shippingAddress.phone %></span>
-                <span>Alt Phone: <%= order?.shippingAddress.altPhone %></span>
+                <% if (order.shippingAddress) { %>
+                    <span>Type: <%= order.shippingAddress.addressType %></span>
+                    <span>City: <%= order.shippingAddress.city %></span>
+                    <span>LandMark: <%= order.shippingAddress.landMark %></span>
+                    <span>State: <%= order.shippingAddress.state %></span>
+                    <span>PinCode: <%= order.shippingAddress.pincode %></span>
+                    <span>Phone: <%= order.shippingAddress.phone %></span>
+                    <span>Alt Phone: <%= order.shippingAddress.altPhone %></span>
+                <% } else { %>
+                    <span>No shipping address available.</span>
+                <% } %>
 
             </div>
         </div>
@@ -244,11 +278,12 @@
     <table>
         <thead>
             <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th class="item" style="padding-left: 10px;">Item</th>
+                <th class="quantity" style="padding-left: -25px; padding-right: 10px;">Quantity</th>
+                <th class="price" style="padding-left: 18px;">Price</th>
+                <th class="status" style="padding-left: 30px;">Status</th>
+                <th class="reason" style="padding-left: 30px;">Reason</th>
+                <th class="action" style="padding-left: 30px;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -258,10 +293,26 @@
                     <td><%= item.quantity %></td>
                     <td>₹<%= item.price.toFixed(2) %></td>
                     <td>
-                        <span id="status-${item._id}" class="status-badge status-<%= item.status.toLowerCase() %>"><%= item.status %></span>
+                        <span class="status-badge status-<%= item.status.toLowerCase().replace(' ', '-') %>">
+                            <%= item.status %>
+                          </span>
                     </td>
+                    <td class="rsn" style="color: #3e648a;  ">
+                        <% if (item.status === 'Cancelled' && item.cancelReason) { %>
+                          <%= item.cancelReason %>
+                        <% } else if  ((item.status === 'Returned' || item.status === 'Return Requested') && item.returnReason)  { %>
+                           <%= item.returnReason %>
+                        <% } else { %>
+                        <% } %>
+                      </td>
                     <td>
+                        <% if(item.status !== "Return Requested" && item.status !== "Cancelled" && item.status !== "Returned"){ %>
                         <button class="edit-btn" onclick="openModal('<%= item._id %>', '<%= item.status %>')">Edit Status</button>
+                        <% } %>
+                        <% if (item.status === 'Return Requested') { %>
+                            <button class="accept-btn" style="margin:3px; margin-left: 0; width: 120px; margin-right: 0;" onclick="acceptReturn('<%= order.orderId %>', '<%= item._id %>')">Accept Return</button><br>
+                            <button class="reject-btn" style="margin:3px; margin-left: 0; width: 120px;" onclick="rejectReturn('<%= order.orderId %>', '<%= item._id %>')">Reject Return</button>
+                          <% } %>
                     </td>
                 </tr>
                 
@@ -368,6 +419,72 @@
             closeModal();
         }
     }
+    
+    async function acceptReturn(orderId, itemId) {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to accept this return request?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Accept',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch(`/admin/process-return/${orderId}/${itemId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept' })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire('Success', 'Return accepted successfully.', 'success').then(() => {
+          window.location.reload();
+        });
+      } else {
+        Swal.fire('Error', 'Failed to accept return: ' + data.message, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire('Error', 'An error occurred while accepting the return.', 'error');
+    }
+  }
+}
+
+async function rejectReturn(orderId, itemId) {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to reject this return request?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Reject',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch(`/admin/process-return/${orderId}/${itemId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reject' })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire('Success', 'Return rejected successfully.', 'success').then(() => {
+          window.location.reload();
+        });
+      } else {
+        Swal.fire('Error', 'Failed to reject return: ' + data.message, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire('Error', 'An error occurred while rejecting the return.', 'error');
+    }
+  }
+}
 </script>
 
     <%- include("../../views/partials/admin/footer") %>

@@ -847,12 +847,14 @@
                             </div>
                         </div>
                     </div>
-                    <% if (order && (order.paymentStatus === "Failed" )&& order.paymentMethod !== "cod" && order.paymentMethod != "wallet") { %>
+                    <% if (order && (order.paymentStatus === "Failed" && order.status !== "Cancelled" )&& order.paymentMethod !== "cod" && order.paymentMethod != "wallet") { %>
                         <button onclick="initiateRepayment('<%= order._id %>', '<%= order.finalAmount %>')"
                                 class="btn btn-primary"
                                 style="width: 100%; margin-top: 1rem;">
                             <i class="fas fa-sync"></i> Complete Payment
                         </button>
+                        <p class="com-pay" style="color: #691700;">Please complete the payment within 24 hours to avoid order cancellation.</p>
+                        <p class="com-pay" style="color: #691700;"> If you no longer need the product, you can cancel the order anytime.</p>
                     <% } %>
                     
                 </div>
@@ -933,7 +935,7 @@
                                                     data-item-id="<%= item._id %>">
                                                 <i class="fas fa-undo"></i> Return
                                             </button>
-                                        <% } else if(item.status.toLowerCase() !== 'returned' && order.paymentStatus !== "Failed") { %>
+                                        <% } else if(item.status.toLowerCase() !== 'returned' || item.status !== 'Return Requested' ) { %>
                                             <button type="button" 
                                                     class="btn-cancel" 
                                                     onclick="handleCancel(event, '<%= order._id %>', '<%= item._id %>')"
@@ -1264,82 +1266,84 @@ async function submitCancel() {
 }
 
 async function submitReturn() {
-    console.log("Submit return called with stored IDs:", { currentOrderId, currentItemId });
+  alert("Submit return called with stored IDs:", { currentOrderId, currentItemId });
 
-    if (!currentOrderId || !currentItemId || currentOrderId === 'undefined' || currentItemId === 'undefined') {
-        console.error('Missing or invalid order/item ID');
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Order information is missing or invalid'
-        });
-        return;
-    }
+  if (!currentOrderId || !currentItemId || currentOrderId === 'undefined' || currentItemId === 'undefined') {
+    alert('Missing or invalid order/item ID');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Order information is missing or invalid'
+    });
+    return;
+  }
 
-    const returnReasonSelect = document.getElementById('returnReasonSelect');
-    const returnReasonTextarea = document.getElementById('returnReason');
-    let reason = returnReasonSelect.value;
+  const returnReasonSelect = document.getElementById('returnReasonSelect');
+  const returnReasonTextarea = document.getElementById('returnReason');
+  let reason = returnReasonSelect.value;
+  alert('Selected reason: ' + reason);
 
-    if (reason === 'Other') {
-        reason = returnReasonTextarea.value.trim();
-    }
+  if (reason === 'Other') {
+    reason = returnReasonTextarea.value.trim();
+    alert('Other reason specified: ' + reason);
+  }
 
-    if (!reason) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Please provide a reason for return'
-        });
-        return;
-    }
+  if (!reason) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Please provide a reason for return'
+    });
+    return;
+  }
 
-    try {
-        const requestData = {
-            orderId: currentOrderId,
-            itemId: currentItemId,
-            reason: reason
-        };
+  try {
+    const requestData = {
+      orderId: currentOrderId,
+      itemId: currentItemId,
+      reason: reason
+    };
 
-        console.log('Sending return request with data:', requestData);
+    alert('Sending return request with data:', requestData);
 
-        const response = await fetch(`/returnOrder/${currentOrderId}/${currentItemId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(requestData)
-        });
+    const response = await fetch(`/returnOrder/${currentOrderId}/${currentItemId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(requestData)
+    });
 
-        const data = await response.json();
-        console.log('Response:', data);
+    const data = await response.json();
+    alert('Response:', data);
 
-        if (data.success) {
-            hideModal('returnModal', false);
-            returnReasonSelect.value = '';
-            returnReasonTextarea.value = '';
-            returnReasonTextarea.style.display = 'none';
+    if (data.success) {
+      hideModal('returnModal', false);
+      returnReasonSelect.value = '';
+      returnReasonTextarea.value = '';
+      returnReasonTextarea.style.display = 'none';
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: 'Order returned successfully'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
-            });
-        } else {
-            throw new Error(data.message || 'Failed to submit return request');
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Return requested successfully'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
         }
-    } catch (error) {
-        console.error("Error:", error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to submit return request'
-        });
+      });
+    } else {
+      throw new Error(data.message || 'Failed to submit return request');
     }
+  } catch (error) {
+    console.error("Error:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to submit return request'
+    });
+  }
 }
 
 const initiateRepayment = async (orderId, amount) => {
