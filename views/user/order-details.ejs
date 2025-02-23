@@ -935,7 +935,7 @@
                                                     data-item-id="<%= item._id %>">
                                                 <i class="fas fa-undo"></i> Return
                                             </button>
-                                        <% } else if(item.status.toLowerCase() !== 'returned' || item.status !== 'Return Requested' ) { %>
+                                        <% } else if(item.status.toLowerCase() !== 'returned' && item.status !== 'Return Requested' ) { %>
                                             <button type="button" 
                                                     class="btn-cancel" 
                                                     onclick="handleCancel(event, '<%= order._id %>', '<%= item._id %>')"
@@ -1068,7 +1068,6 @@ function handleCancel(event, orderId, itemId) {
     orderId = orderId || button.getAttribute('data-order-id');
     itemId = itemId || button.getAttribute('data-item-id');
     
-    console.log('Cancel handler received:', { orderId, itemId });
     
     if (!orderId || !itemId || orderId === 'undefined' || itemId === 'undefined') {
         console.error('Invalid order or item ID:', { orderId, itemId });
@@ -1266,10 +1265,8 @@ async function submitCancel() {
 }
 
 async function submitReturn() {
-  alert("Submit return called with stored IDs:", { currentOrderId, currentItemId });
-
+ 
   if (!currentOrderId || !currentItemId || currentOrderId === 'undefined' || currentItemId === 'undefined') {
-    alert('Missing or invalid order/item ID');
     Swal.fire({
       icon: 'error',
       title: 'Error',
@@ -1281,11 +1278,9 @@ async function submitReturn() {
   const returnReasonSelect = document.getElementById('returnReasonSelect');
   const returnReasonTextarea = document.getElementById('returnReason');
   let reason = returnReasonSelect.value;
-  alert('Selected reason: ' + reason);
 
   if (reason === 'Other') {
     reason = returnReasonTextarea.value.trim();
-    alert('Other reason specified: ' + reason);
   }
 
   if (!reason) {
@@ -1304,7 +1299,6 @@ async function submitReturn() {
       reason: reason
     };
 
-    alert('Sending return request with data:', requestData);
 
     const response = await fetch(`/returnOrder/${currentOrderId}/${currentItemId}`, {
       method: 'POST',
@@ -1316,7 +1310,6 @@ async function submitReturn() {
     });
 
     const data = await response.json();
-    alert('Response:', data);
 
     if (data.success) {
       hideModal('returnModal', false);
