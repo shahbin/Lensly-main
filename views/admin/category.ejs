@@ -349,8 +349,7 @@
         }
         const name = document.getElementsByName("name")[0].value.trim();
         const description = document.getElementById("descriptionId").value;
-        console.log(name);
-        
+
 
         fetch('/admin/addCategory', {
             method:'POST',
@@ -391,7 +390,6 @@
     clearErrorMessages();
     const name = document.getElementsByName("name")[0].value.trim();
     const description = document.getElementById("descriptionId").value.trim();
-    console.log("name", name, "description", description);
 
     let isValid = true;
 

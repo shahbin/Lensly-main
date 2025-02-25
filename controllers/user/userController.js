@@ -25,7 +25,6 @@ const loadHomePage = async (req,res)=>{
         }
     }
     catch(error){
-        console.log("Home page not found");
         res.status(500).send("Server error")
     }
 }
@@ -198,7 +197,6 @@ const loadSignup = async (req,res)=>{
         return res.render('signup')
     }
     catch(error){
-        console.log('Signup page not loading');
         res.status(500).send('Server Error')
     }
 }
@@ -392,13 +390,11 @@ const logout = async (req,res)=>{
     try {
         req.session.destroy((err)=>{
             if(err){
-                console.log("Session destruction error", err.message);
                 return res.redirect('/pageNotFound')
             }
             return res.redirect("login")
         })
     } catch (error) {
-        console.log("Logout error", error);
         res.redirect("/pageNotFound")
     }
 }

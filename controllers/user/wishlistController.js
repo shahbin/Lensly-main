@@ -102,8 +102,6 @@ const removeFromWishlist = async (req, res) => {
             { $pull: { products: { productId: productId } } }
         );
 
-        console.log("MongoDB Update Result:", result);
-
         if (result.modifiedCount > 0) {
             res.json({ success: true, message: 'Product removed from wishlist' });
         } else {

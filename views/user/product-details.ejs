@@ -334,7 +334,6 @@ const cartAPI = {
     });
 
     const data = await response.json()
-    console.log("Response from server:", data)
     return data
  
   } catch (error) {
@@ -499,14 +498,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             const heartIcon = this.querySelector('.fa-heart');
-            const productId = this.getAttribute('href').split('/').pop();  // Extract productId
+            const productId = this.getAttribute('href').split('/').pop(); 
 
             try {
-                // Check if the product is in the wishlist
                 const checkResponse = await fetch(`/check-wishlist/${productId}`);
                 
                 if (!checkResponse.ok) {
-                    // Log the response body if the status is not OK
                     const errorText = await checkResponse.text();
                     console.error('Error response:', errorText);
                     Swal.fire({
@@ -521,22 +518,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const checkData = await checkResponse.json();
-                const isInWishlist = checkData.inWishlist;  // true or false
+                const isInWishlist = checkData.inWishlist;  
 
-                // Decide whether to add or remove
                 const url = isInWishlist ? `/remove/${productId}` : `/add/${productId}`;
                 const method = "POST";
 
                 const response = await fetch(url, { method });
                 const data = await response.json();
 
-                console.log('Wishlist update response:', data);  // Log the response for debugging
-
                 if (data.success) {
-                    // Toggle heart icon styles
                     if (isInWishlist) {
                         heartIcon.classList.remove('fa-solid', 'in-wishlist');
-                        heartIcon.classList.add('fa-regular');  // Change to outline heart
+                        heartIcon.classList.add('fa-regular'); 
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -547,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                     } else {
                       heartIcon.classList.remove('fa-regular');
-                      heartIcon.classList.add('fa-solid', 'in-wishlist');  // Change to filled heart
+                      heartIcon.classList.add('fa-solid', 'in-wishlist');  
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -568,7 +561,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             } catch (error) {
-                console.error('❌ Error:', error);
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -588,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (wishlistBtn) {
         const heartIcon = wishlistBtn.querySelector('.fa-heart');
-        const productId = wishlistBtn.getAttribute('href').split('/').pop();  // Extract productId
+        const productId = wishlistBtn.getAttribute('href').split('/').pop(); 
 
         fetch(`/check-wishlist/${productId}`)
             .then(response => response.json())
@@ -609,19 +601,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<!-- if (quantity >= maxQuantity) {
-  increaseBtn.disabled = true;
-  Swal.fire({
-    icon: 'warning',
-    title: 'Maximum quantity reached',
-    text: 'You cannot add more than the allowed limit.',
-    timer: 2000,
-    showConfirmButton: false
-  });
-} else if (quantity >= availableStock) {
-  increaseBtn.disabled = true;
-  outOfStockMessage.style.display = 'block';
-} else {
-  increaseBtn.disabled = false;
-  outOfStockMessage.style.display = 'none';
-} -->

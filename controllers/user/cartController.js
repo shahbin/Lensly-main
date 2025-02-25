@@ -202,7 +202,6 @@ const getCheckout = async (req, res) => {
 
   } catch (error) {
     console.error('Error getting checkout:', error);
-    console.log(error.stack); 
   }
 }
 

@@ -449,7 +449,6 @@ const returnOrder = async (req, res) => {
       });
     }
 
-    console.log('Order Found:', order);
 
     const orderItem = order.orderedItems.find(item =>
       item._id.toString() === itemId
@@ -461,8 +460,6 @@ const returnOrder = async (req, res) => {
         message: 'Order item not found'
       });
     }
-
-    console.log('Order Item Found:', orderItem);
 
     if (orderItem.status !== 'Delivered') {
       return res.status(400).json({

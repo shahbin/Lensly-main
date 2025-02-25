@@ -6,12 +6,12 @@ require("dotenv").config();
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    // callbackURL: "http://localhost:5000/auth/google/callback"
+    // callbackURL: "https://lensly.site/auth/google/callback"
     callbackURL: process.env.GOOGLE_CLIENT_SECRET === "production" 
     ? "http://lensly.site/auth/google/callback"
     : process.env.GOOGLE_CLIENT_SECRET === "staging"
     ? "http://www.lensly.site/auth/google/callback"
-    : "http://localhost:5000/auth/google/callback"
+    : "https://lensly.site/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
     try {

@@ -437,8 +437,6 @@
   }
 
   async function placeOrder() {
-    console.log("Place Order function triggered");
-
     const selectedAddressId = document.querySelector('input[name="addressId"]:checked')?.value;
     if (!selectedAddressId) {
         Swal.fire({ icon: "error", title: "Error", text: "Please select an address" });
@@ -446,7 +444,6 @@
     }
 
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-    console.log("Selected Payment Method:", paymentMethod);
     if (!paymentMethod) {
         Swal.fire({ icon: "error", title: "Error", text: "Please select a payment method" });
         return;
@@ -466,8 +463,6 @@
         totalAmount: totalPrice
     };
 
-    console.log("Order Data:", orderData);
-
     if (paymentMethod === "cod") {
         try {
             const response = await fetch("/place-order", {
@@ -477,7 +472,6 @@
             });
 
             const data = await response.json();
-            console.log("Order Response:", data);
 
             if (response.ok) {
                 Swal.fire({
@@ -642,7 +636,6 @@
             });
 
             const data = await response.json();
-            console.log("Order Response:", data);
 
             if (!response.ok) {
                 const errorData = await data;
@@ -815,11 +808,8 @@ async function initiateRepayment(orderId) {
 
   async function saveAddress(event) {
     event.preventDefault();
-    console.log("Save Address triggered");
     const { isValid, errors, formData } = validateForm();
-    console.log("Validation Result:", { isValid, errors, formData });
     if (!isValid) {
-      console.log("Validation failed with errors:", errors);
       clearValidationMessages();
       displayErrorMessages(errors);
       return;
@@ -830,14 +820,12 @@ async function initiateRepayment(orderId) {
         ? `/addresses/${editingAddressId}`
         : "/addAddress";
       const method = editingAddressId ? "PUT" : "POST";
-      console.log("Sending request:", { url, method, formData });
       const response = await fetch(url, {
         method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-      console.log("Server Response:", { status: response.status, data });
       if (response.ok) {
         if (editingAddressId) {
           addresses = addresses.map((addr) =>

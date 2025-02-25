@@ -184,10 +184,6 @@
             const categoryData = JSON.parse('<%- JSON.stringify(dashboardData.products.categories) %>');
             const topProductsData = JSON.parse('<%- JSON.stringify(dashboardData.products.top) %>');
         
-            console.log('Time Series Data:', timeSeriesData);
-            console.log('Category Data:', categoryData);
-            console.log('Top Products Data:', topProductsData);
-        
             const revenueCtx = document.getElementById('revenueChart').getContext('2d');
             let revenueChart;
         

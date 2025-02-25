@@ -473,7 +473,6 @@ document.addEventListener('DOMContentLoaded', initializeWishlist);
       });
 
       const data = await response.json();
-      console.log("Response from server:", data);
       return data;
     } catch (error) {
       console.error('Error adding item to cart:', error);
@@ -519,9 +518,7 @@ document.addEventListener('DOMContentLoaded', initializeWishlist);
 };
 
 async function handleAddToCart(productId, availableStock) {
-  try {
-    console.log("Adding to cart - Product ID:", productId, "Stock:", availableStock);
-    
+  try { 
     availableStock = parseInt(availableStock, 10);
     
     if (isNaN(availableStock) || availableStock <= 0) {

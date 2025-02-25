@@ -1082,8 +1082,6 @@ function handleCancel(event, orderId, itemId) {
     currentOrderId = orderId;
     currentItemId = itemId;
     
-    console.log('Stored IDs:', { currentOrderId, currentItemId });
-    
     const modal = document.getElementById('cancelModal');
     if (modal) {
         modal.style.display = 'block';
@@ -1102,8 +1100,7 @@ function handleReturn(event, orderId, itemId) {
     const button = event.currentTarget;
     orderId = orderId || button.getAttribute('data-order-id');
     itemId = itemId || button.getAttribute('data-item-id');
-    
-    console.log('Return handler received:', { orderId, itemId });
+
     
     if (!orderId || !itemId || orderId === 'undefined' || itemId === 'undefined') {
         console.error('Invalid order or item ID:', { orderId, itemId });
@@ -1117,8 +1114,7 @@ function handleReturn(event, orderId, itemId) {
     
     currentOrderId = orderId;
     currentItemId = itemId;
-    
-    console.log('Stored IDs:', { currentOrderId, currentItemId });
+
     
     const modal = document.getElementById('returnModal');
     if (modal) {
@@ -1186,7 +1182,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function submitCancel() {
-    console.log("Submit cancel called with stored IDs:", { currentOrderId, currentItemId });
 
     if (!currentOrderId || !currentItemId || currentOrderId === 'undefined' || currentItemId === 'undefined') {
         console.error('Missing or invalid order/item ID');
@@ -1222,7 +1217,6 @@ async function submitCancel() {
             reason: reason
         };
 
-        console.log('Sending request with data:', requestData);
 
         const response = await fetch(`/cancel-order-item/${currentOrderId}/${currentItemId}`, {
             method: 'POST',
@@ -1234,7 +1228,6 @@ async function submitCancel() {
         });
 
         const data = await response.json();
-        console.log('Response:', data);
 
         if (data.success) {
             hideModal('cancelModal', false);

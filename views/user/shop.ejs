@@ -811,7 +811,6 @@ const cartAPI = {
       });
 
       const data = await response.json();
-      console.log("Response from server:", data);
       return data;
     } catch (error) {
       console.error('Error adding item to cart:', error);
@@ -859,7 +858,6 @@ const cartAPI = {
 
 async function handleAddToCart(productId, availableStock) {
   try {
-    console.log("Adding to cart - Product ID:", productId, "Stock:", availableStock);
     
     availableStock = parseInt(availableStock, 10);
     

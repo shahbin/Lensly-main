@@ -487,7 +487,7 @@ function generateOtp() {
 
 
 async function sendVerificationEmail(email, otp) {
-    console.log(email, otp);
+    (email, otp);
     try {
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -556,7 +556,7 @@ const verifyEmailOtp = async (req, res) => {
     
           req.session.isOtpVerified = true;
           
-          console.log("Email in session during OTP verify:", req.session.email);
+          ("Email in session during OTP verify:", req.session.email);
           res.json({ success: true, redirectUrl: '/create-password' });
       } else {
           res.json({ success: false, message: "OTP does not match" });
@@ -582,7 +582,7 @@ const resendEmailOtp = async (req, res) => {
 
         const emailSend = await sendVerificationEmail(email, otp);
         if (emailSend) {
-            console.log("Resend OTP:", otp);
+            ("Resend OTP:", otp);
             res.status(200).json({ 
                 success: true, 
                 message: "OTP Resent Successfully" 
@@ -606,8 +606,7 @@ const resendEmailOtp = async (req, res) => {
 const createPassword = async(req,res) => {
     try {
 
-      console.log("Entering createPassword controller");
-      console.log("Session data:", {
+      ("Session data:", {
           email: req.session.email,
           isOtpVerified: req.session.isOtpVerified
       });
@@ -625,13 +624,10 @@ const createPassword = async(req,res) => {
 
 const saveNewPassword = async(req, res) => {
   try {
-      console.log("Entering saveNewPassword controller");
-      
       const {newPassword, confirmPassword} = req.body;
       const email = req.session.email;
 
       if(!email || !req.session.isOtpVerified) {
-          console.log("Invalid session state");
           return res.json({
               success: false,
               message: "Session expired. Please try again."
@@ -651,8 +647,7 @@ const saveNewPassword = async(req, res) => {
               {email: email},
               {$set: {password: passwordHash}}
           );
-          
-          console.log("Password update result:", updated);
+
           
           if (updated.modifiedCount === 0) {
               throw new Error('Password update failed');
@@ -812,7 +807,6 @@ const userData = async (req, res) => {
 
         const user = await User.findById(userId).select('referralCode referralCount hasAppliedReferral');
         if (!user) {
-            console.log("User not found.");
             return res.status(404).json({ success: false, message: 'User not found.' });
         }
 

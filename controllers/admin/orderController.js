@@ -213,8 +213,6 @@ const processReturnRequest = async (req, res) => {
       });
     }
 
-    console.log('Order Found:', order);
-
     const orderItem = order.orderedItems.find(item =>
       item._id.toString() === itemId
     );
@@ -225,16 +223,12 @@ const processReturnRequest = async (req, res) => {
       });
     }
 
-    console.log('Order Item Found:', orderItem);
-
     if (orderItem.status !== 'Return Requested') {
       return res.status(400).json({
         success: false,
         message: 'This item does not have a pending return request'
       });
     }
-
-    console.log('Item Status:', orderItem.status);
 
     if (action === 'accept') {
       orderItem.status = 'Returned';

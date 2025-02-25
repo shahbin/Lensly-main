@@ -79,7 +79,6 @@ const loadSalesReport = async (req, res) => {
 
         let totalDiscounts = 0;
         for(let order of orders) {
-            console.log(order)
             for(let item of order.orderedItems) {
                 totalDiscounts += item.product.offerAmount
             }

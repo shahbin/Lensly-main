@@ -74,7 +74,6 @@ userSchema.pre('save', async function (next) {
 
 userSchema.statics.generateMissingReferralCodes = async function () {
     const users = await this.find({ referralCode: { $exists: false } });
-    console.log(`Found ${users.length} users without referral codes.`);
     
     for (const user of users) {
         let uniqueCode;
@@ -85,7 +84,6 @@ userSchema.statics.generateMissingReferralCodes = async function () {
         user.referralCode = uniqueCode;
         await user.save();
         
-        // Log the user and the assigned referral code
         console.log(`Assigned referral code ${uniqueCode} to user ${user._id}`);
     }
 };
