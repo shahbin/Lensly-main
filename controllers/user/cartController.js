@@ -4,6 +4,7 @@ const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
 const Wishlist = require("../../models/wishlistSchema");
 const Wallet = require("../../models/walletSchema") 
+const Category = require("../../models/categorySchema")
 const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
 const { v4: uuidv4 } = require('uuid');
@@ -236,26 +237,39 @@ const placeOrder = async (req, res) => {
       }
 
       const quantityErrors = [];
-      for (const item of cart.items) {
-          const product = item.productId;
-          if (!product) {
-              quantityErrors.push(`Product not found in the cart`);
-              continue;
-          }
-          if (product.quantity === 0) {
-              quantityErrors.push(`${product.productName} is out of stock.`);
-          } else if (product.quantity < item.quantity) {
-              quantityErrors.push(`Only ${product.quantity} left. You have ${item.quantity} in cart.`);
-          }
-      }
+      const blockedProductErrors = [];
+      const unlistedCategoryErrors = [];
 
-      if (quantityErrors.length > 0) {
-          return res.status(400).json({
-              success: false,
-              message: 'Some items in your cart are no longer available in the requested quantity',
-              errors: quantityErrors
-          });
-      }
+      for (const item of cart.items) {
+        const product = item.productId;
+        if (!product) {
+            quantityErrors.push(`Product not found in the cart`);
+            continue;
+        }
+
+        if (product.isBlocked) {
+            blockedProductErrors.push(`${product.productName} is currently unavailable.`);
+        }
+
+        const category = await Category.findById(product.category);
+        if (!category || !category.isListed) {
+            unlistedCategoryErrors.push(`${product.productName} is currently unavailable.`);
+        }
+
+        if (product.quantity === 0) {
+            quantityErrors.push(`${product.productName} is out of stock.`);
+        } else if (product.quantity < item.quantity) {
+            quantityErrors.push(`Only ${product.quantity} left. You have ${item.quantity} in cart.`);
+        }
+    }
+
+    if (quantityErrors.length > 0 || blockedProductErrors.length > 0 || unlistedCategoryErrors.length > 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Some issues with your cart items.',
+            errors: [...quantityErrors, ...blockedProductErrors, ...unlistedCategoryErrors]
+        });
+    }
 
       const orderItems = cart.items.map(item => ({
           product: item.productId._id,

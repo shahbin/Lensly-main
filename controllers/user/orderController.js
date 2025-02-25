@@ -434,9 +434,6 @@ const returnOrder = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { reason } = req.body;
 
-    console.log('Received Params:', { orderId, itemId });
-    console.log('Received Body:', { reason });
-
     if (!reason || !reason.trim()) {
       return res.status(400).json({
         success: false,
@@ -554,9 +551,7 @@ const updatePaymentMethod = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-       // If paymentStatus is "Failed", do not credit the amount to the wallet
        if (paymentStatus === "Failed") {
-        // Simply update the payment status and method
         order.paymentMethod = paymentMethod;
         order.paymentStatus = paymentStatus;
         await order.save();
@@ -567,7 +562,6 @@ const updatePaymentMethod = async (req, res) => {
         });
     }
 
-            // If paymentStatus is "Paid" and the previous status was not "Paid", credit the amount
         if (paymentStatus === "Paid" && order.paymentStatus !== "Paid" && order.finalAmount > 0) {
           const userId = order.userId;
           const Amount = order.finalAmount;
@@ -576,7 +570,6 @@ const updatePaymentMethod = async (req, res) => {
           await walletHelper.updateWalletBalance(userId, Amount, transactionType);
       }
 
-      // Update the payment method and status
       order.paymentMethod = paymentMethod;
       order.paymentStatus = paymentStatus;
       await order.save();

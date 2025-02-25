@@ -455,7 +455,7 @@
     const couponCode = document.getElementById("couponCode").value.trim() || null;
     const subtotal = parseFloat(document.getElementById("subtotal").value);
     const discount = parseFloat(document.querySelector(".order__discount").textContent.replace("₹", "")) || 0;
-    const totalPrice = subtotal + 49 - discount; // Adding shipping cost of ₹49
+    const totalPrice = subtotal + 49 - discount; 
 
     const orderData = {
         addressId: selectedAddressId,
@@ -763,7 +763,6 @@ async function initiateRepayment(orderId) {
     modal: {
         ondismiss: async function() {
             try {
-                // Don't attempt payment verification since we don't have Razorpay parameters
                 Swal.fire({
                     icon: "warning",
                     title: "Payment Cancelled",

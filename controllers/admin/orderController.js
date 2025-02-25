@@ -37,7 +37,6 @@ const getAllOrders = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   const { orderId, status } = req.body;
 
-  // Validate the status
   const allowedStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Requested', 'Returned'];
   if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
@@ -77,7 +76,7 @@ const getOrderDetails = async (req, res) => {
       const order = await Order.findOne({ _id: orderId })
           .populate('orderedItems.product')
           .populate('userId')
-          .populate('address') // Ensure this matches the schema field name
+          .populate('address') 
           .lean();
 
 
@@ -89,14 +88,11 @@ const getOrderDetails = async (req, res) => {
           });
       }
 
-      // Handle missing or invalid address
       if (!order.address && order.userId) {
           const addressDoc = await Address.findOne({ userId: order.userId._id }).lean();
           if (addressDoc && addressDoc.addresses && addressDoc.addresses.length > 0) {
-              // Use the first address as a fallback
               order.shippingAddress = addressDoc.addresses[0];
           } else {
-              // Set a default empty address to avoid errors
               order.shippingAddress = {
                   addressType: 'N/A',
                   city: 'N/A',
@@ -145,7 +141,6 @@ const getOrderDetails = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order item not found' });
         }
 
-        // Check if the item status can be updated
         if (orderItem.status === 'Cancelled') {
             return res.status(400).json({ success: false, message: 'Cannot change status of a cancelled item' });
         }
@@ -156,10 +151,8 @@ const getOrderDetails = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot change status of a delivered item' });
         }
 
-        // Update the item status
         orderItem.status = newStatus;
 
-        // Update the overall order status
         updateOverallOrderStatus(order);
 
         await order.save();
@@ -181,7 +174,7 @@ const getOrderDetails = async (req, res) => {
     }
 };
 
-// Helper function to update the overall order status
+
 const updateOverallOrderStatus = (order) => {
     const itemStatuses = order.orderedItems.map(item => item.status);
 
@@ -204,10 +197,6 @@ const processReturnRequest = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { action, reason } = req.body;
 
-    console.log('Received Params:', { orderId, itemId });
-    console.log('Received Body:', { reason });
-
-    // Validate action
     if (!['accept', 'reject'].includes(action)) {
       return res.status(400).json({
         success: false,
@@ -216,7 +205,6 @@ const processReturnRequest = async (req, res) => {
     }
 
 
-    // Find the order
     const order = await Order.findOne({ orderId: orderId });
     if (!order) {
       return res.status(404).json({
@@ -227,7 +215,6 @@ const processReturnRequest = async (req, res) => {
 
     console.log('Order Found:', order);
 
-    // Find the order item
     const orderItem = order.orderedItems.find(item =>
       item._id.toString() === itemId
     );
@@ -240,7 +227,6 @@ const processReturnRequest = async (req, res) => {
 
     console.log('Order Item Found:', orderItem);
 
-    // Validate item status
     if (orderItem.status !== 'Return Requested') {
       return res.status(400).json({
         success: false,
@@ -251,11 +237,9 @@ const processReturnRequest = async (req, res) => {
     console.log('Item Status:', orderItem.status);
 
     if (action === 'accept') {
-      // Update item status to "Returned"
       orderItem.status = 'Returned';
       orderItem.returnRequestedAt = new Date();
 
-      // Calculate return amount
       const itemTotal = orderItem.price * orderItem.quantity;
       let returnAmount = 0;
 
@@ -268,7 +252,6 @@ const processReturnRequest = async (req, res) => {
         returnAmount = itemTotal;
       }
 
-      // Credit the amount to the user's wallet
       const userId = order.userId;
       try {
         await walletHelper.updateWalletBalance(userId, returnAmount, 'credit');
@@ -280,7 +263,6 @@ const processReturnRequest = async (req, res) => {
         });
       }
 
-      // Update product quantity
       const product = await Product.findById(orderItem.product);
       if (product) {
         product.quantity += orderItem.quantity;
@@ -289,7 +271,6 @@ const processReturnRequest = async (req, res) => {
         console.warn('Product not found for ID:', orderItem.product);
       }
 
-      // Update order totals
       order.totalPrice -= itemTotal;
       const allItemsReturned = order.orderedItems.every(item =>
         item.status === 'Returned'
@@ -297,7 +278,7 @@ const processReturnRequest = async (req, res) => {
 
       if (allItemsReturned) {
         order.status = 'Returned';
-        order.finalAmount = 49; // Shipping charge
+        order.finalAmount = 49; 
       } else {
         order.finalAmount = order.totalPrice - (order.discount || 0) + 49;
       }
@@ -310,7 +291,6 @@ const processReturnRequest = async (req, res) => {
       });
 
     } else if (action === 'reject') {
-      // Reject the return request
       orderItem.status = 'Delivered';
       orderItem.returnReason = reason;
       orderItem.returnRequestedAt = null;
